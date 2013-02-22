@@ -4,10 +4,10 @@ import "fmt"
 import "log"
 import "math/rand"
 import "os"
-import "path/filepath"
 import "time"
 
 import "github.com/mewkiz/pkg/errorsutil"
+import "github.com/mewkiz/pkg/goutil"
 
 import "github.com/karlek/reason/actions"
 import "github.com/karlek/reason/beastiary"
@@ -20,22 +20,6 @@ import "github.com/karlek/worc/menu"
 import "github.com/karlek/worc/creature"
 import "github.com/karlek/worc/terrain"
 import "github.com/nsf/termbox-go"
-
-// reason base directory.
-var baseDir string
-
-func init() {
-	srcDir := "/src/github.com/karlek/reason/"
-	for _, goPath := range filepath.SplitList(os.Getenv("GOPATH")) {
-		baseDir = goPath + srcDir
-		_, err := os.Stat(baseDir)
-		if err == nil {
-			return
-		}
-	}
-	err := errorsutil.ErrorfColor("unable to locate reason base directory (%q) in GOPATH (%q).", srcDir, os.Getenv("GOPATH"))
-	log.Fatalln(err)
-}
 
 const (
 	// Status messages
@@ -75,7 +59,12 @@ func reason() (err error) {
 	}
 
 	// Tries to load save from path.
-	sav, err := save.New(baseDir + "debug.save")
+	dir := "github.com/karlek/reason"
+	baseDir, ok := goutil.SrcDir(dir)
+	if !ok {
+		return errorsutil.ErrorfColor("unable to locate reason base directory (%q) in GOPATH (%q).", dir, os.Getenv("GOPATH"))
+	}
+	sav, err := save.New(baseDir + "/debug.save")
 	if err != nil {
 		return errorsutil.ErrorfColor("%s", err)
 	}
