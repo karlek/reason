@@ -5,7 +5,7 @@ subject to change. The documentation can be inaccurate.
 
 reason
 ======
-Reason is a roguelike written in golang.
+Reason is a roguelike written in golang. The name is a reference to the japanese word for freedom: jiyuu/jiyū (自由). The direct translation of the kanji is: self (自) and reason (由).
 
 API documentation
 -----------------
