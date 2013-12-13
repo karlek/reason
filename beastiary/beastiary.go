@@ -23,7 +23,7 @@ type Creature struct {
 
 // LoadCreatures initializes the Creatures map with creatures.
 func LoadCreatures() (err error) {
-	folder := "/home/_/Dropbox/comp/coding/go/src/github.com/karlek/reason/beastiary/data/"
+	folder := os.Getenv("GOPATH") + "/src/github.com/karlek/reason/beastiary/data/"
 	f, err := os.Open(folder)
 	if err != nil {
 		return errutil.Err(err)
