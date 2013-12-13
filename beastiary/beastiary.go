@@ -1,13 +1,14 @@
+// Package beastiary contains information about all creatures in reason.
 package beastiary
 
 import (
 	"encoding/json"
 	"io/ioutil"
-	"log"
 	"os"
 
 	"github.com/karlek/worc/object"
 	"github.com/mewkiz/pkg/errutil"
+	"github.com/mewkiz/pkg/goutil"
 	"github.com/nsf/termbox-go"
 )
 
@@ -23,7 +24,10 @@ type Creature struct {
 
 // LoadCreatures initializes the Creatures map with creatures.
 func LoadCreatures() (err error) {
-	folder := os.Getenv("GOPATH") + "/src/github.com/karlek/reason/beastiary/data/"
+	folder, err := goutil.SrcDir("github.com/karlek/reason/beastiary/data/")
+	if err != nil {
+		return errutil.Err(err)
+	}
 	f, err := os.Open(folder)
 	if err != nil {
 		return errutil.Err(err)
@@ -40,7 +44,6 @@ func LoadCreatures() (err error) {
 			return errutil.Err(err)
 		}
 		Creatures[c.Name()] = *c
-		log.Printf("%#v\n", *c)
 	}
 	return nil
 }

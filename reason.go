@@ -1,7 +1,3 @@
-// Once you work with files, you can make your preferences and keybindings
-// config files. Again, if you make them human-readable, you'll save yourself a
-// lot of trouble.
-
 // Reason is a roguelike written on top of worc engine.
 package main
 
@@ -22,6 +18,7 @@ import (
 	"github.com/karlek/worc/coord"
 	"github.com/karlek/worc/screen"
 	"github.com/mewkiz/pkg/errutil"
+	"github.com/mewkiz/pkg/goutil"
 	"github.com/nsf/termbox-go"
 )
 
@@ -46,7 +43,11 @@ func reason() (err error) {
 	}
 	defer termbox.Close()
 
-	sav, err := save.New("a.save")
+	path, err := goutil.SrcDir("github.com/karlek/reason/")
+	if err != nil {
+		return errutil.Err(err)
+	}
+	sav, err := save.New(path + "debug.save")
 	if err != nil {
 		return errutil.Err(err)
 	}
@@ -60,12 +61,15 @@ func reason() (err error) {
 	// Load or create new game.
 	var a area.Area
 	var hero beastiary.Creature
+
+	// If save exists load old game session.
 	if sav.Exists() {
 		err = load(sav, &a, &hero)
 		if err != nil {
 			return errutil.Err(err)
 		}
 	} else {
+		// Otherwise create a new game session.
 		newGame(&a, &hero)
 	}
 
@@ -75,7 +79,7 @@ func reason() (err error) {
 	// Main loop.
 	var finished bool
 	for !finished {
-		finished = playerTurn(&a, &hero)
+		finished = playerTurn(sav, &a, &hero)
 	}
 	return nil
 }
@@ -114,7 +118,7 @@ func newGame(a *area.Area, hero *beastiary.Creature) {
 }
 
 // playerTurn listens on user input and then acts on it.
-func playerTurn(a *area.Area, hero *beastiary.Creature) bool {
+func playerTurn(sav *save.Save, a *area.Area, hero *beastiary.Creature) bool {
 	// Listen for keystrokes.
 	switch ev := termbox.PollEvent(); ev.Type {
 	case termbox.EventKey:
@@ -127,12 +131,7 @@ func playerTurn(a *area.Area, hero *beastiary.Creature) bool {
 			return true
 		case 'p':
 			// user wants to save and exit.
-			sav, err := save.New("a.save")
-			if err != nil {
-				log.Println(err)
-			}
-
-			err = sav.Save(*a, *hero)
+			err := sav.Save(*a, *hero)
 			if err != nil {
 				log.Println(err)
 			}
