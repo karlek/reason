@@ -1,0 +1,9 @@
+{
+	"Name": "door (open)",
+	"Graphics": {
+		"Ch": "-",
+		"Fg": {"color": "yellow", "attr": null},
+		"Bg": null
+	},
+	"Stackable": true
+}

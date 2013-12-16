@@ -1,0 +1,9 @@
+{
+	"Name": "water",
+	"Graphics": {
+		"Ch": "~",
+		"Fg": {"color": "blue", "attr": ""},
+		"Bg": null
+	},
+	"Stackable": true
+}

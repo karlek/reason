@@ -1,4 +1,4 @@
-package beastiary
+package fauna
 
 import (
 	"encoding/json"
@@ -11,40 +11,35 @@ import (
 	"github.com/nsf/termbox-go"
 )
 
-// Creatures is a map where names of the creature is the key mapping to that
-// creature object.
-var Creatures = map[string]Creature{}
+var Doodads = map[string]Doodad{}
 
-// Load initializes the Creatures map with creatures.
+// Load initializes the Doodads map with doodads.
 func Load() (err error) {
-	filenames, err := util.DirFiles("github.com/karlek/reason/beastiary/data/")
+	filenames, err := util.DirFiles("github.com/karlek/reason/fauna/data/")
 	if err != nil {
 		return errutil.Err(err)
 	}
 	for _, filename := range filenames {
-		c, err := load(filename)
+		d, err := load(filename)
 		if err != nil {
 			return errutil.Err(err)
 		}
-		Creatures[c.Name()] = *c
+		Doodads[d.Name()] = *d
 	}
 	return nil
 }
 
-// load parses a JSON data file into a go creature object.
-func load(filename string) (c *Creature, err error) {
-	// jsonCreature is a temporary struct for easier conversion between JSON and
+// load parses a JSON data file into a go fauna object.
+func load(filename string) (fa *Doodad, err error) {
+	// jsonDoodad is a temporary struct for easier conversion between JSON and
 	// go structs.
-	type jsonCreature struct {
+	type jsonDoodad struct {
 		Name     string
 		Graphics struct {
 			Ch string
 			Fg map[string]string
 			Bg map[string]string
 		}
-		Hp        int
-		Strength  int
-		Speed     float64
 		Stackable bool
 	}
 
@@ -53,7 +48,7 @@ func load(filename string) (c *Creature, err error) {
 		return nil, errutil.Err(err)
 	}
 
-	var jc jsonCreature
+	var jc jsonDoodad
 	err = json.Unmarshal(buf, &jc)
 	if err != nil {
 		return nil, errutil.Err(err)
@@ -68,12 +63,8 @@ func load(filename string) (c *Creature, err error) {
 		return nil, errutil.Err(err)
 	}
 
-	c = &Creature{
-		N:        jc.Name,
-		Hp:       jc.Hp,
-		MaxHp:    jc.Hp,
-		Strength: jc.Strength,
-		Speed:    jc.Speed,
+	fa = &Doodad{
+		N: jc.Name,
 		O: object.Object{
 			G: termbox.Cell{
 				Ch: rune(jc.Graphics.Ch[0]),
@@ -83,10 +74,10 @@ func load(filename string) (c *Creature, err error) {
 			Stackable: jc.Stackable,
 		},
 	}
-	return c, nil
+	return fa, nil
 }
 
-// parseColor takes a JSON map that describes the color of a creature and
+// parseColor takes a JSON map that describes the color of a object and
 // returns a termbox attribute.
 func parseColor(colorSetting map[string]string) (attr termbox.Attribute, err error) {
 	if colorSetting == nil {

@@ -2,7 +2,6 @@ package gen
 
 import (
 	"github.com/karlek/reason/beastiary"
-	"log"
 
 	"github.com/karlek/worc/area"
 	"github.com/karlek/worc/coord"
@@ -33,7 +32,6 @@ func Mobs(a *area.Area, num int) {
 					g.NewY(y)
 					a.Objects[c].Push(&g)
 					num--
-					log.Println("(", x, y, ")")
 				}
 			} else if a.Terrain[x][y].IsStackable() {
 				g.NewX(x)
@@ -41,7 +39,6 @@ func Mobs(a *area.Area, num int) {
 				a.Objects[c] = new(area.Stack)
 				a.Objects[c].Push(&g)
 				num--
-				log.Println("(", x, y, ")")
 			}
 		}
 	}

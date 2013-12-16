@@ -5,12 +5,13 @@ package main
 /// Add saving capabilities.
 
 import (
-	"fmt"
+	// "fmt"
 	"log"
 	"math"
 
 	"github.com/karlek/reason/action"
 	"github.com/karlek/reason/beastiary"
+	"github.com/karlek/reason/fauna"
 	"github.com/karlek/reason/gen"
 	"github.com/karlek/reason/save"
 	"github.com/karlek/reason/ui" // loads with init.
@@ -18,7 +19,7 @@ import (
 	"github.com/karlek/worc/area"
 	"github.com/karlek/worc/coord"
 	"github.com/karlek/worc/screen"
-	"github.com/karlek/worc/status"
+	// "github.com/karlek/worc/status"
 	"github.com/mewkiz/pkg/errutil"
 	"github.com/mewkiz/pkg/goutil"
 	"github.com/nsf/termbox-go"
@@ -46,7 +47,13 @@ func reason() (err error) {
 	defer termbox.Close()
 
 	// Initialize beastiary.
-	err = beastiary.LoadCreatures()
+	err = beastiary.Load()
+	if err != nil {
+		return errutil.Err(err)
+	}
+
+	// Initialize fauna.
+	err = fauna.Load()
 	if err != nil {
 		return errutil.Err(err)
 	}
@@ -141,6 +148,12 @@ func nextTurn(sav *save.Save, a *area.Area, hero *beastiary.Creature) bool {
 			// user wants to look around.
 			action.Look(hero.X(), hero.Y(), *a)
 			return false
+		case 'o':
+			actionTaken := action.OpenDoorNarrative(a, hero.X(), hero.Y())
+			if actionTaken {
+				passTime(a, hero)
+			}
+			return false
 		case 'q':
 			// user wants to quit game.
 			return true
@@ -153,39 +166,45 @@ func nextTurn(sav *save.Save, a *area.Area, hero *beastiary.Creature) bool {
 			return true
 		}
 
-		var col area.Stackable
-		var finished bool
+		var col *area.Collision
 		switch ev.Key {
 		// Movement.
 		case termbox.KeyArrowUp:
 			col = a.MoveUp(hero)
-			finished = passTime(a, hero)
+			passTime(a, hero)
 		case termbox.KeyArrowDown:
 			col = a.MoveDown(hero)
-			finished = passTime(a, hero)
+			passTime(a, hero)
 		case termbox.KeyArrowLeft:
 			col = a.MoveLeft(hero)
-			finished = passTime(a, hero)
+			passTime(a, hero)
 		case termbox.KeyArrowRight:
 			col = a.MoveRight(hero)
-			finished = passTime(a, hero)
+			passTime(a, hero)
 		}
-		if finished {
-			return true
+		if col == nil {
+			break
 		}
-		if c, ok := col.(*beastiary.Creature); ok {
-			finished := attackNarrative(a, hero, c)
-			if finished {
-				return true
+		if c, ok := col.S.(*beastiary.Creature); ok {
+			action.Attack(a, hero, c)
+			passTime(a, hero)
+		}
+		if fa, ok := col.S.(fauna.Doodad); ok {
+			if fa.Name() == "door (closed)" {
+				actionTaken := action.WalkedIntoDoor(a, col.X, col.Y)
+				if actionTaken {
+					passTime(a, hero)
+				}
 			}
 		}
 	}
+
 	ui.UpdateHp(*hero)
 	return false
 }
 
 ///
-func passTime(a *area.Area, hero *beastiary.Creature) bool {
+func passTime(a *area.Area, hero *beastiary.Creature) {
 	// Other creatures!
 	for _, s := range a.Objects {
 		if c, ok := s.Peek().(*beastiary.Creature); ok {
@@ -205,17 +224,4 @@ func passTime(a *area.Area, hero *beastiary.Creature) bool {
 			c.Actions(int(turns), a, hero)
 		}
 	}
-	return false
-}
-
-///
-func attackNarrative(a *area.Area, hero *beastiary.Creature, defender *beastiary.Creature) bool {
-	defender.Hp -= hero.Strength
-	status.Print(fmt.Sprintf("You inflict %d damage to %s!", hero.Strength, defender.Name()))
-	if defender.Hp <= 0 {
-		a.Objects[coord.Coord{defender.X(), defender.Y()}].Pop()
-		a.Draw()
-		status.Print(fmt.Sprintf("You killed %s!", defender.Name()))
-	}
-	return false
 }

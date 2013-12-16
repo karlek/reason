@@ -28,39 +28,3 @@ func (d Doodad) Graphic() termbox.Cell {
 func (d Doodad) Name() string {
 	return d.N
 }
-
-// Wall is a white '#', which can not be walked over.
-var Wall = Doodad{
-	O: object.Object{
-		G: termbox.Cell{
-			Ch: '#',
-			Fg: termbox.ColorWhite + termbox.AttrBold,
-		},
-		Stackable: false,
-	},
-	N: "a wall",
-}
-
-// Soil is a "yellow" '.', which can be walked over.
-var Soil = Doodad{
-	O: object.Object{
-		G: termbox.Cell{
-			Ch: '.',
-			Fg: termbox.ColorYellow,
-		},
-		Stackable: true,
-	},
-	N: "soil",
-}
-
-// Water is a blue '~', which can be walked over.
-var Water = Doodad{
-	O: object.Object{
-		G: termbox.Cell{
-			Ch: '~',
-			Fg: termbox.ColorBlue,
-		},
-		Stackable: true,
-	},
-	N: "water",
-}

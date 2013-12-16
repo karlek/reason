@@ -1,0 +1,9 @@
+{
+	"Name": "soil",
+	"Graphics": {
+		"Ch": ".",
+		"Fg": {"color": "yellow", "attr": null},
+		"Bg": null
+	},
+	"Stackable": true
+}

@@ -13,15 +13,17 @@ import (
 
 // Area is a debug function to generate terrain.
 func Area(scr screen.Screen, width, height int) area.Area {
+
 	// Placeholder for terrain generation.
 	var ms = []area.Stackable{
-		&fauna.Soil,
-		&fauna.Soil,
-		&fauna.Soil,
-		&fauna.Soil,
-		&fauna.Soil,
-		&fauna.Soil,
-		&fauna.Wall,
+		fauna.Doodads["water"],
+		fauna.Doodads["soil"],
+		fauna.Doodads["water"],
+		fauna.Doodads["soil"],
+		fauna.Doodads["water"],
+		fauna.Doodads["soil"],
+		fauna.Doodads["wall"],
+		fauna.Doodads["door (closed)"],
 	}
 
 	a := area.Area{

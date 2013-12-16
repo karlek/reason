@@ -14,10 +14,6 @@ import (
 	"github.com/nsf/termbox-go"
 )
 
-// Creatures is a map where names of the creature is the key mapping to that
-// creature object.
-var Creatures = map[string]Creature{}
-
 // Creature is an object with a name.
 type Creature struct {
 	O        object.Object
@@ -32,7 +28,7 @@ type Creature struct {
 // action performs simple AI for a creature.
 func (c *Creature) action(a *area.Area, hero *Creature) {
 	i := randInt(0, 1000)
-	var col area.Stackable
+	var col *area.Collision
 	switch {
 	case i == 999:
 		status.Print("Fresh grass, yum!")
@@ -47,8 +43,10 @@ func (c *Creature) action(a *area.Area, hero *Creature) {
 	default:
 		return
 	}
-
-	if mob, ok := col.(*Creature); ok {
+	if col == nil {
+		return
+	}
+	if mob, ok := col.S.(*Creature); ok {
 		if mob.Name() == "hero" {
 			battleNarrative(a, hero, c)
 		} else {
@@ -63,7 +61,7 @@ func battle(a *area.Area, defender *Creature, attacker *Creature) {
 	if defender.Hp <= 0 {
 		a.Objects[coord.Coord{defender.X(), defender.Y()}].Pop()
 	}
-	a.Draw()
+	a.ReDraw(defender.X(), defender.Y())
 }
 
 ///

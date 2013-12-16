@@ -1,0 +1,9 @@
+{
+	"Name": "wall",
+	"Graphics": {
+		"Ch": "#",
+		"Fg": {"color": "white", "attr": "bold"},
+		"Bg": null
+	},
+	"Stackable": false
+}
