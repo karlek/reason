@@ -3,9 +3,10 @@ package beastiary
 
 import (
 	"fmt"
-	"math/rand"
 	"os"
 	"time"
+
+	"github.com/karlek/reason/util"
 
 	"github.com/karlek/worc/area"
 	"github.com/karlek/worc/coord"
@@ -27,7 +28,7 @@ type Creature struct {
 
 // action performs simple AI for a creature.
 func (c *Creature) action(a *area.Area, hero *Creature) {
-	i := randInt(0, 1000)
+	i := util.RandInt(0, 1000)
 	var col *area.Collision
 	switch {
 	case i == 999:
@@ -82,12 +83,6 @@ func (c *Creature) Actions(turns int, a *area.Area, hero *Creature) {
 	for ; turns > 0; turns-- {
 		c.action(a, hero)
 	}
-}
-
-// randInt is used by the debug function GenArea.
-func randInt(min, max int) int {
-	rand.Seed(time.Now().UTC().UnixNano())
-	return min + rand.Intn(max-min)
 }
 
 // Name returns the name of the creature.

@@ -2,6 +2,7 @@ package gen
 
 import (
 	"github.com/karlek/reason/beastiary"
+	"github.com/karlek/reason/util"
 
 	"github.com/karlek/worc/area"
 	"github.com/karlek/worc/coord"
@@ -20,11 +21,11 @@ func Mobs(a *area.Area, num int) {
 				return
 			}
 
-			if randInt(0, 50) != 42 {
+			if util.RandInt(0, 50) != 42 {
 				continue
 			}
 
-			g := mobList[randInt(0, len(mobList))]
+			g := mobList[util.RandInt(0, len(mobList))]
 			c := coord.Coord{x, y}
 			if s, ok := a.Objects[c]; ok {
 				if s.Peek().IsStackable() && a.Terrain[x][y].IsStackable() {

@@ -1,7 +1,9 @@
 package util
 
 import (
+	"math/rand"
 	"os"
+	"time"
 
 	"github.com/mewkiz/pkg/errutil"
 	"github.com/mewkiz/pkg/goutil"
@@ -28,4 +30,10 @@ func DirFiles(srcDir string) (filnames []string, err error) {
 		filenames = append(filenames, filename)
 	}
 	return filenames, nil
+}
+
+// RandInt is used by the debug function GenArea.
+func RandInt(min, max int) int {
+	rand.Seed(time.Now().UTC().UnixNano())
+	return min + rand.Intn(max-min)
 }

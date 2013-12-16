@@ -1,10 +1,8 @@
 package gen
 
 import (
-	"math/rand"
-	"time"
-
 	"github.com/karlek/reason/fauna"
+	"github.com/karlek/reason/util"
 
 	"github.com/karlek/worc/area"
 	"github.com/karlek/worc/coord"
@@ -37,14 +35,8 @@ func Area(scr screen.Screen, width, height int) area.Area {
 	for x := 0; x < width; x++ {
 		a.Terrain[x] = make([]area.Stackable, height)
 		for y := 0; y < height; y++ {
-			a.Terrain[x][y] = ms[randInt(0, len(ms))]
+			a.Terrain[x][y] = ms[util.RandInt(0, len(ms))]
 		}
 	}
 	return a
-}
-
-// randInt is used by the debug function GenArea.
-func randInt(min, max int) int {
-	rand.Seed(time.Now().UTC().UnixNano())
-	return min + rand.Intn(max-min)
 }
