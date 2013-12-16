@@ -1,0 +1,12 @@
+{
+	"Name": "tofu",
+	"Graphics": {
+		"Ch": "t",
+		"Fg": {"color": "yellow", "attr": "bold"},
+		"Bg": null
+	},
+	"HP": 4,
+	"Speed": 0.5,
+	"Strength": 1,
+	"Stackable": false
+}

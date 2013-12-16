@@ -5,11 +5,12 @@ package main
 /// Add saving capabilities.
 
 import (
+	"fmt"
 	"log"
+	"math"
 
 	"github.com/karlek/reason/action"
 	"github.com/karlek/reason/beastiary"
-	"github.com/karlek/reason/fauna"
 	"github.com/karlek/reason/gen"
 	"github.com/karlek/reason/save"
 	"github.com/karlek/reason/ui" // loads with init.
@@ -17,6 +18,7 @@ import (
 	"github.com/karlek/worc/area"
 	"github.com/karlek/worc/coord"
 	"github.com/karlek/worc/screen"
+	"github.com/karlek/worc/status"
 	"github.com/mewkiz/pkg/errutil"
 	"github.com/mewkiz/pkg/goutil"
 	"github.com/nsf/termbox-go"
@@ -43,15 +45,6 @@ func reason() (err error) {
 	}
 	defer termbox.Close()
 
-	path, err := goutil.SrcDir("github.com/karlek/reason/")
-	if err != nil {
-		return errutil.Err(err)
-	}
-	sav, err := save.New(path + "debug.save")
-	if err != nil {
-		return errutil.Err(err)
-	}
-
 	// Initialize beastiary.
 	err = beastiary.LoadCreatures()
 	if err != nil {
@@ -62,16 +55,14 @@ func reason() (err error) {
 	var a area.Area
 	var hero beastiary.Creature
 
-	// If save exists load old game session.
-	if sav.Exists() {
-		err = load(sav, &a, &hero)
-		if err != nil {
-			return errutil.Err(err)
-		}
-	} else {
-		// Otherwise create a new game session.
-		newGame(&a, &hero)
+	// Load or create a new game session.
+	sav, err := initGameSession(&a, &hero)
+	if err != nil {
+		return errutil.Err(err)
 	}
+
+	// Initialize and draw the user interface to screen.
+	ui.Init(hero)
 
 	// Draw both terrain and objects to screen.
 	a.Draw()
@@ -79,9 +70,33 @@ func reason() (err error) {
 	// Main loop.
 	var finished bool
 	for !finished {
-		finished = playerTurn(sav, &a, &hero)
+		finished = nextTurn(sav, &a, &hero)
 	}
 	return nil
+}
+
+///
+func initGameSession(a *area.Area, hero *beastiary.Creature) (sav *save.Save, err error) {
+	path, err := goutil.SrcDir("github.com/karlek/reason/")
+	if err != nil {
+		return nil, errutil.Err(err)
+	}
+	sav, err = save.New(path + "debug.save")
+	if err != nil {
+		return nil, errutil.Err(err)
+	}
+
+	// If save exists load old game session.
+	if sav.Exists() {
+		err = load(sav, a, hero)
+		if err != nil {
+			return nil, errutil.Err(err)
+		}
+	} else {
+		// Otherwise create a new game session.
+		newGame(a, hero)
+	}
+	return sav, nil
 }
 
 // load loads old information from a save file.
@@ -105,6 +120,7 @@ func newGame(a *area.Area, hero *beastiary.Creature) {
 		Height: ui.AreaScreenHeight,
 	}
 	*a = gen.Area(areaScreen, areaScreen.Width, areaScreen.Height)
+	gen.Mobs(a, 14)
 
 	// Hero starting position.
 	*hero = beastiary.Creatures["hero"]
@@ -113,12 +129,10 @@ func newGame(a *area.Area, hero *beastiary.Creature) {
 
 	a.Objects[coord.Coord{hero.X(), hero.Y()}] = new(area.Stack)
 	a.Objects[coord.Coord{hero.X(), hero.Y()}].Push(hero)
-	a.Objects[coord.Coord{2, 3}] = new(area.Stack)
-	a.Objects[coord.Coord{2, 3}].Push(fauna.Water)
 }
 
-// playerTurn listens on user input and then acts on it.
-func playerTurn(sav *save.Save, a *area.Area, hero *beastiary.Creature) bool {
+// nextTurn listens on user input and then acts on it.
+func nextTurn(sav *save.Save, a *area.Area, hero *beastiary.Creature) bool {
 	// Listen for keystrokes.
 	switch ev := termbox.PollEvent(); ev.Type {
 	case termbox.EventKey:
@@ -126,6 +140,7 @@ func playerTurn(sav *save.Save, a *area.Area, hero *beastiary.Creature) bool {
 		case 'l':
 			// user wants to look around.
 			action.Look(hero.X(), hero.Y(), *a)
+			return false
 		case 'q':
 			// user wants to quit game.
 			return true
@@ -135,21 +150,72 @@ func playerTurn(sav *save.Save, a *area.Area, hero *beastiary.Creature) bool {
 			if err != nil {
 				log.Println(err)
 			}
-
 			return true
 		}
 
+		var col area.Stackable
+		var finished bool
 		switch ev.Key {
 		// Movement.
 		case termbox.KeyArrowUp:
-			_ = a.MoveUp(hero)
+			col = a.MoveUp(hero)
+			finished = passTime(a, hero)
 		case termbox.KeyArrowDown:
-			_ = a.MoveDown(hero)
+			col = a.MoveDown(hero)
+			finished = passTime(a, hero)
 		case termbox.KeyArrowLeft:
-			_ = a.MoveLeft(hero)
+			col = a.MoveLeft(hero)
+			finished = passTime(a, hero)
 		case termbox.KeyArrowRight:
-			_ = a.MoveRight(hero)
+			col = a.MoveRight(hero)
+			finished = passTime(a, hero)
 		}
+		if finished {
+			return true
+		}
+		if c, ok := col.(*beastiary.Creature); ok {
+			finished := attackNarrative(a, hero, c)
+			if finished {
+				return true
+			}
+		}
+	}
+	ui.UpdateHp(*hero)
+	return false
+}
+
+///
+func passTime(a *area.Area, hero *beastiary.Creature) bool {
+	// Other creatures!
+	for _, s := range a.Objects {
+		if c, ok := s.Peek().(*beastiary.Creature); ok {
+			if c.Name() == "hero" {
+				continue
+			}
+
+			precise := hero.Speed / c.Speed
+			turns := math.Floor(precise)
+			reminder := precise - turns
+			c.CurSpeed += reminder
+
+			if c.CurSpeed > c.Speed {
+				c.CurSpeed -= c.Speed
+				turns += 1
+			}
+			c.Actions(int(turns), a, hero)
+		}
+	}
+	return false
+}
+
+///
+func attackNarrative(a *area.Area, hero *beastiary.Creature, defender *beastiary.Creature) bool {
+	defender.Hp -= hero.Strength
+	status.Print(fmt.Sprintf("You inflict %d damage to %s!", hero.Strength, defender.Name()))
+	if defender.Hp <= 0 {
+		a.Objects[coord.Coord{defender.X(), defender.Y()}].Pop()
+		a.Draw()
+		status.Print(fmt.Sprintf("You killed %s!", defender.Name()))
 	}
 	return false
 }

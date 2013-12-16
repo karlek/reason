@@ -2,13 +2,15 @@
 package beastiary
 
 import (
-	"encoding/json"
-	"io/ioutil"
+	"fmt"
+	"math/rand"
 	"os"
+	"time"
 
+	"github.com/karlek/worc/area"
+	"github.com/karlek/worc/coord"
 	"github.com/karlek/worc/object"
-	"github.com/mewkiz/pkg/errutil"
-	"github.com/mewkiz/pkg/goutil"
+	"github.com/karlek/worc/status"
 	"github.com/nsf/termbox-go"
 )
 
@@ -18,125 +20,76 @@ var Creatures = map[string]Creature{}
 
 // Creature is an object with a name.
 type Creature struct {
-	O object.Object
-	N string
+	O        object.Object
+	N        string
+	MaxHp    int
+	Hp       int
+	Strength int
+	CurSpeed float64
+	Speed    float64
 }
 
-// LoadCreatures initializes the Creatures map with creatures.
-func LoadCreatures() (err error) {
-	folder, err := goutil.SrcDir("github.com/karlek/reason/beastiary/data/")
-	if err != nil {
-		return errutil.Err(err)
-	}
-	f, err := os.Open(folder)
-	if err != nil {
-		return errutil.Err(err)
-	}
-	fi, err := f.Readdir(0)
-	if err != nil {
-		return errutil.Err(err)
+// action performs simple AI for a creature.
+func (c *Creature) action(a *area.Area, hero *Creature) {
+	i := randInt(0, 1000)
+	var col area.Stackable
+	switch {
+	case i == 999:
+		status.Print("Fresh grass, yum!")
+	case i%4 == 0:
+		col = a.MoveUp(c)
+	case i%4 == 1:
+		col = a.MoveDown(c)
+	case i%4 == 2:
+		col = a.MoveLeft(c)
+	case i%4 == 3:
+		col = a.MoveRight(c)
+	default:
+		return
 	}
 
-	for _, v := range fi {
-		filename := folder + v.Name()
-		c, err := loadCreature(filename)
-		if err != nil {
-			return errutil.Err(err)
+	if mob, ok := col.(*Creature); ok {
+		if mob.Name() == "hero" {
+			battleNarrative(a, hero, c)
+		} else {
+			battle(a, c, mob)
 		}
-		Creatures[c.Name()] = *c
 	}
-	return nil
 }
 
-// jsonCreature is a temporary struct for easier conversion between JSON and
-// go structs.
-type jsonCreature struct {
-	Name     string
-	Graphics struct {
-		Ch string
-		Fg map[string]string
-		Bg map[string]string
+// battle between to non player characters.
+func battle(a *area.Area, defender *Creature, attacker *Creature) {
+	defender.Hp -= attacker.Strength
+	if defender.Hp <= 0 {
+		a.Objects[coord.Coord{defender.X(), defender.Y()}].Pop()
 	}
-	Stackable bool
+	a.Draw()
 }
 
-// loadCreature parses a JSON data file into a go creature object.
-func loadCreature(filename string) (c *Creature, err error) {
-	buf, err := ioutil.ReadFile(filename)
-	if err != nil {
-		return nil, errutil.Err(err)
+///
+func battleNarrative(a *area.Area, hero *Creature, attacker *Creature) {
+	hero.Hp -= attacker.Strength
+	status.Print(fmt.Sprintf("You take %d damage from %s!", attacker.Strength, attacker.Name()))
+	if hero.Hp <= 0 {
+		status.Print("You die. Press any key to quit.")
+		termbox.PollEvent()
+		time.Sleep(100)
+		termbox.Close()
+		os.Exit(0)
 	}
-
-	var jc jsonCreature
-	err = json.Unmarshal(buf, &jc)
-	if err != nil {
-		return nil, errutil.Err(err)
-	}
-
-	fg, err := parseColor(jc.Graphics.Fg)
-	if err != nil {
-		return nil, errutil.Err(err)
-	}
-	bg, err := parseColor(jc.Graphics.Bg)
-	if err != nil {
-		return nil, errutil.Err(err)
-	}
-
-	c = &Creature{
-		N: jc.Name,
-		O: object.Object{
-			G: termbox.Cell{
-				Ch: rune(jc.Graphics.Ch[0]),
-				Fg: fg,
-				Bg: bg,
-			},
-			Stackable: jc.Stackable,
-		},
-	}
-	return c, nil
 }
 
-// parseColor takes a JSON map that describes the color of a creature and
-// returns a termbox attribute.
-func parseColor(colorSetting map[string]string) (attr termbox.Attribute, err error) {
-	if colorSetting == nil {
-		return 0, nil
+// Actions performs a number of actions for the creature.
+func (c *Creature) Actions(turns int, a *area.Area, hero *Creature) {
+	for ; turns > 0; turns-- {
+		c.action(a, hero)
 	}
-	v, ok := colorSetting["color"]
-	if !ok {
-		return 0, errutil.Newf("missing map key `color` in: %v", colorSetting)
-	}
-	switch v {
-	case "black":
-		attr += termbox.ColorBlack
-	case "red":
-		attr += termbox.ColorRed
-	case "green":
-		attr += termbox.ColorGreen
-	case "yellow":
-		attr += termbox.ColorYellow
-	case "blue":
-		attr += termbox.ColorBlue
-	case "magenta":
-		attr += termbox.ColorMagenta
-	case "cyan":
-		attr += termbox.ColorCyan
-	case "white":
-		attr += termbox.ColorWhite
-	}
-	v, ok = colorSetting["attr"]
-	if !ok {
-		return 0, errutil.Newf("missing map key `attr`")
-	}
-	switch v {
-	case "bold":
-		attr += termbox.AttrBold
-	case "underline":
-		attr += termbox.AttrUnderline
-	case "reverse":
-		attr += termbox.AttrReverse
-	}
-	return attr, nil
+}
+
+// randInt is used by the debug function GenArea.
+func randInt(min, max int) int {
+	rand.Seed(time.Now().UTC().UnixNano())
+	return min + rand.Intn(max-min)
 }
 
 // Name returns the name of the creature.
