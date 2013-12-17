@@ -8,6 +8,7 @@ import (
 	// "fmt"
 	"log"
 	"math"
+	"os"
 
 	"github.com/karlek/reason/action"
 	"github.com/karlek/reason/beastiary"
@@ -26,11 +27,6 @@ import (
 	"github.com/nsf/termbox-go"
 )
 
-const (
-	// Status messages.
-	pathIsBlockedStr = "Your path is blocked by %s"
-)
-
 // Error wrapper
 func main() {
 	err := reason()
@@ -47,6 +43,36 @@ func reason() (err error) {
 	}
 	defer termbox.Close()
 
+	err = initGameLibs()
+	if err != nil {
+		return errutil.Err(err)
+	}
+
+	// Load or create new game.
+	var a area.Area
+	var hero beastiary.Creature
+
+	// Load or create a new game session.
+	sav, err := loadOrCreateNewGameSession(&a, &hero)
+	if err != nil {
+		return errutil.Err(err)
+	}
+
+	ui.AreaScreenRedraw(a, hero)
+
+	// Main loop.
+	for {
+		nextTurn(sav, &a, &hero)
+	}
+	return nil
+}
+
+func quit() {
+	termbox.Close()
+	os.Exit(0)
+}
+
+func initGameLibs() (err error) {
 	// Initialize beastiary.
 	err = beastiary.Load()
 	if err != nil {
@@ -65,32 +91,12 @@ func reason() (err error) {
 		return errutil.Err(err)
 	}
 
-	// Load or create new game.
-	var a area.Area
-	var hero beastiary.Creature
-
-	// Load or create a new game session.
-	sav, err := initGameSession(&a, &hero)
-	if err != nil {
-		return errutil.Err(err)
-	}
-
-	// Initialize and draw the user interface to screen.
-	ui.Update(hero)
-
-	// Draw both terrain and objects to screen.
-	a.Draw()
-
-	// Main loop.
-	var finished bool
-	for !finished {
-		finished = nextTurn(sav, &a, &hero)
-	}
 	return nil
 }
 
 ///
-func initGameSession(a *area.Area, hero *beastiary.Creature) (sav *save.Save, err error) {
+func loadOrCreateNewGameSession(a *area.Area, hero *beastiary.Creature) (sav *save.Save, err error) {
+	// If save exists load old game session.
 	path, err := goutil.SrcDir("github.com/karlek/reason/")
 	if err != nil {
 		return nil, errutil.Err(err)
@@ -99,8 +105,6 @@ func initGameSession(a *area.Area, hero *beastiary.Creature) (sav *save.Save, er
 	if err != nil {
 		return nil, errutil.Err(err)
 	}
-
-	// If save exists load old game session.
 	if sav.Exists() {
 		err = load(sav, a, hero)
 		if err != nil {
@@ -114,7 +118,7 @@ func initGameSession(a *area.Area, hero *beastiary.Creature) (sav *save.Save, er
 }
 
 // load loads old information from a save file.
-func load(sav *save.Save, a *area.Area, hero *beastiary.Creature) error {
+func load(sav *save.Save, a *area.Area, hero *beastiary.Creature) (err error) {
 	s, err := sav.Load()
 	if err != nil {
 		return errutil.Err(err)
@@ -146,95 +150,93 @@ func newGame(a *area.Area, hero *beastiary.Creature) {
 }
 
 // nextTurn listens on user input and then acts on it.
-func nextTurn(sav *save.Save, a *area.Area, hero *beastiary.Creature) bool {
+func nextTurn(sav *save.Save, a *area.Area, hero *beastiary.Creature) {
 	// Listen for keystrokes.
-	switch ev := termbox.PollEvent(); ev.Type {
-	case termbox.EventKey:
-		switch ev.Ch {
-		case ui.LookKey:
-			// user wants to look around.
-			action.Look(*a, hero.X(), hero.Y())
-			return false
-		case ui.PickUpItemKey:
-			// user wants to pick up an item.
-			action.PickUpNarrative(a, hero)
+	ev := termbox.PollEvent()
+	if ev.Type != termbox.EventKey {
+		return
+	}
+	switch ev.Ch {
+	case ui.LookKey:
+		// user wants to look around.
+		action.Look(*a, hero.X(), hero.Y())
+		return
+	case ui.PickUpItemKey:
+		// user wants to pick up an item.
+		action.PickUpNarrative(a, hero)
+		passTime(a, hero)
+		return
+	case ui.ShowInventoryKey:
+		// user wants to look at inventory.
+		actionTaken := action.ShowInventory(a, hero)
+		if actionTaken {
 			passTime(a, hero)
-			return false
-		case ui.ShowInventoryKey:
-			// user wants to look at inventory.
-			actionTaken := action.ShowInventory(a, hero)
-			if actionTaken {
-				passTime(a, hero)
-			}
-			ui.AreaScreenRedraw(*a, *hero)
-			return false
-		case ui.DropItemKey:
-			// user wants to drop an item.
-			actionTaken := action.DropItem(hero, a)
-			if actionTaken {
-				passTime(a, hero)
-			}
-			ui.AreaScreenRedraw(*a, *hero)
-			return false
-		case ui.OpenDoorKey:
-			// user wants to open a door.
-			actionTaken := action.OpenDoorNarrative(a, hero.X(), hero.Y())
-			if actionTaken {
-				passTime(a, hero)
-			}
-			return false
-		case ui.CloseDoorKey:
-			// user wants to close a door.
-			actionTaken := action.CloseDoorNarrative(a, hero.X(), hero.Y())
-			if actionTaken {
-				passTime(a, hero)
-			}
-			return false
-		case ui.QuitKey:
-			// user wants to quit game.
-			return true
-		case ui.SaveAndQuitKey:
-			// user wants to save and exit.
-			err := sav.Save(*a, *hero)
-			if err != nil {
-				log.Println(err)
-			}
-			return true
 		}
+		ui.AreaScreenRedraw(*a, *hero)
+		return
+	case ui.DropItemKey:
+		// user wants to drop an item.
+		actionTaken := action.DropItem(hero, a)
+		if actionTaken {
+			passTime(a, hero)
+		}
+		ui.AreaScreenRedraw(*a, *hero)
+		return
+	case ui.OpenDoorKey:
+		// user wants to open a door.
+		actionTaken := action.OpenDoorNarrative(a, hero.X(), hero.Y())
+		if actionTaken {
+			passTime(a, hero)
+		}
+		return
+	case ui.CloseDoorKey:
+		// user wants to close a door.
+		actionTaken := action.CloseDoorNarrative(a, hero.X(), hero.Y())
+		if actionTaken {
+			passTime(a, hero)
+		}
+		return
+	case ui.QuitKey:
+		// user wants to quit game.
+		quit()
+	case ui.SaveAndQuitKey:
+		// user wants to save and exit.
+		err := sav.Save(*a, *hero)
+		if err != nil {
+			log.Println(err)
+		}
+		quit()
+	}
 
-		var col *area.Collision
-		switch ev.Key {
-		// Movement.
-		case ui.MoveUpKey:
-			col = a.MoveUp(hero)
-		case ui.MoveDownKey:
-			col = a.MoveDown(hero)
-		case ui.MoveLeftKey:
-			col = a.MoveLeft(hero)
-		case ui.MoveRightKey:
-			col = a.MoveRight(hero)
-		}
-		if col == nil {
-			/// bugs
-			passTime(a, hero)
-			break
-		}
-		if c, ok := col.S.(*beastiary.Creature); ok {
-			action.Attack(a, hero, c)
-			passTime(a, hero)
-		}
-		if fa, ok := col.S.(fauna.Doodad); ok {
-			if fa.Name() == "door (closed)" {
-				actionTaken := action.WalkedIntoDoor(a, col.X, col.Y)
-				if actionTaken {
-					passTime(a, hero)
-				}
+	// Movement.
+	/// Temp fix
+	col := &area.Collision{nil, 999, 999}
+	switch ev.Key {
+	case ui.MoveUpKey:
+		col = a.MoveUp(hero)
+	case ui.MoveDownKey:
+		col = a.MoveDown(hero)
+	case ui.MoveLeftKey:
+		col = a.MoveLeft(hero)
+	case ui.MoveRightKey:
+		col = a.MoveRight(hero)
+	}
+	if col == nil {
+		passTime(a, hero)
+		return
+	}
+	if c, ok := col.S.(*beastiary.Creature); ok {
+		action.Attack(a, hero, c)
+		passTime(a, hero)
+	}
+	if fa, ok := col.S.(fauna.Doodad); ok {
+		if fa.Name() == "door (closed)" {
+			actionTaken := action.WalkedIntoDoor(a, col.X, col.Y)
+			if actionTaken {
+				passTime(a, hero)
 			}
 		}
 	}
-
-	ui.UpdateHp(*hero)
-	return false
 }
 
 ///
@@ -258,4 +260,5 @@ func passTime(a *area.Area, hero *beastiary.Creature) {
 			c.Actions(int(turns), a, hero)
 		}
 	}
+	ui.UpdateHp(*hero)
 }

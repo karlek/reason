@@ -2,6 +2,7 @@ package action
 
 import (
 	"github.com/karlek/reason/beastiary"
+	"github.com/karlek/reason/item"
 	"github.com/karlek/reason/ui"
 
 	"github.com/karlek/worc/area"
@@ -67,13 +68,19 @@ func PrintCategorizedInventory(title string, hero *beastiary.Creature) {
 		"weapon":  "Weapons",
 		"unknown": "Unknown",
 	}
-	for _, i := range hero.Inventory {
-		s := i.Hotkey + " - " + i.Name()
-		if _, ok := categories[i.Category]; !ok {
-			categories["unknown"] = append(categories["unknown"], s)
+
+	// We do this the quirky we to get the inventory list sorted.
+	for _, ch := range item.Letters {
+		if i, ok := hero.Inventory[string(ch)]; ok {
+			s := i.Hotkey + " - " + i.Name()
+			if _, ok := categories[i.Category]; !ok {
+				categories["unknown"] = append(categories["unknown"], s)
+			} else {
+				categories[i.Category] = append(categories[i.Category], s)
+			}
 		}
-		categories[i.Category] = append(categories[i.Category], s)
 	}
+
 	yOffset := 2
 	xOffset := 1
 	row := 0
