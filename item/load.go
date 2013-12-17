@@ -1,10 +1,9 @@
-package beastiary
+package item
 
 import (
 	"encoding/json"
 	"io/ioutil"
 
-	"github.com/karlek/reason/item"
 	"github.com/karlek/reason/util"
 
 	"github.com/karlek/worc/object"
@@ -12,40 +11,39 @@ import (
 	"github.com/nsf/termbox-go"
 )
 
-// Creatures is a map where names of the creature is the key mapping to that
-// creature object.
-var Creatures = map[string]Creature{}
+// Items is a map where names of the item is the key mapping to that
+// item object.
+var Items = map[string]Item{}
 
-// Load initializes the Creatures map with creatures.
+// Load initializes the Items map with creatures.
 func Load() (err error) {
-	filenames, err := util.DirFiles("github.com/karlek/reason/beastiary/data/")
+	filenames, err := util.DirFiles("github.com/karlek/reason/item/data/")
 	if err != nil {
 		return errutil.Err(err)
 	}
 	for _, filename := range filenames {
-		c, err := load(filename)
+		i, err := load(filename)
 		if err != nil {
 			return errutil.Err(err)
 		}
-		Creatures[c.Name()] = *c
+		Items[i.Name()] = *i
 	}
 	return nil
 }
 
-// load parses a JSON data file into a go creature object.
-func load(filename string) (c *Creature, err error) {
-	// jsonCreature is a temporary struct for easier conversion between JSON and
+// load parses a JSON data file into a go item object.
+func load(filename string) (i *Item, err error) {
+	// jsonItem is a temporary struct for easier conversion between JSON and
 	// go structs.
-	type jsonCreature struct {
-		Name     string
-		Graphics struct {
+	type jsonItem struct {
+		Name        string
+		Category    string
+		Description string
+		Graphics    struct {
 			Ch string
 			Fg map[string]string
 			Bg map[string]string
 		}
-		Hp        int
-		Strength  int
-		Speed     float64
 		Stackable bool
 	}
 
@@ -54,7 +52,7 @@ func load(filename string) (c *Creature, err error) {
 		return nil, errutil.Err(err)
 	}
 
-	var jc jsonCreature
+	var jc jsonItem
 	err = json.Unmarshal(buf, &jc)
 	if err != nil {
 		return nil, errutil.Err(err)
@@ -69,13 +67,10 @@ func load(filename string) (c *Creature, err error) {
 		return nil, errutil.Err(err)
 	}
 
-	c = &Creature{
-		N:         jc.Name,
-		Hp:        jc.Hp,
-		MaxHp:     jc.Hp,
-		Strength:  jc.Strength,
-		Speed:     jc.Speed,
-		Inventory: make(Inventory, len(item.Letters)),
+	i = &Item{
+		N:           jc.Name,
+		Category:    jc.Category,
+		Description: jc.Description,
 		O: object.Object{
 			G: termbox.Cell{
 				Ch: rune(jc.Graphics.Ch[0]),
@@ -85,5 +80,5 @@ func load(filename string) (c *Creature, err error) {
 			Stackable: jc.Stackable,
 		},
 	}
-	return c, nil
+	return i, nil
 }

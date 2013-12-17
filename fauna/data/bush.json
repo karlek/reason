@@ -1,0 +1,9 @@
+{
+	"Name": "bush",
+	"Graphics": {
+		"Ch": "&",
+		"Fg": {"color": "green", "attr": ""},
+		"Bg": null
+	},
+	"Stackable": false
+}

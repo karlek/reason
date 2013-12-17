@@ -5,35 +5,35 @@ import (
 	"github.com/karlek/reason/util"
 
 	"github.com/karlek/worc/area"
-	"github.com/karlek/worc/coord"
 	"github.com/karlek/worc/screen"
 )
 
 // Area is a debug function to generate terrain.
-func Area(scr screen.Screen, width, height int) area.Area {
+func Area(scr screen.Screen, width, height int) *area.Area {
 
 	// Placeholder for terrain generation.
 	var ms = []area.Stackable{
-		fauna.Doodads["water"],
+		// fauna.Doodads["door (closed)"],
 		fauna.Doodads["soil"],
-		fauna.Doodads["water"],
 		fauna.Doodads["soil"],
-		fauna.Doodads["water"],
 		fauna.Doodads["soil"],
+		fauna.Doodads["soil"],
+		fauna.Doodads["soil"],
+		fauna.Doodads["soil"],
+		fauna.Doodads["soil"],
+		fauna.Doodads["soil"],
+		fauna.Doodads["bush"],
 		fauna.Doodads["wall"],
-		fauna.Doodads["door (closed)"],
+		fauna.Doodads["water"],
+		fauna.Doodads["water"],
+		fauna.Doodads["water"],
+		fauna.Doodads["water"],
+		fauna.Doodads["water"],
+		fauna.Doodads["water"],
 	}
 
-	a := area.Area{
-		Terrain: make([][]area.Stackable, width),
-		Objects: make(map[coord.Coord]*area.Stack),
-		Width:   width,
-		Height:  height,
-		Screen:  scr,
-	}
-
+	a := area.New(width, height, scr)
 	for x := 0; x < width; x++ {
-		a.Terrain[x] = make([]area.Stackable, height)
 		for y := 0; y < height; y++ {
 			a.Terrain[x][y] = ms[util.RandInt(0, len(ms))]
 		}

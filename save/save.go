@@ -8,6 +8,7 @@ import (
 
 	"github.com/karlek/reason/beastiary"
 	"github.com/karlek/reason/fauna"
+	"github.com/karlek/reason/item"
 
 	"github.com/karlek/worc/area"
 	"github.com/karlek/worc/object"
@@ -24,6 +25,7 @@ func init() {
 	// Register types to be saved / loaded.
 	gob.Register(new(beastiary.Creature))
 	gob.Register(new(fauna.Doodad))
+	gob.Register(new(item.Item))
 	gob.Register(new(object.Object))
 	gob.Register(new(area.Area))
 }

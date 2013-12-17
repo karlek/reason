@@ -54,11 +54,11 @@ func load(filename string) (fa *Doodad, err error) {
 		return nil, errutil.Err(err)
 	}
 
-	fg, err := parseColor(jc.Graphics.Fg)
+	fg, err := util.ParseColor(jc.Graphics.Fg)
 	if err != nil {
 		return nil, errutil.Err(err)
 	}
-	bg, err := parseColor(jc.Graphics.Bg)
+	bg, err := util.ParseColor(jc.Graphics.Bg)
 	if err != nil {
 		return nil, errutil.Err(err)
 	}
@@ -75,47 +75,4 @@ func load(filename string) (fa *Doodad, err error) {
 		},
 	}
 	return fa, nil
-}
-
-// parseColor takes a JSON map that describes the color of a object and
-// returns a termbox attribute.
-func parseColor(colorSetting map[string]string) (attr termbox.Attribute, err error) {
-	if colorSetting == nil {
-		return 0, nil
-	}
-	v, ok := colorSetting["color"]
-	if !ok {
-		return 0, errutil.Newf("missing map key `color` in: %v", colorSetting)
-	}
-	switch v {
-	case "black":
-		attr += termbox.ColorBlack
-	case "red":
-		attr += termbox.ColorRed
-	case "green":
-		attr += termbox.ColorGreen
-	case "yellow":
-		attr += termbox.ColorYellow
-	case "blue":
-		attr += termbox.ColorBlue
-	case "magenta":
-		attr += termbox.ColorMagenta
-	case "cyan":
-		attr += termbox.ColorCyan
-	case "white":
-		attr += termbox.ColorWhite
-	}
-	v, ok = colorSetting["attr"]
-	if !ok {
-		return 0, errutil.Newf("missing map key `attr`")
-	}
-	switch v {
-	case "bold":
-		attr += termbox.AttrBold
-	case "underline":
-		attr += termbox.AttrUnderline
-	case "reverse":
-		attr += termbox.AttrReverse
-	}
-	return attr, nil
 }

@@ -2,7 +2,10 @@
 package action
 
 import (
+	"fmt"
+
 	"github.com/karlek/reason/fauna"
+	"github.com/karlek/reason/ui"
 
 	"github.com/karlek/worc/area"
 	"github.com/karlek/worc/status"
@@ -18,20 +21,20 @@ import (
 // }
 
 func OpenDoorNarrative(a *area.Area, x, y int) bool {
-	status.Print("Toggle door - In which direction lies the door?")
+	status.Print("Open door - In which direction lies the door?")
 	switch ev := termbox.PollEvent(); ev.Type {
 	case termbox.EventKey:
 		switch ev.Key {
-		case termbox.KeyEsc:
+		case ui.CancelKey:
 			return false
 		// Movement
-		case termbox.KeyArrowUp:
+		case ui.MoveUpKey:
 			x, y = x, y-1
-		case termbox.KeyArrowDown:
+		case ui.MoveDownKey:
 			x, y = x, y+1
-		case termbox.KeyArrowLeft:
+		case ui.MoveLeftKey:
 			x, y = x-1, y
-		case termbox.KeyArrowRight:
+		case ui.MoveRightKey:
 			x, y = x+1, y
 		}
 		// Prevent from moving outside the top
@@ -58,12 +61,9 @@ func OpenDoorNarrative(a *area.Area, x, y int) bool {
 			a.Terrain[x][y] = fauna.Doodads["door (open)"]
 			a.ReDraw(x, y)
 			return true
-		} else if a.Terrain[x][y] == fauna.Doodads["door (open)"] {
-			a.Terrain[x][y] = fauna.Doodads["door (closed)"]
-			a.ReDraw(x, y)
-			return true
 		} else {
-			status.Print("You can't open / close that.")
+			status.Print("You can't open that.")
+			status.Print(fmt.Sprintf("%T", a.Terrain[x][y]))
 		}
 	}
 	return false

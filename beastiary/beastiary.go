@@ -6,7 +6,8 @@ import (
 	"os"
 	"time"
 
-	"github.com/karlek/reason/util"
+	"github.com/karlek/reason/item"
+	// "github.com/karlek/reason/util"
 
 	"github.com/karlek/worc/area"
 	"github.com/karlek/worc/coord"
@@ -15,44 +16,104 @@ import (
 	"github.com/nsf/termbox-go"
 )
 
+type Inventory map[string]*item.Item
+
 // Creature is an object with a name.
 type Creature struct {
-	O        object.Object
-	N        string
-	MaxHp    int
-	Hp       int
-	Strength int
-	CurSpeed float64
-	Speed    float64
+	O         object.Object
+	N         string
+	MaxHp     int
+	Hp        int
+	Strength  int
+	CurSpeed  float64
+	Speed     float64
+	Inventory Inventory
+}
+
+func (c *Creature) PickUp(a *area.Area) *item.Item {
+	x, y := c.X(), c.Y()
+	cor := coord.Coord{x, y}
+
+	s, ok := a.Items[cor]
+	if !ok {
+		return nil
+	}
+	w := s.Pop()
+	if w == nil {
+		return nil
+	}
+	i, ok := w.(*item.Item)
+	if !ok {
+		return nil
+	}
+
+	i.Hotkey = c.findHotkey()
+	c.Inventory[i.Hotkey] = i
+	return i
+}
+
+func (c *Creature) DropItem(ch string, a *area.Area) *item.Item {
+	i := c.Inventory[ch]
+	delete(c.Inventory, ch)
+
+	cor := coord.Coord{c.X(), c.Y()}
+	if a.Items[cor] == nil {
+		a.Items[cor] = new(area.Stack)
+	}
+	a.Items[cor].Push(i)
+
+	return i
+}
+
+/// can overflow!!
+func (c *Creature) findHotkey() string {
+	for _, ch := range item.Letters {
+		hotkey := string(ch)
+		if _, ok := c.Inventory[hotkey]; !ok {
+			return hotkey
+		}
+	}
+	return ""
 }
 
 // action performs simple AI for a creature.
 func (c *Creature) action(a *area.Area, hero *Creature) {
-	i := util.RandInt(0, 1000)
 	var col *area.Collision
-	switch {
-	case i == 999:
-		status.Print("Fresh grass, yum!")
-	case i%4 == 0:
-		col = a.MoveUp(c)
-	case i%4 == 1:
-		col = a.MoveDown(c)
-	case i%4 == 2:
-		col = a.MoveLeft(c)
-	case i%4 == 3:
+	if c.X() < hero.X() {
 		col = a.MoveRight(c)
-	default:
-		return
+	} else if c.X() > hero.X() {
+		col = a.MoveLeft(c)
+	} else if c.Y() < hero.Y() {
+		col = a.MoveDown(c)
+	} else if c.Y() > hero.Y() {
+		col = a.MoveUp(c)
 	}
+
+	// i := util.RandInt(0, 1000)
+	// switch {
+	// case i == 999:
+	// 	status.Print("Fresh grass, yum!")
+	// case i%4 == 0:
+	// 	col = a.MoveUp(c)
+	// case i%4 == 1:
+	// 	col = a.MoveDown(c)
+	// case i%4 == 2:
+	// 	col = a.MoveLeft(c)
+	// case i%4 == 3:
+	// 	col = a.MoveRight(c)
+	// default:
+	// 	return
+	// }
 	if col == nil {
 		return
 	}
 	if mob, ok := col.S.(*Creature); ok {
 		if mob.Name() == "hero" {
 			battleNarrative(a, hero, c)
-		} else {
-			battle(a, c, mob)
 		}
+		// } else {
+		// battle(a, c, mob)
+		// }
 	}
 }
 
@@ -60,7 +121,7 @@ func (c *Creature) action(a *area.Area, hero *Creature) {
 func battle(a *area.Area, defender *Creature, attacker *Creature) {
 	defender.Hp -= attacker.Strength
 	if defender.Hp <= 0 {
-		a.Objects[coord.Coord{defender.X(), defender.Y()}].Pop()
+		a.Monsters[coord.Coord{defender.X(), defender.Y()}] = nil
 	}
 	a.ReDraw(defender.X(), defender.Y())
 }

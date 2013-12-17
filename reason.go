@@ -13,6 +13,7 @@ import (
 	"github.com/karlek/reason/beastiary"
 	"github.com/karlek/reason/fauna"
 	"github.com/karlek/reason/gen"
+	"github.com/karlek/reason/item"
 	"github.com/karlek/reason/save"
 	"github.com/karlek/reason/ui" // loads with init.
 
@@ -58,6 +59,12 @@ func reason() (err error) {
 		return errutil.Err(err)
 	}
 
+	// Initialize items.
+	err = item.Load()
+	if err != nil {
+		return errutil.Err(err)
+	}
+
 	// Load or create new game.
 	var a area.Area
 	var hero beastiary.Creature
@@ -69,7 +76,7 @@ func reason() (err error) {
 	}
 
 	// Initialize and draw the user interface to screen.
-	ui.Init(hero)
+	ui.Update(hero)
 
 	// Draw both terrain and objects to screen.
 	a.Draw()
@@ -112,9 +119,9 @@ func load(sav *save.Save, a *area.Area, hero *beastiary.Creature) error {
 	if err != nil {
 		return errutil.Err(err)
 	}
-	*a = s.Area
-	*hero = s.Hero
-
+	g := *s
+	*a = g.Area
+	*hero = g.Hero
 	return nil
 }
 
@@ -126,16 +133,16 @@ func newGame(a *area.Area, hero *beastiary.Creature) {
 		Width:  ui.AreaScreenWidth,
 		Height: ui.AreaScreenHeight,
 	}
-	*a = gen.Area(areaScreen, areaScreen.Width, areaScreen.Height)
-	gen.Mobs(a, 14)
+	*a = *gen.Area(areaScreen, areaScreen.Width, areaScreen.Height)
+	gen.Mobs(a, 16)
+	gen.Items(a, 5)
 
 	// Hero starting position.
 	*hero = beastiary.Creatures["hero"]
 	hero.NewX(2)
 	hero.NewY(2)
 
-	a.Objects[coord.Coord{hero.X(), hero.Y()}] = new(area.Stack)
-	a.Objects[coord.Coord{hero.X(), hero.Y()}].Push(hero)
+	a.Monsters[coord.Coord{hero.X(), hero.Y()}] = hero
 }
 
 // nextTurn listens on user input and then acts on it.
@@ -144,20 +151,49 @@ func nextTurn(sav *save.Save, a *area.Area, hero *beastiary.Creature) bool {
 	switch ev := termbox.PollEvent(); ev.Type {
 	case termbox.EventKey:
 		switch ev.Ch {
-		case 'l':
+		case ui.LookKey:
 			// user wants to look around.
-			action.Look(hero.X(), hero.Y(), *a)
+			action.Look(*a, hero.X(), hero.Y())
 			return false
-		case 'o':
+		case ui.PickUpItemKey:
+			// user wants to pick up an item.
+			action.PickUpNarrative(a, hero)
+			passTime(a, hero)
+			return false
+		case ui.ShowInventoryKey:
+			// user wants to look at inventory.
+			actionTaken := action.ShowInventory(a, hero)
+			if actionTaken {
+				passTime(a, hero)
+			}
+			ui.AreaScreenRedraw(*a, *hero)
+			return false
+		case ui.DropItemKey:
+			// user wants to drop an item.
+			actionTaken := action.DropItem(hero, a)
+			if actionTaken {
+				passTime(a, hero)
+			}
+			ui.AreaScreenRedraw(*a, *hero)
+			return false
+		case ui.OpenDoorKey:
+			// user wants to open a door.
 			actionTaken := action.OpenDoorNarrative(a, hero.X(), hero.Y())
 			if actionTaken {
 				passTime(a, hero)
 			}
 			return false
-		case 'q':
+		case ui.CloseDoorKey:
+			// user wants to close a door.
+			actionTaken := action.CloseDoorNarrative(a, hero.X(), hero.Y())
+			if actionTaken {
+				passTime(a, hero)
+			}
+			return false
+		case ui.QuitKey:
 			// user wants to quit game.
 			return true
-		case 'p':
+		case ui.SaveAndQuitKey:
 			// user wants to save and exit.
 			err := sav.Save(*a, *hero)
 			if err != nil {
@@ -169,20 +205,18 @@ func nextTurn(sav *save.Save, a *area.Area, hero *beastiary.Creature) bool {
 		var col *area.Collision
 		switch ev.Key {
 		// Movement.
-		case termbox.KeyArrowUp:
+		case ui.MoveUpKey:
 			col = a.MoveUp(hero)
-			passTime(a, hero)
-		case termbox.KeyArrowDown:
+		case ui.MoveDownKey:
 			col = a.MoveDown(hero)
-			passTime(a, hero)
-		case termbox.KeyArrowLeft:
+		case ui.MoveLeftKey:
 			col = a.MoveLeft(hero)
-			passTime(a, hero)
-		case termbox.KeyArrowRight:
+		case ui.MoveRightKey:
 			col = a.MoveRight(hero)
-			passTime(a, hero)
 		}
 		if col == nil {
+			/// bugs
+			passTime(a, hero)
 			break
 		}
 		if c, ok := col.S.(*beastiary.Creature); ok {
@@ -206,8 +240,8 @@ func nextTurn(sav *save.Save, a *area.Area, hero *beastiary.Creature) bool {
 ///
 func passTime(a *area.Area, hero *beastiary.Creature) {
 	// Other creatures!
-	for _, s := range a.Objects {
-		if c, ok := s.Peek().(*beastiary.Creature); ok {
+	for _, m := range a.Monsters {
+		if c, ok := m.(*beastiary.Creature); ok {
 			if c.Name() == "hero" {
 				continue
 			}

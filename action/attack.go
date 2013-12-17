@@ -13,11 +13,13 @@ import (
 
 ///
 func Attack(a *area.Area, hero *beastiary.Creature, defender *beastiary.Creature) {
+	var msg string
 	defender.Hp -= hero.Strength
-	status.Print(fmt.Sprintf("You inflict %d damage to %s!", hero.Strength, defender.Name()))
+	msg += fmt.Sprintf("You inflict %d damage to %s!", hero.Strength, defender.Name())
 	if defender.Hp <= 0 {
-		a.Objects[coord.Coord{defender.X(), defender.Y()}].Pop()
+		a.Monsters[coord.Coord{defender.X(), defender.Y()}] = nil
 		a.ReDraw(defender.X(), defender.Y())
-		status.Print(fmt.Sprintf("You killed %s!", defender.Name()))
+		msg += fmt.Sprintf(" You killed %s!", defender.Name())
 	}
+	status.Print(msg)
 }

@@ -25,23 +25,19 @@ func Mobs(a *area.Area, num int) {
 				continue
 			}
 
+			if !a.IsXYStackable(x, y) {
+				continue
+			}
+
 			g := mobList[util.RandInt(0, len(mobList))]
 			c := coord.Coord{x, y}
-			if s, ok := a.Objects[c]; ok {
-				if s.Peek().IsStackable() && a.Terrain[x][y].IsStackable() {
-					g.NewX(x)
-					g.NewY(y)
-					a.Objects[c].Push(&g)
-					num--
-				}
-			} else if a.Terrain[x][y].IsStackable() {
-				g.NewX(x)
-				g.NewY(y)
-				a.Objects[c] = new(area.Stack)
-				a.Objects[c].Push(&g)
-				num--
-			}
+
+			g.NewX(x)
+			g.NewY(y)
+
+			a.Monsters[c] = &g
+			num--
 		}
 	}
-	a.Draw()
+	a.DrawMonsters()
 }

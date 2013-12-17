@@ -3,6 +3,7 @@ package action
 
 import (
 	"github.com/karlek/reason/name"
+	"github.com/karlek/reason/ui"
 
 	"github.com/karlek/worc/area"
 	"github.com/karlek/worc/coord"
@@ -11,7 +12,7 @@ import (
 )
 
 // Look takes the units coordiantes and an area to observe.
-func Look(x, y int, a area.Area) {
+func Look(a area.Area, x, y int) {
 	termbox.SetCursor(x, y)
 	termbox.Flush()
 
@@ -21,17 +22,17 @@ lookLoop:
 		case termbox.EventKey:
 			switch ev.Key {
 			// Cursor movement.
-			case termbox.KeyEsc:
+			case ui.CancelKey:
 				termbox.HideCursor()
 				termbox.Flush()
 				break lookLoop
-			case termbox.KeyArrowUp:
+			case ui.MoveUpKey:
 				x, y = x, y-1
-			case termbox.KeyArrowDown:
+			case ui.MoveDownKey:
 				x, y = x, y+1
-			case termbox.KeyArrowLeft:
+			case ui.MoveLeftKey:
 				x, y = x-1, y
-			case termbox.KeyArrowRight:
+			case ui.MoveRightKey:
 				x, y = x+1, y
 			default:
 				continue
@@ -65,22 +66,26 @@ lookLoop:
 			termbox.Flush()
 
 			c := coord.Coord{x, y}
-			var msg string
-			if s, found := a.Objects[c]; found {
-				// Object found message.
-				if n, ok := s.Peek().(name.Namer); ok {
+
+			// Message is originally about terrain, but is then overwritten.
+			msg := a.Terrain[x][y].(name.Namer).Name()
+			if o, found := a.Objects[c]; found {
+				if n, ok := o.(name.Namer); ok {
 					msg = n.Name()
-					if msg != "" {
-						status.Print("You see " + msg + ".")
-					}
-					continue
 				}
 			}
-			// If no object was found, print the terrains name instead.
-			if msg == "" {
-				msg = a.Terrain[x][y].(name.Namer).Name()
+			if m, found := a.Monsters[c]; found {
+				if n, ok := m.(name.Namer); ok {
+					msg = n.Name()
+				}
 			}
-			// Terrain found.
+			if s, found := a.Items[c]; found {
+				if i := s.Peek(); i != nil {
+					if n, ok := i.(name.Namer); ok {
+						msg = n.Name()
+					}
+				}
+			}
 			status.Print("You see " + msg + ".")
 		}
 	}
