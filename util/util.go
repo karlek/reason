@@ -10,6 +10,50 @@ import (
 	"github.com/nsf/termbox-go"
 )
 
+// YesOrNo forces the player to answer either y or n.
+// Esc is false and enter is true.
+func YesOrNo() bool {
+	for {
+		switch ev := termbox.PollEvent(); ev.Type {
+		case termbox.EventKey:
+			switch ev.Ch {
+			case 'n', 'N':
+				return false
+			case 'y', 'Y':
+				return true
+			}
+			switch ev.Key {
+			case termbox.KeyEsc:
+				return false
+			case termbox.KeyEnter:
+				return true
+			}
+		}
+	}
+}
+
+// NoOrYes forces the player to answer either y or n.
+// Enter is false and esc is false.
+func NoOrYes() bool {
+	for {
+		switch ev := termbox.PollEvent(); ev.Type {
+		case termbox.EventKey:
+			switch ev.Ch {
+			case 'n', 'N':
+				return false
+			case 'y', 'Y':
+				return true
+			}
+			switch ev.Key {
+			case termbox.KeyEsc:
+				return false
+			case termbox.KeyEnter:
+				return false
+			}
+		}
+	}
+}
+
 // DirFiles initializes the Doodads map with doodads.
 func DirFiles(srcDir string) (filnames []string, err error) {
 	folder, err := goutil.SrcDir(srcDir)

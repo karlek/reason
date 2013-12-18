@@ -15,6 +15,7 @@ import (
 	"github.com/karlek/reason/save"
 	"github.com/karlek/reason/ui"
 	"github.com/karlek/reason/ui/status"
+	// "github.com/karlek/reason/util"
 
 	"github.com/karlek/worc/area"
 	"github.com/karlek/worc/coord"
@@ -55,6 +56,12 @@ func reason() (err error) {
 }
 
 func quit() {
+	/// Add on release.
+	// status.Print("Do you want to quit the game? [y/N]")
+	// wantToQuit := util.NoOrYes()
+	// if !wantToQuit {
+	// 	return
+	// }
 	termbox.Close()
 	os.Exit(0)
 }

@@ -6,6 +6,7 @@ import (
 
 	"github.com/karlek/reason/fauna"
 	"github.com/karlek/reason/ui"
+	"github.com/karlek/reason/util"
 
 	"github.com/karlek/reason/ui/status"
 	"github.com/karlek/worc/area"
@@ -70,32 +71,10 @@ func OpenDoorNarrative(a *area.Area, x, y int) bool {
 
 func WalkedIntoDoor(a *area.Area, x, y int) bool {
 	status.Print("Do you want to open door? [Y/n]")
-	wantToOpenDoor := YesOrNo()
+	wantToOpenDoor := util.YesOrNo()
 	if wantToOpenDoor {
 		a.Terrain[x][y] = fauna.Doodads["door (open)"]
 		return true
 	}
 	return false
-}
-
-// YesOrNo forces the player to answer either y or n.
-// Esc is false and enter is true.
-func YesOrNo() bool {
-	for {
-		switch ev := termbox.PollEvent(); ev.Type {
-		case termbox.EventKey:
-			switch ev.Ch {
-			case 'n':
-				return false
-			case 'y':
-				return true
-			}
-			switch ev.Key {
-			case termbox.KeyEsc:
-				return false
-			case termbox.KeyEnter:
-				return true
-			}
-		}
-	}
 }
