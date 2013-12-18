@@ -39,5 +39,4 @@ func Mobs(a *area.Area, num int) {
 			num--
 		}
 	}
-	a.DrawMonsters()
 }

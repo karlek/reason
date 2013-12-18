@@ -6,7 +6,7 @@ import (
 
 	"github.com/karlek/reason/util"
 
-	"github.com/karlek/worc/object"
+	"github.com/karlek/worc/model"
 	"github.com/mewkiz/pkg/errutil"
 	"github.com/nsf/termbox-go"
 )
@@ -71,7 +71,7 @@ func load(filename string) (i *Item, err error) {
 		N:           jc.Name,
 		Category:    jc.Category,
 		Description: jc.Description,
-		O: object.Object{
+		M: model.Model{
 			G: termbox.Cell{
 				Ch: rune(jc.Graphics.Ch[0]),
 				Fg: fg,

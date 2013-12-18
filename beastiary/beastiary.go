@@ -7,20 +7,19 @@ import (
 	"time"
 
 	"github.com/karlek/reason/item"
-	// "github.com/karlek/reason/util"
+	"github.com/karlek/reason/ui/status"
 
 	"github.com/karlek/worc/area"
 	"github.com/karlek/worc/coord"
-	"github.com/karlek/worc/object"
-	"github.com/karlek/worc/status"
+	"github.com/karlek/worc/model"
 	"github.com/nsf/termbox-go"
 )
 
 type Inventory map[string]*item.Item
 
-// Creature is an object with a name.
+// Creature is a model with stats, name, inventory... etc.
 type Creature struct {
-	O         object.Object
+	M         model.Model
 	N         string
 	MaxHp     int
 	Hp        int
@@ -65,7 +64,6 @@ func (c *Creature) DropItem(ch string, a *area.Area) *item.Item {
 	return i
 }
 
-/// can overflow!!
 func (c *Creature) findHotkey() string {
 	for _, ch := range item.Letters {
 		hotkey := string(ch)
@@ -111,6 +109,7 @@ func (c *Creature) action(a *area.Area, hero *Creature) {
 		if mob.Name() == "hero" {
 			battleNarrative(a, hero, c)
 		}
+		/// mobs friendly fire
 		// } else {
 		// battle(a, c, mob)
 		// }
@@ -123,14 +122,13 @@ func battle(a *area.Area, defender *Creature, attacker *Creature) {
 	if defender.Hp <= 0 {
 		a.Monsters[coord.Coord{defender.X(), defender.Y()}] = nil
 	}
-	a.ReDraw(defender.X(), defender.Y())
 }
 
-///
 func battleNarrative(a *area.Area, hero *Creature, attacker *Creature) {
 	hero.Hp -= attacker.Strength
 	status.Print(fmt.Sprintf("You take %d damage from %s!", attacker.Strength, attacker.Name()))
 	if hero.Hp <= 0 {
+		hero.DrawFOV(a)
 		status.Print("You die. Press any key to quit.")
 		termbox.PollEvent()
 		time.Sleep(100)
@@ -153,30 +151,30 @@ func (c *Creature) Name() string {
 
 // NewX sets a new x value for the coordinate.
 func (c *Creature) NewX(x int) {
-	c.O.NewX(x)
+	c.M.NewX(x)
 }
 
 // NewY sets a new y value for the coordinate.
 func (c *Creature) NewY(y int) {
-	c.O.NewY(y)
+	c.M.NewY(y)
 }
 
 // IsStackable returns whether objects can be stacked ontop of this object.
 func (c *Creature) IsStackable() bool {
-	return c.O.IsStackable()
+	return c.M.IsStackable()
 }
 
 // Graphic returns the graphic data of this object.
 func (c *Creature) Graphic() termbox.Cell {
-	return c.O.Graphic()
+	return c.M.Graphic()
 }
 
 // X returns the x value of the current coordinate.
 func (c *Creature) X() int {
-	return c.O.X()
+	return c.M.X()
 }
 
 // Y returns the y value of the current coordinate.
 func (c *Creature) Y() int {
-	return c.O.Y()
+	return c.M.Y()
 }

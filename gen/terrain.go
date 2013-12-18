@@ -5,14 +5,13 @@ import (
 	"github.com/karlek/reason/util"
 
 	"github.com/karlek/worc/area"
-	"github.com/karlek/worc/screen"
 )
 
 // Area is a debug function to generate terrain.
-func Area(scr screen.Screen, width, height int) *area.Area {
+func Area(width, height int) area.Area {
 
 	// Placeholder for terrain generation.
-	var ms = []area.Stackable{
+	var ms = []area.Tile{
 		// fauna.Doodads["door (closed)"],
 		fauna.Doodads["soil"],
 		fauna.Doodads["soil"],
@@ -32,11 +31,11 @@ func Area(scr screen.Screen, width, height int) *area.Area {
 		fauna.Doodads["water"],
 	}
 
-	a := area.New(width, height, scr)
+	a := area.New(width, height)
 	for x := 0; x < width; x++ {
 		for y := 0; y < height; y++ {
 			a.Terrain[x][y] = ms[util.RandInt(0, len(ms))]
 		}
 	}
-	return a
+	return *a
 }

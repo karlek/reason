@@ -5,16 +5,13 @@ import (
 	"github.com/karlek/reason/item"
 	"github.com/karlek/reason/ui"
 
+	"github.com/karlek/reason/ui/status"
 	"github.com/karlek/worc/area"
-	"github.com/karlek/worc/status"
 
 	"github.com/nsf/termbox-go"
 )
 
 func DropItem(hero *beastiary.Creature, a *area.Area) bool {
-	termbox.Clear(termbox.ColorBlack, termbox.ColorBlack)
-	termbox.Flush()
-
 	PrintCategorizedInventory("Drop Item: currentWeight/maxPossibleWeight (usedSlots/totalSlots)", hero)
 
 	if len(hero.Inventory) == 0 {
@@ -45,13 +42,13 @@ func NarrativeDropItem(ch string, hero *beastiary.Creature, a *area.Area) {
 
 func PrintCategorizedInventory(title string, hero *beastiary.Creature) {
 	termbox.Clear(termbox.ColorBlack, termbox.ColorBlack)
-	termbox.Flush()
 	if len(hero.Inventory) == 0 {
-		ui.PrintInventory("You aren't carrying anything.", 0, 0, ui.WholeScreenWidth, termbox.ColorWhite+termbox.AttrBold, termbox.ColorDefault)
+		ui.PrintInventory("You aren't carrying anything.", 0, 0, ui.Whole.Width, termbox.ColorWhite+termbox.AttrBold, termbox.ColorDefault)
+		termbox.Flush()
 		termbox.PollEvent()
 		return
 	}
-	ui.PrintInventory(title, 0, 0, ui.WholeScreenWidth, termbox.ColorWhite+termbox.AttrBold, termbox.ColorDefault)
+	ui.PrintInventory(title, 0, 0, ui.Whole.Width, termbox.ColorWhite+termbox.AttrBold, termbox.ColorDefault)
 
 	// item category is the key to which plural category it will be placed under.
 	var categories = map[string][]string{
@@ -84,16 +81,19 @@ func PrintCategorizedInventory(title string, hero *beastiary.Creature) {
 	yOffset := 2
 	xOffset := 1
 	row := 0
+
+	/// Make inventory screen in ui
 	for cat, items := range categories {
 		if len(items) == 0 {
 			continue
 		}
-		ui.PrintInventory(properCategory[cat], 0, row+yOffset, ui.WholeScreenWidth, termbox.ColorCyan+termbox.AttrBold, termbox.ColorDefault)
+		ui.PrintInventory(properCategory[cat], 0, row+yOffset, ui.Whole.Width, termbox.ColorCyan+termbox.AttrBold, termbox.ColorDefault)
 		row++
 		for _, itemStr := range items {
-			ui.PrintInventory(itemStr, xOffset, row+yOffset, ui.WholeScreenWidth, termbox.ColorWhite, termbox.ColorDefault)
+			ui.PrintInventory(itemStr, xOffset, row+yOffset, ui.Whole.Width, termbox.ColorWhite, termbox.ColorDefault)
 			row++
 		}
 		row++
 	}
+	termbox.Flush()
 }

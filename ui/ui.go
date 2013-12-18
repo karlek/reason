@@ -2,40 +2,48 @@ package ui
 
 import (
 	"fmt"
-
-	"github.com/karlek/reason/beastiary"
+	"log"
 
 	"github.com/karlek/progress/barcli"
-	"github.com/karlek/worc/area"
-	"github.com/karlek/worc/status"
+	// "github.com/karlek/worc/area"
+	"github.com/karlek/worc/screen"
 	"github.com/nsf/termbox-go"
 )
 
-const (
-	// Whole game screen.
-	WholeScreenWidth  = 127
-	WholeScreenHeight = 44
-
+var (
 	// Area screen size.
-	AreaScreenWidth  = 34
-	AreaScreenHeight = 20
+	Area = screen.Screen{
+		Width:   35,
+		Height:  20,
+		YOffset: 2,
+	}
 
-	// Character info.
-	CharacterInfoX      = AreaScreenWidth + 2
-	CharacterInfoY      = 0
-	CharacterInfoWidth  = 25
-	CharacterInfoHeight = AreaScreenHeight
+	CharacterInfo = screen.Screen{
+		Width:   25,
+		Height:  Area.Height,
+		YOffset: 0,
+		XOffset: 1,
+	}
 
-	// Status bar screen coordinates.
-	statusX = 5
-	statusY = AreaScreenHeight + 1
+	Message = screen.Screen{
+		Width:   Whole.Width,
+		Height:  5,
+		YOffset: Area.Height + Area.YOffset + 1,
+		XOffset: 1,
+	}
 
-	// Status bar size.
-	statusWidth  = 100 - statusX*2
-	statusHeight = 7
+	Whole = screen.Screen{
+		Width:  34 + 25 + 2,
+		Height: 44,
+	}
 
+	Inventory = screen.Screen{
+		Width: 60,
+	}
+)
+
+const (
 	// Keybindings.
-
 	// Action keys.
 	LookKey          = 'l'
 	OpenDoorKey      = 'o'
@@ -56,12 +64,6 @@ const (
 	CancelKey = termbox.KeyEsc
 )
 
-func init() {
-	// Init status menu.
-	status.SetSize(statusWidth, statusHeight)
-	status.SetLoc(statusX, statusY)
-}
-
 func print(str string, x, y, width int, fg termbox.Attribute, bg termbox.Attribute) {
 	// Clears the line from old characters.
 	for i := len(str); i < width; i++ {
@@ -71,7 +73,6 @@ func print(str string, x, y, width int, fg termbox.Attribute, bg termbox.Attribu
 	for charOffset, char := range str {
 		termbox.SetCell(x+charOffset, y, char, fg, bg)
 	}
-	termbox.Flush()
 }
 
 func PrintInventory(str string, x, y, width int, fg termbox.Attribute, bg termbox.Attribute) {
@@ -83,41 +84,29 @@ func PrintInventory(str string, x, y, width int, fg termbox.Attribute, bg termbo
 	for charOffset, char := range str {
 		termbox.SetCell(x+charOffset, y, char, fg, bg)
 	}
-	termbox.Flush()
 }
 
 // UpdateHp updates the hero health bar.
-func UpdateHp(hero beastiary.Creature) {
-	hpMsg := fmt.Sprintf("%d/%d", hero.Hp, hero.MaxHp)
+func UpdateHp(curHp, maxHp int) {
+	hpMsg := fmt.Sprintf("%d/%d", curHp, maxHp)
 
 	xOffset := 0
-	print("Health: ", CharacterInfoX, CharacterInfoY+1, CharacterInfoWidth, termbox.ColorWhite, termbox.ColorDefault)
+	print("Health: ", CharacterInfo.XOffset, CharacterInfo.YOffset, CharacterInfo.Width, termbox.ColorWhite, termbox.ColorDefault)
 	xOffset += 8
-	print(hpMsg, CharacterInfoX+xOffset, CharacterInfoY+1, CharacterInfoWidth, termbox.ColorRed, termbox.ColorDefault)
+	print(hpMsg, CharacterInfo.XOffset+xOffset, CharacterInfo.YOffset, CharacterInfo.Width, termbox.ColorRed, termbox.ColorDefault)
 	xOffset += len(hpMsg) + 1
 
-	bar, err := barcli.New(hero.MaxHp)
+	bar, err := barcli.New(maxHp)
 	if err != nil {
-		status.Print(err.Error())
+		log.Println(err)
 	}
-	bar.IncN(hero.Hp)
+	bar.IncN(curHp)
 	filled, unfilled, err := bar.StringSize(20)
 	if err != nil {
-		status.Print(err.Error())
+		log.Println(err)
 	}
 
-	print(filled, CharacterInfoX+xOffset, CharacterInfoY+1, CharacterInfoWidth, termbox.ColorGreen+termbox.AttrBold, termbox.ColorDefault)
+	print(filled, CharacterInfo.XOffset+xOffset, CharacterInfo.YOffset, CharacterInfo.Width, termbox.ColorGreen+termbox.AttrBold, termbox.ColorDefault)
 	xOffset += len(filled)
-	print(unfilled, CharacterInfoX+xOffset, CharacterInfoY+1, CharacterInfoWidth, termbox.ColorBlack+termbox.AttrBold, termbox.ColorDefault)
-}
-
-// Update draws all user interfaces to the screen.
-func Update(hero beastiary.Creature) {
-	UpdateHp(hero)
-}
-
-func AreaScreenRedraw(a area.Area, hero beastiary.Creature) {
-	a.Draw()
-	Update(hero)
-	status.Update()
+	print(unfilled, CharacterInfo.XOffset+xOffset, CharacterInfo.YOffset, CharacterInfo.Width, termbox.ColorBlack+termbox.AttrBold, termbox.ColorDefault)
 }

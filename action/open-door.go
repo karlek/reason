@@ -7,15 +7,15 @@ import (
 	"github.com/karlek/reason/fauna"
 	"github.com/karlek/reason/ui"
 
+	"github.com/karlek/reason/ui/status"
 	"github.com/karlek/worc/area"
-	"github.com/karlek/worc/status"
 	"github.com/nsf/termbox-go"
 )
 
 // func OpenDoor(a *area.Area, x, y int) bool {
 // }
 
-// ///
+//
 // func openDoor(a *area.Area, x, y int) bool {
 
 // }
@@ -59,7 +59,6 @@ func OpenDoorNarrative(a *area.Area, x, y int) bool {
 
 		if a.Terrain[x][y] == fauna.Doodads["door (closed)"] {
 			a.Terrain[x][y] = fauna.Doodads["door (open)"]
-			a.ReDraw(x, y)
 			return true
 		} else {
 			status.Print("You can't open that.")
@@ -74,7 +73,6 @@ func WalkedIntoDoor(a *area.Area, x, y int) bool {
 	wantToOpenDoor := YesOrNo()
 	if wantToOpenDoor {
 		a.Terrain[x][y] = fauna.Doodads["door (open)"]
-		a.ReDraw(x, y)
 		return true
 	}
 	return false

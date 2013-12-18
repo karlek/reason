@@ -7,7 +7,7 @@ import (
 	"github.com/karlek/reason/item"
 	"github.com/karlek/reason/util"
 
-	"github.com/karlek/worc/object"
+	"github.com/karlek/worc/model"
 	"github.com/mewkiz/pkg/errutil"
 	"github.com/nsf/termbox-go"
 )
@@ -76,7 +76,7 @@ func load(filename string) (c *Creature, err error) {
 		Strength:  jc.Strength,
 		Speed:     jc.Speed,
 		Inventory: make(Inventory, len(item.Letters)),
-		O: object.Object{
+		M: model.Model{
 			G: termbox.Cell{
 				Ch: rune(jc.Graphics.Ch[0]),
 				Fg: fg,

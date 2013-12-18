@@ -11,7 +11,7 @@ import (
 	"github.com/karlek/reason/item"
 
 	"github.com/karlek/worc/area"
-	"github.com/karlek/worc/object"
+	"github.com/karlek/worc/model"
 	"github.com/mewkiz/pkg/errorsutil"
 )
 
@@ -26,7 +26,7 @@ func init() {
 	gob.Register(new(beastiary.Creature))
 	gob.Register(new(fauna.Doodad))
 	gob.Register(new(item.Item))
-	gob.Register(new(object.Object))
+	gob.Register(new(model.Model))
 	gob.Register(new(area.Area))
 }
 

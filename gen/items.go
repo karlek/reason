@@ -41,5 +41,4 @@ func Items(a *area.Area, num int) {
 			num--
 		}
 	}
-	a.DrawItems()
 }

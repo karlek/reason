@@ -1,9 +1,6 @@
 // Reason is a roguelike written on top of worc engine.
 package main
 
-/// Add y/n dialog for quitting the game.
-/// Add saving capabilities.
-
 import (
 	// "fmt"
 	"log"
@@ -16,12 +13,11 @@ import (
 	"github.com/karlek/reason/gen"
 	"github.com/karlek/reason/item"
 	"github.com/karlek/reason/save"
-	"github.com/karlek/reason/ui" // loads with init.
+	"github.com/karlek/reason/ui"
+	"github.com/karlek/reason/ui/status"
 
 	"github.com/karlek/worc/area"
 	"github.com/karlek/worc/coord"
-	"github.com/karlek/worc/screen"
-	// "github.com/karlek/worc/status"
 	"github.com/mewkiz/pkg/errutil"
 	"github.com/mewkiz/pkg/goutil"
 	"github.com/nsf/termbox-go"
@@ -36,13 +32,6 @@ func main() {
 }
 
 func reason() (err error) {
-	// Init graphic library.
-	err = termbox.Init()
-	if err != nil {
-		return errutil.Err(err)
-	}
-	defer termbox.Close()
-
 	err = initGameLibs()
 	if err != nil {
 		return errutil.Err(err)
@@ -52,13 +41,11 @@ func reason() (err error) {
 	var a area.Area
 	var hero beastiary.Creature
 
-	// Load or create a new game session.
+	// Load old values or initalize a new area and hero.
 	sav, err := loadOrCreateNewGameSession(&a, &hero)
 	if err != nil {
 		return errutil.Err(err)
 	}
-
-	ui.AreaScreenRedraw(a, hero)
 
 	// Main loop.
 	for {
@@ -73,6 +60,12 @@ func quit() {
 }
 
 func initGameLibs() (err error) {
+	// Init graphic library.
+	err = termbox.Init()
+	if err != nil {
+		return errutil.Err(err)
+	}
+
 	// Initialize beastiary.
 	err = beastiary.Load()
 	if err != nil {
@@ -94,7 +87,6 @@ func initGameLibs() (err error) {
 	return nil
 }
 
-///
 func loadOrCreateNewGameSession(a *area.Area, hero *beastiary.Creature) (sav *save.Save, err error) {
 	// If save exists load old game session.
 	path, err := goutil.SrcDir("github.com/karlek/reason/")
@@ -131,13 +123,7 @@ func load(sav *save.Save, a *area.Area, hero *beastiary.Creature) (err error) {
 
 // newGame initalizes a new game session.
 func newGame(a *area.Area, hero *beastiary.Creature) {
-	// Create a screen for the area.
-	// areaScreen is the active viewport of the area.
-	var areaScreen = screen.Screen{
-		Width:  ui.AreaScreenWidth,
-		Height: ui.AreaScreenHeight,
-	}
-	*a = *gen.Area(areaScreen, areaScreen.Width, areaScreen.Height)
+	*a = gen.Area(100, 30)
 	gen.Mobs(a, 16)
 	gen.Items(a, 5)
 
@@ -151,6 +137,11 @@ func newGame(a *area.Area, hero *beastiary.Creature) {
 
 // nextTurn listens on user input and then acts on it.
 func nextTurn(sav *save.Save, a *area.Area, hero *beastiary.Creature) {
+	hero.DrawFOV(a)
+	status.Update()
+	ui.UpdateHp(hero.Hp, hero.MaxHp)
+	termbox.Flush()
+
 	// Listen for keystrokes.
 	ev := termbox.PollEvent()
 	if ev.Type != termbox.EventKey {
@@ -160,6 +151,10 @@ func nextTurn(sav *save.Save, a *area.Area, hero *beastiary.Creature) {
 	case ui.LookKey:
 		// user wants to look around.
 		action.Look(*a, hero.X(), hero.Y())
+		return
+	case 'm':
+		status.Print("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
+		status.Print("bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb")
 		return
 	case ui.PickUpItemKey:
 		// user wants to pick up an item.
@@ -172,7 +167,6 @@ func nextTurn(sav *save.Save, a *area.Area, hero *beastiary.Creature) {
 		if actionTaken {
 			passTime(a, hero)
 		}
-		ui.AreaScreenRedraw(*a, *hero)
 		return
 	case ui.DropItemKey:
 		// user wants to drop an item.
@@ -180,7 +174,6 @@ func nextTurn(sav *save.Save, a *area.Area, hero *beastiary.Creature) {
 		if actionTaken {
 			passTime(a, hero)
 		}
-		ui.AreaScreenRedraw(*a, *hero)
 		return
 	case ui.OpenDoorKey:
 		// user wants to open a door.
@@ -209,8 +202,7 @@ func nextTurn(sav *save.Save, a *area.Area, hero *beastiary.Creature) {
 	}
 
 	// Movement.
-	/// Temp fix
-	col := &area.Collision{nil, 999, 999}
+	var col *area.Collision
 	switch ev.Key {
 	case ui.MoveUpKey:
 		col = a.MoveUp(hero)
@@ -220,6 +212,8 @@ func nextTurn(sav *save.Save, a *area.Area, hero *beastiary.Creature) {
 		col = a.MoveLeft(hero)
 	case ui.MoveRightKey:
 		col = a.MoveRight(hero)
+	default:
+		return
 	}
 	if col == nil {
 		passTime(a, hero)
@@ -239,7 +233,6 @@ func nextTurn(sav *save.Save, a *area.Area, hero *beastiary.Creature) {
 	}
 }
 
-///
 func passTime(a *area.Area, hero *beastiary.Creature) {
 	// Other creatures!
 	for _, m := range a.Monsters {
@@ -260,5 +253,8 @@ func passTime(a *area.Area, hero *beastiary.Creature) {
 			c.Actions(int(turns), a, hero)
 		}
 	}
-	ui.UpdateHp(*hero)
+	hero.DrawFOV(a)
+	status.Update()
+	ui.UpdateHp(hero.Hp, hero.MaxHp)
+	termbox.Flush()
 }

@@ -1,6 +1,8 @@
 package action
 
 import (
+	"log"
+
 	"github.com/karlek/reason/beastiary"
 	"github.com/karlek/reason/item"
 	"github.com/karlek/reason/ui"
@@ -39,13 +41,18 @@ inventoryLoop:
 
 func ShowItemDetails(i *item.Item, hero *beastiary.Creature, a *area.Area) bool {
 	termbox.Clear(termbox.ColorBlack, termbox.ColorBlack)
-	termbox.Flush()
+
 	rows := 0
-	ui.PrintInventory(i.Hotkey+" - "+i.Name(), 0, 0, ui.WholeScreenWidth, termbox.ColorWhite, termbox.ColorDefault)
-	rows += 2
-	ui.PrintInventory(i.Description, 0, rows, ui.WholeScreenWidth, termbox.ColorWhite, termbox.ColorDefault)
-	rows += 2
-	ui.PrintInventory("You can (d)rop this item.", 0, rows, ui.WholeScreenWidth, termbox.ColorCyan, termbox.ColorDefault)
+	msg := MakePrintableString(i.Hotkey + " - " + i.Name())
+	PrintLong(msg, rows)
+	rows += len(msg) + 1
+	msg = MakePrintableString(i.Description)
+	PrintLong(msg, rows)
+	rows += len(msg) + 1
+	msg = MakePrintableString("You can (d)rop this item.")
+	PrintLongCyan(msg, rows)
+
+	termbox.Flush()
 
 itemDetailLoop:
 	for {
@@ -63,4 +70,36 @@ itemDetailLoop:
 		}
 	}
 	return false
+}
+
+// Print writes a string to the status buffer.
+func MakePrintableString(str string) []string {
+	var msg []string
+	for {
+		if len(str) < ui.Inventory.Width {
+			msg = append(msg, str)
+			break
+		}
+		strLen := ui.Inventory.Width
+
+		msg = append(msg, str[:strLen])
+		str = str[strLen:]
+	}
+	return msg
+}
+
+func PrintLong(msg []string, yoffset int) {
+	log.Println(len(msg), msg)
+	for y, m := range msg {
+		ui.PrintInventory(m, ui.Inventory.XOffset, ui.Inventory.YOffset+y+yoffset, ui.Inventory.Width, termbox.ColorWhite, termbox.ColorDefault)
+	}
+	termbox.Flush()
+}
+
+func PrintLongCyan(msg []string, yoffset int) {
+	log.Println(len(msg), msg)
+	for y, m := range msg {
+		ui.PrintInventory(m, ui.Inventory.XOffset, ui.Inventory.YOffset+y+yoffset, ui.Inventory.Width, termbox.ColorCyan, termbox.ColorDefault)
+	}
+	termbox.Flush()
 }

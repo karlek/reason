@@ -5,14 +5,15 @@ import (
 	"github.com/karlek/reason/name"
 	"github.com/karlek/reason/ui"
 
+	"github.com/karlek/reason/ui/status"
 	"github.com/karlek/worc/area"
 	"github.com/karlek/worc/coord"
-	"github.com/karlek/worc/status"
 	"github.com/nsf/termbox-go"
 )
 
 // Look takes the units coordiantes and an area to observe.
 func Look(a area.Area, x, y int) {
+	x, y = x+ui.Area.XOffset, y+ui.Area.YOffset
 	termbox.SetCursor(x, y)
 	termbox.Flush()
 
