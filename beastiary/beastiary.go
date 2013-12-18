@@ -3,11 +3,10 @@ package beastiary
 
 import (
 	"fmt"
-	"os"
-	"time"
 
 	"github.com/karlek/reason/item"
 	"github.com/karlek/reason/ui/status"
+	"github.com/karlek/reason/util"
 
 	"github.com/karlek/worc/area"
 	"github.com/karlek/worc/coord"
@@ -131,9 +130,7 @@ func battleNarrative(a *area.Area, hero *Creature, attacker *Creature) {
 		hero.DrawFOV(a)
 		status.Print("You die. Press any key to quit.")
 		termbox.PollEvent()
-		time.Sleep(100)
-		termbox.Close()
-		os.Exit(0)
+		util.Quit()
 	}
 }
 

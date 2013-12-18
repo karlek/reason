@@ -10,6 +10,17 @@ import (
 	"github.com/nsf/termbox-go"
 )
 
+func Quit() {
+	/// Add on release.
+	// status.Print("Do you want to quit the game? [y/N]")
+	// wantToQuit := util.NoOrYes()
+	// if !wantToQuit {
+	// 	return
+	// }
+	termbox.Close()
+	os.Exit(0)
+}
+
 // YesOrNo forces the player to answer either y or n.
 // Esc is false and enter is true.
 func YesOrNo() bool {

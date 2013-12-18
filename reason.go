@@ -5,7 +5,6 @@ import (
 	// "fmt"
 	"log"
 	"math"
-	"os"
 
 	"github.com/karlek/reason/action"
 	"github.com/karlek/reason/beastiary"
@@ -15,7 +14,7 @@ import (
 	"github.com/karlek/reason/save"
 	"github.com/karlek/reason/ui"
 	"github.com/karlek/reason/ui/status"
-	// "github.com/karlek/reason/util"
+	"github.com/karlek/reason/util"
 
 	"github.com/karlek/worc/area"
 	"github.com/karlek/worc/coord"
@@ -53,17 +52,6 @@ func reason() (err error) {
 		nextTurn(sav, &a, &hero)
 	}
 	return nil
-}
-
-func quit() {
-	/// Add on release.
-	// status.Print("Do you want to quit the game? [y/N]")
-	// wantToQuit := util.NoOrYes()
-	// if !wantToQuit {
-	// 	return
-	// }
-	termbox.Close()
-	os.Exit(0)
 }
 
 func initGameLibs() (err error) {
@@ -198,14 +186,14 @@ func nextTurn(sav *save.Save, a *area.Area, hero *beastiary.Creature) {
 		return
 	case ui.QuitKey:
 		// user wants to quit game.
-		quit()
+		util.Quit()
 	case ui.SaveAndQuitKey:
 		// user wants to save and exit.
 		err := sav.Save(*a, *hero)
 		if err != nil {
 			log.Println(err)
 		}
-		quit()
+		util.Quit()
 	}
 
 	// Movement.

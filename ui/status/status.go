@@ -8,7 +8,7 @@ import (
 	"github.com/nsf/termbox-go"
 )
 
-var statusBuffer = []string{}
+var messageBuffer = []string{}
 
 // Prints to string to screen taking x coordinate, y coordinate,
 // foreground color (attributes) and background color (attributes)
@@ -27,22 +27,22 @@ func print(str string, x, y, width int, fg termbox.Attribute, bg termbox.Attribu
 func Print(str string) {
 	for {
 		if len(str) < ui.Message.Width {
-			statusBuffer = append(statusBuffer, str)
+			messageBuffer = append(messageBuffer, str)
 			break
 		}
 		strLen := ui.Message.Width
 
-		statusBuffer = append(statusBuffer, str[:strLen])
+		messageBuffer = append(messageBuffer, str[:strLen])
 		str = str[strLen:]
 	}
 	Update()
 }
 
 func Update() {
-	lenBuf := len(statusBuffer)
-	lastMessages := statusBuffer
+	lenBuf := len(messageBuffer)
+	lastMessages := messageBuffer
 	if lenBuf > ui.Message.Height {
-		lastMessages = statusBuffer[lenBuf-ui.Message.Height:]
+		lastMessages = messageBuffer[lenBuf-ui.Message.Height:]
 	}
 
 	for y, msg := range lastMessages {
