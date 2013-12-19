@@ -124,8 +124,8 @@ func newGame(a *area.Area, hero *beastiary.Creature) {
 
 	// Hero starting position.
 	*hero = beastiary.Creatures["hero"]
-	hero.NewX(2)
-	hero.NewY(2)
+	hero.NewX(ui.Area.Width / 2)
+	hero.NewY(ui.Area.Height / 2)
 
 	a.Monsters[coord.Coord{hero.X(), hero.Y()}] = hero
 }
@@ -152,6 +152,7 @@ func nextTurn(sav *save.Save, a *area.Area, hero *beastiary.Creature) {
 		status.Print("bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb")
 		return
 	case ui.PickUpItemKey:
+		/// picking up item when there's no item on the ground passes time.
 		// user wants to pick up an item.
 		action.PickUpNarrative(a, hero)
 		passTime(a, hero)
@@ -210,6 +211,7 @@ func nextTurn(sav *save.Save, a *area.Area, hero *beastiary.Creature) {
 	default:
 		return
 	}
+	/// walking out of bounds passes time.
 	if col == nil {
 		passTime(a, hero)
 		return
