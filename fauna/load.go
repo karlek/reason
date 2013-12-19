@@ -40,7 +40,7 @@ func load(filename string) (fa *Doodad, err error) {
 			Fg map[string]string
 			Bg map[string]string
 		}
-		Stackable bool
+		Pathable bool
 	}
 
 	buf, err := ioutil.ReadFile(filename)
@@ -71,7 +71,7 @@ func load(filename string) (fa *Doodad, err error) {
 				Fg: fg,
 				Bg: bg,
 			},
-			Stackable: jc.Stackable,
+			Pathable: jc.Pathable,
 		},
 	}
 	return fa, nil

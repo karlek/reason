@@ -15,6 +15,15 @@ type Item struct {
 	Category    string
 	Description string
 	FlavorText  string
+	Num         int
+}
+
+func (i *Item) IsStackable() bool {
+	switch i.Category {
+	case "tool", "ring":
+		return false
+	}
+	return true
 }
 
 // Name returns the name of the item.
@@ -32,9 +41,9 @@ func (i *Item) NewY(y int) {
 	i.M.NewY(y)
 }
 
-// IsStackable returns whether objects can be stacked ontop of this object.
-func (i *Item) IsStackable() bool {
-	return i.M.IsStackable()
+// IsPathable returns whether objects can be stacked ontop of this object.
+func (i *Item) IsPathable() bool {
+	return i.M.IsPathable()
 }
 
 // Graphic returns the graphic data of this object.

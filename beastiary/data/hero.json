@@ -6,7 +6,8 @@
 		"Bg": null
 	},
 	"HP": 17,
+	"Sight": 9,
 	"Speed": 1.0,
 	"Strength": 5,
-	"Stackable": false
+	"Pathable": false
 }

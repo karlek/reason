@@ -120,7 +120,7 @@ func load(sav *save.Save, a *area.Area, hero *beastiary.Creature) (err error) {
 func newGame(a *area.Area, hero *beastiary.Creature) {
 	*a = gen.Area(100, 30)
 	gen.Mobs(a, 16)
-	gen.Items(a, 5)
+	gen.Items(a, 20)
 
 	// Hero starting position.
 	*hero = beastiary.Creatures["hero"]

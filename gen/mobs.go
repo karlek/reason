@@ -25,7 +25,7 @@ func Mobs(a *area.Area, num int) {
 				continue
 			}
 
-			if !a.IsXYStackable(x, y) {
+			if !a.IsXYPathable(x, y) {
 				continue
 			}
 

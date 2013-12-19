@@ -39,12 +39,13 @@ func load(filename string) (i *Item, err error) {
 		Name        string
 		Category    string
 		Description string
+		Num         int
 		Graphics    struct {
 			Ch string
 			Fg map[string]string
 			Bg map[string]string
 		}
-		Stackable bool
+		Pathable bool
 	}
 
 	buf, err := ioutil.ReadFile(filename)
@@ -71,13 +72,14 @@ func load(filename string) (i *Item, err error) {
 		N:           jc.Name,
 		Category:    jc.Category,
 		Description: jc.Description,
+		Num:         jc.Num,
 		M: model.Model{
 			G: termbox.Cell{
 				Ch: rune(jc.Graphics.Ch[0]),
 				Fg: fg,
 				Bg: bg,
 			},
-			Stackable: jc.Stackable,
+			Pathable: jc.Pathable,
 		},
 	}
 	return i, nil

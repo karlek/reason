@@ -23,6 +23,7 @@ type Creature struct {
 	MaxHp     int
 	Hp        int
 	Strength  int
+	Sight     int
 	CurSpeed  float64
 	Speed     float64
 	Inventory Inventory
@@ -45,9 +46,26 @@ func (c *Creature) PickUp(a *area.Area) *item.Item {
 		return nil
 	}
 
-	i.Hotkey = c.findHotkey()
-	c.Inventory[i.Hotkey] = i
+	if hotkey, ok := c.findStack(i); ok {
+		i.Hotkey = hotkey
+		c.Inventory[i.Hotkey].Num += i.Num
+	} else {
+		i.Hotkey = c.findHotkey()
+		c.Inventory[i.Hotkey] = i
+	}
 	return i
+}
+
+func (c *Creature) findStack(i *item.Item) (hotkey string, ok bool) {
+	if !i.IsStackable() {
+		return "", false
+	}
+	for _, v := range c.Inventory {
+		if v.Name() == i.Name() {
+			return v.Hotkey, true
+		}
+	}
+	return "", false
 }
 
 func (c *Creature) DropItem(ch string, a *area.Area) *item.Item {
@@ -156,9 +174,9 @@ func (c *Creature) NewY(y int) {
 	c.M.NewY(y)
 }
 
-// IsStackable returns whether objects can be stacked ontop of this object.
-func (c *Creature) IsStackable() bool {
-	return c.M.IsStackable()
+// IsPathable returns whether objects can be stacked ontop of this object.
+func (c *Creature) IsPathable() bool {
+	return c.M.IsPathable()
 }
 
 // Graphic returns the graphic data of this object.

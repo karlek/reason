@@ -43,10 +43,11 @@ func load(filename string) (c *Creature, err error) {
 			Fg map[string]string
 			Bg map[string]string
 		}
-		Hp        int
-		Strength  int
-		Speed     float64
-		Stackable bool
+		Hp       int
+		Strength int
+		Sight    int
+		Speed    float64
+		Pathable bool
 	}
 
 	buf, err := ioutil.ReadFile(filename)
@@ -75,6 +76,7 @@ func load(filename string) (c *Creature, err error) {
 		MaxHp:     jc.Hp,
 		Strength:  jc.Strength,
 		Speed:     jc.Speed,
+		Sight:     jc.Sight,
 		Inventory: make(Inventory, len(item.Letters)),
 		M: model.Model{
 			G: termbox.Cell{
@@ -82,7 +84,7 @@ func load(filename string) (c *Creature, err error) {
 				Fg: fg,
 				Bg: bg,
 			},
-			Stackable: jc.Stackable,
+			Pathable: jc.Pathable,
 		},
 	}
 	return c, nil

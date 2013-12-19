@@ -8,5 +8,5 @@
 	"HP": 5,
 	"Speed": 0.8,
 	"Strength": 2,
-	"Stackable": false
+	"Pathable": false
 }

@@ -1,0 +1,13 @@
+{
+	"Name": "Potion of Increase Weight",
+	"Category": "potion",
+	"Rarity": "common",
+	"Description":"I'm not written yet :)",
+	"Graphics": {
+		"Ch": "!",
+		"Fg": {"color": "yellow", "attr": "bold"},
+		"Bg": null
+	},
+	"Num": 1,
+	"Pathable": true
+}

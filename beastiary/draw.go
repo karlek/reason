@@ -17,9 +17,10 @@ func (c Creature) DrawFOV(a *area.Area) {
 	cameraX, cameraY := CameraXY(c, a)
 	a.DrawExplored(ui.Area, cameraX, cameraY)
 
-	radius := 9 // Inclusive hero's square, so actually 8 from hero's "eyes".
+	radius := c.Sight // Inclusive hero's square, so actually 8 from hero's "eyes".
 	for x := c.X() - radius; x <= c.X()+radius; x++ {
 		for y := c.Y() - radius; y <= c.Y()+radius; y++ {
+			// Descriminate coordinates which are out of bounds.
 			if !a.ExistsXY(x, y) {
 				continue
 			}
@@ -31,10 +32,12 @@ func (c Creature) DrawFOV(a *area.Area) {
 			// Distance between creature and sight radius.
 			dist := math.Sqrt(math.Pow(dx, 2) + math.Pow(dy, 2))
 
+			// Discriminate coordinates which are outside of the circle.
 			if dist > float64(radius) {
 				continue
+
 			}
-			// / workaround for pointer reciver on area.Tile problem.
+			/// workaround for pointer reciver on area.Tile problem.
 			tile := a.Terrain[x][y]
 			d, ok := tile.(fauna.Doodad)
 			if !ok {

@@ -12,6 +12,11 @@ import (
 func Items(a *area.Area, num int) {
 	var itemList = []item.Item{
 		item.Items["Star-Eye Map"],
+		item.Items["Potion of Increase Weight"],
+		item.Items["Potion of Increase Weight"],
+		item.Items["Potion of Increase Weight"],
+		item.Items["Potion of Increase Weight"],
+		item.Items["Potion of Increase Weight"],
 		item.Items["Ring of Orihalcon"],
 	}
 	for x := 0; x < a.Width; x++ {
@@ -24,7 +29,7 @@ func Items(a *area.Area, num int) {
 				continue
 			}
 
-			if !a.IsXYStackable(x, y) {
+			if !a.IsXYPathable(x, y) {
 				continue
 			}
 

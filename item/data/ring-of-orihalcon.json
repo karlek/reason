@@ -8,5 +8,6 @@
 		"Fg": {"color": "red", "attr": ""},
 		"Bg": null
 	},
-	"Stackable": true
+	"Num": 1,
+	"Pathable": true
 }

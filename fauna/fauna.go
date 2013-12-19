@@ -29,9 +29,9 @@ func (d Doodad) SetExplored(mode bool) {
 	d.Explored = mode
 }
 
-// IsStackable returns whether objects can be stacked ontop of this object.
-func (d Doodad) IsStackable() bool {
-	return d.M.IsStackable()
+// IsPathable returns whether objects can be stacked ontop of this object.
+func (d Doodad) IsPathable() bool {
+	return d.M.IsPathable()
 }
 
 // Graphic is needed for draw.Drawable.

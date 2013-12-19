@@ -5,5 +5,5 @@
 		"Fg": {"color": "yellow", "attr": null},
 		"Bg": null
 	},
-	"Stackable": false
+	"Pathable": false
 }

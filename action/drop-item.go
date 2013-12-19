@@ -1,6 +1,8 @@
 package action
 
 import (
+	"strconv"
+
 	"github.com/karlek/reason/beastiary"
 	"github.com/karlek/reason/item"
 	"github.com/karlek/reason/ui"
@@ -69,7 +71,12 @@ func PrintCategorizedInventory(title string, hero *beastiary.Creature) {
 	// We do this the quirky we to get the inventory list sorted.
 	for _, ch := range item.Letters {
 		if i, ok := hero.Inventory[string(ch)]; ok {
-			s := i.Hotkey + " - " + i.Name()
+			var s string
+			if i.IsStackable() {
+				s = i.Hotkey + " - " + strconv.Itoa(i.Num) + " " + i.Name()
+			} else {
+				s = i.Hotkey + " - " + i.Name()
+			}
 			if _, ok := categories[i.Category]; !ok {
 				categories["unknown"] = append(categories["unknown"], s)
 			} else {
