@@ -6,7 +6,7 @@
 		"Bg": null
 	},
 	"HP": 4,
-	"Speed": 0.5,
+	"Speed": 50,
 	"Strength": 1,
 	"Pathable": false
 }

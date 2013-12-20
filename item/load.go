@@ -69,7 +69,7 @@ func load(filename string) (i *Item, err error) {
 	}
 
 	i = &Item{
-		N:           jc.Name,
+		name:        jc.Name,
 		Category:    jc.Category,
 		Description: jc.Description,
 		Num:         jc.Num,

@@ -1,4 +1,4 @@
-package beastiary
+package creature
 
 import (
 	"math"

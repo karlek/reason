@@ -48,5 +48,4 @@ func Update() {
 	for y, msg := range lastMessages {
 		print(msg, ui.Message.XOffset, ui.Message.YOffset+y, ui.Message.Width, termbox.ColorWhite, termbox.ColorDefault)
 	}
-	termbox.Flush()
 }

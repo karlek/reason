@@ -3,14 +3,15 @@ package action
 import (
 	"strconv"
 
-	"github.com/karlek/reason/beastiary"
+	"github.com/karlek/reason/creature"
 
 	"github.com/karlek/reason/ui/status"
 	"github.com/karlek/worc/area"
 )
 
-func PickUpNarrative(a *area.Area, hero *beastiary.Creature) {
+func PickUpNarrative(a *area.Area, hero *creature.Creature) bool {
 	var msg string
+	var actionTaken bool
 	i := hero.PickUp(a)
 	if i == nil {
 		msg += "There's no item here."
@@ -22,6 +23,8 @@ func PickUpNarrative(a *area.Area, hero *beastiary.Creature) {
 			}
 		}
 		msg += i.Name() + " picked up."
+		actionTaken = true
 	}
 	status.Print(msg)
+	return actionTaken
 }

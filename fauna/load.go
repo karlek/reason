@@ -64,7 +64,7 @@ func load(filename string) (fa *Doodad, err error) {
 	}
 
 	fa = &Doodad{
-		N: jc.Name,
+		name: jc.Name,
 		M: model.Model{
 			G: termbox.Cell{
 				Ch: rune(jc.Graphics.Ch[0]),

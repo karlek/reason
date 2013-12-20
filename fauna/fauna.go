@@ -11,7 +11,7 @@ import (
 type Doodad struct {
 	area.Tile
 	M        model.Model
-	N        string
+	name     string
 	Explored bool
 	BlockLOS bool
 }
@@ -41,5 +41,5 @@ func (d Doodad) Graphic() termbox.Cell {
 
 // Name returns the name of the creature.
 func (d Doodad) Name() string {
-	return d.N
+	return d.name
 }

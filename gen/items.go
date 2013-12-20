@@ -14,9 +14,6 @@ func Items(a *area.Area, num int) {
 		item.Items["Star-Eye Map"],
 		item.Items["Potion of Increase Weight"],
 		item.Items["Potion of Increase Weight"],
-		item.Items["Potion of Increase Weight"],
-		item.Items["Potion of Increase Weight"],
-		item.Items["Potion of Increase Weight"],
 		item.Items["Ring of Orihalcon"],
 	}
 	for x := 0; x < a.Width; x++ {

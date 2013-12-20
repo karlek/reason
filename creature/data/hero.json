@@ -1,12 +1,13 @@
 {
-	"Name": "gobbal",
+	"Name": "hero",
 	"Graphics": {
-		"Ch": "G",
+		"Ch": "@",
 		"Fg": {"color": "white", "attr": "bold"},
 		"Bg": null
 	},
-	"HP": 7,
-	"Speed": 1.5,
-	"Strength": 3,
+	"HP": 17,
+	"Sight": 9,
+	"Speed": 100,
+	"Strength": 5,
 	"Pathable": false
 }

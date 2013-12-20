@@ -3,7 +3,7 @@ package action
 import (
 	"strconv"
 
-	"github.com/karlek/reason/beastiary"
+	"github.com/karlek/reason/creature"
 	"github.com/karlek/reason/item"
 	"github.com/karlek/reason/ui"
 
@@ -13,7 +13,7 @@ import (
 	"github.com/nsf/termbox-go"
 )
 
-func DropItem(hero *beastiary.Creature, a *area.Area) bool {
+func DropItem(hero *creature.Creature, a *area.Area) bool {
 	PrintCategorizedInventory("Drop Item: currentWeight/maxPossibleWeight (usedSlots/totalSlots)", hero)
 
 	if len(hero.Inventory) == 0 {
@@ -37,12 +37,19 @@ dropItemLoop:
 	return false
 }
 
-func NarrativeDropItem(ch string, hero *beastiary.Creature, a *area.Area) {
+func NarrativeDropItem(ch string, hero *creature.Creature, a *area.Area) {
 	i := hero.DropItem(ch, a)
-	status.Print("You dropped " + i.Name() + ".")
+	s := "You dropped "
+	if i.IsStackable() {
+		s += strconv.Itoa(i.Num) + " " + i.Name()
+	} else {
+		s = i.Name()
+	}
+	s += "."
+	status.Print(s)
 }
 
-func PrintCategorizedInventory(title string, hero *beastiary.Creature) {
+func PrintCategorizedInventory(title string, hero *creature.Creature) {
 	termbox.Clear(termbox.ColorBlack, termbox.ColorBlack)
 	if len(hero.Inventory) == 0 {
 		ui.PrintInventory("You aren't carrying anything.", 0, 0, ui.Whole.Width, termbox.ColorWhite+termbox.AttrBold, termbox.ColorDefault)

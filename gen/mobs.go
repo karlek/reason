@@ -1,7 +1,7 @@
 package gen
 
 import (
-	"github.com/karlek/reason/beastiary"
+	"github.com/karlek/reason/creature"
 	"github.com/karlek/reason/util"
 
 	"github.com/karlek/worc/area"
@@ -10,10 +10,10 @@ import (
 
 // Mobs is a debug function to add mobs to the map.
 func Mobs(a *area.Area, num int) {
-	var mobList = []beastiary.Creature{
-		beastiary.Creatures["gobbal"],
-		beastiary.Creatures["tofu"],
-		beastiary.Creatures["arachnee"],
+	var mobList = []creature.Creature{
+		creature.Creatures["gobbal"],
+		creature.Creatures["tofu"],
+		creature.Creatures["arachnee"],
 	}
 	for x := 0; x < a.Width; x++ {
 		for y := 0; y < a.Height; y++ {

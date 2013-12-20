@@ -1,4 +1,4 @@
-package beastiary
+package creature
 
 import (
 	"encoding/json"
@@ -18,7 +18,7 @@ var Creatures = map[string]Creature{}
 
 // Load initializes the Creatures map with creatures.
 func Load() (err error) {
-	filenames, err := util.DirFiles("github.com/karlek/reason/beastiary/data/")
+	filenames, err := util.DirFiles("github.com/karlek/reason/creature/data/")
 	if err != nil {
 		return errutil.Err(err)
 	}
@@ -46,7 +46,7 @@ func load(filename string) (c *Creature, err error) {
 		Hp       int
 		Strength int
 		Sight    int
-		Speed    float64
+		Speed    int
 		Pathable bool
 	}
 
@@ -71,7 +71,7 @@ func load(filename string) (c *Creature, err error) {
 	}
 
 	c = &Creature{
-		N:         jc.Name,
+		name:      jc.Name,
 		Hp:        jc.Hp,
 		MaxHp:     jc.Hp,
 		Strength:  jc.Strength,

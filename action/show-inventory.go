@@ -3,7 +3,7 @@ package action
 import (
 	"log"
 
-	"github.com/karlek/reason/beastiary"
+	"github.com/karlek/reason/creature"
 	"github.com/karlek/reason/item"
 	"github.com/karlek/reason/ui"
 
@@ -12,7 +12,7 @@ import (
 	"github.com/nsf/termbox-go"
 )
 
-func ShowInventory(a *area.Area, hero *beastiary.Creature) bool {
+func ShowInventory(a *area.Area, hero *creature.Creature) bool {
 	PrintCategorizedInventory("Inventory: currentWeight/maxPossibleWeight (usedSlots/totalSlots)", hero)
 	if len(hero.Inventory) == 0 {
 		return false
@@ -39,7 +39,7 @@ inventoryLoop:
 	return false
 }
 
-func ShowItemDetails(i *item.Item, hero *beastiary.Creature, a *area.Area) bool {
+func ShowItemDetails(i *item.Item, hero *creature.Creature, a *area.Area) bool {
 	termbox.Clear(termbox.ColorBlack, termbox.ColorBlack)
 
 	rows := 0

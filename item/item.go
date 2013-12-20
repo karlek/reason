@@ -10,7 +10,7 @@ var Letters string = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 // Item is an object with a name.
 type Item struct {
 	M           model.Model
-	N           string
+	name        string
 	Hotkey      string
 	Category    string
 	Description string
@@ -28,7 +28,7 @@ func (i *Item) IsStackable() bool {
 
 // Name returns the name of the item.
 func (i *Item) Name() string {
-	return i.N
+	return i.name
 }
 
 // NewX sets a new x value for the coordinate.
