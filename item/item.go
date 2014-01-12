@@ -8,17 +8,26 @@ import (
 
 var Letters string = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
+type ItemModeler interface {
+	Itemer
+	model.Modeler
+}
+
 type Itemer interface {
 	IsStackable() bool
 	IsEquipable() bool
 	GetHotkey() string
+	/// TODO(_): rename to GetCount
 	GetNum() int
+	// TODO(_): implement GetFlavorText
 	GetDescription() string
+	// TODO(_): remove.
 	GetCategory() string
 	SetName(string)
 	SetDescription(string)
-	IncreaseNum(int)
 	SetCategory(string)
+	// TODO(u): IncCount()
+	IncreaseNum(int)
 	name.Namer
 	// model.Modelable
 }
@@ -31,7 +40,6 @@ type Item struct {
 	Hotkey      string
 	Category    string
 	Description string
-	FlavorText  string
 	Num         int
 	Effects     []Effect
 }
@@ -39,20 +47,11 @@ type Item struct {
 type Effect struct {
 }
 
-type Armor struct {
-	Item
-	Protection int
-}
+type Armor Item
 
-type Jewelery struct {
-	Item
-}
+type Jewelery Item
 
-type Weapon struct {
-	Item
-	MinDamage int
-	MaxDamage int
-}
+type Weapon Item
 
 type Boots Armor
 type Gloves Armor

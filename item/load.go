@@ -7,12 +7,11 @@ import (
 	"github.com/karlek/reason/util"
 
 	"github.com/mewkiz/pkg/errutil"
-	"github.com/nsf/termbox-go"
 )
 
 // Items is a map where names of the item is the key mapping to that
 // item object.
-var Items = map[string]*Item{}
+var Items = map[string]Itemer{}
 
 // Load initializes the Items map with creatures.
 func Load() (err error) {
@@ -31,7 +30,7 @@ func Load() (err error) {
 }
 
 // load parses a JSON data file into a go item object.
-func load(filename string) (i *Item, err error) {
+func load(filename string) (i ItemModeler, err error) {
 	// jsonItem is a temporary struct for easier conversion between JSON and
 	// go structs.
 	type jsonItem struct {
@@ -67,7 +66,6 @@ func load(filename string) (i *Item, err error) {
 		return nil, errutil.Err(err)
 	}
 
-	j := new(Item)
 	// j = &Item{
 	// 	name:        jc.Name,
 	// 	Category:    jc.Category,
@@ -75,20 +73,26 @@ func load(filename string) (i *Item, err error) {
 	// 	Num:         jc.Num,
 	// }
 
-	j.name = jc.Name
-	j.Category = jc.Category
-	j.Description = jc.Description
-	j.Num = jc.Num
+	// j.name = jc.Name
+	// j.Category = jc.Category
+	// j.Description = jc.Description
+	// j.Num = jc.Num
 
-	// if jc.Category == "weapon" {
-	// 	i = &Weapon{}
-	// }
-
-	j.SetPathable(jc.Pathable)
-	j.SetGraphics(termbox.Cell{
+	switch jc.Category {
+	case "weapon":
+		i = Weapon{
+			name:        jc.Name,
+			Category:    jc.Category,
+			Description: jc.Description,
+			Num:         jc.Num,
+		}
+	}
+	i.SetPathable(jc.Pathable)
+	i.SetGraphics(termbox.Cell{
 		Ch: rune(jc.Graphics.Ch[0]),
 		Fg: fg,
 		Bg: bg,
 	})
-	return j, nil
+
+	return i, nil
 }

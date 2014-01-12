@@ -11,6 +11,8 @@ import (
 	"github.com/nsf/termbox-go"
 )
 
+// TODO(_): rename to beastiary.
+
 // Creatures is a map where names of the creature is the key mapping to that
 // creature object.
 var Creatures = map[string]Creature{}
