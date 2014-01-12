@@ -35,10 +35,6 @@ func (c *Creature) Action(a *area.Area, hero *Creature) int {
 			battleNarrative(a, hero, c)
 			return c.Speed
 		}
-		/// mobs friendly fire
-		// } else {
-		// battle(a, c, mob)
-		// }
 	}
 
 	/// this simulates waiting.

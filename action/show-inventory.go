@@ -1,7 +1,8 @@
 package action
 
 import (
-	"log"
+	"fmt"
+	"strconv"
 
 	"github.com/karlek/reason/creature"
 	"github.com/karlek/reason/item"
@@ -13,7 +14,10 @@ import (
 )
 
 func ShowInventory(a *area.Area, hero *creature.Creature) bool {
-	PrintCategorizedInventory("Inventory: currentWeight/maxPossibleWeight (usedSlots/totalSlots)", hero)
+	weightStr := "Current Weight/Max Possible Weight To Carry kg"
+	slotsStr := strconv.Itoa(hero.Inventory.GetUsedSlots()) + "/" + strconv.Itoa(len(item.Letters))
+	inventoryDetailStr := fmt.Sprintf("Inventory: %s (%s)", weightStr, slotsStr)
+	PrintCategorizedInventory(inventoryDetailStr, hero)
 	if len(hero.Inventory) == 0 {
 		return false
 	}
@@ -31,7 +35,7 @@ inventoryLoop:
 				if actionTaken := ShowItemDetails(i, hero, a); actionTaken {
 					return true
 				} else {
-					PrintCategorizedInventory("Inventory: currentWeight/maxPossibleWeight (usedSlots/totalSlots)", hero)
+					PrintCategorizedInventory(inventoryDetailStr, hero)
 				}
 			}
 		}
@@ -39,17 +43,22 @@ inventoryLoop:
 	return false
 }
 
-func ShowItemDetails(i *item.Item, hero *creature.Creature, a *area.Area) bool {
+func ShowItemDetails(i item.Itemer, hero *creature.Creature, a *area.Area) bool {
 	termbox.Clear(termbox.ColorBlack, termbox.ColorBlack)
 
 	rows := 0
-	msg := MakePrintableString(i.Hotkey + " - " + i.Name())
+	msg := MakePrintableString(i.GetHotkey() + " - " + i.Name())
 	PrintLong(msg, rows)
 	rows += len(msg) + 1
-	msg = MakePrintableString(i.Description)
+	msg = MakePrintableString(i.GetDescription())
 	PrintLong(msg, rows)
 	rows += len(msg) + 1
-	msg = MakePrintableString("You can (d)rop this item.")
+
+	str := "You can (d)rop this item."
+	if i.IsEquipable() {
+		str += " You can (e)quip this " + i.GetCategory() + "."
+	}
+	msg = MakePrintableString(str)
 	PrintLongCyan(msg, rows)
 
 	termbox.Flush()
@@ -64,7 +73,10 @@ itemDetailLoop:
 
 			itemAction := string(detailsEvent.Ch)
 			if itemAction == string(ui.DropItemKey) {
-				NarrativeDropItem(i.Hotkey, hero, a)
+				NarrativeDropItem(i.GetHotkey(), hero, a)
+			}
+			if itemAction == string(ui.EquipItemKey) {
+				NarrativeEquip(i.GetHotkey(), hero)
 			}
 			return true
 		}
@@ -89,7 +101,6 @@ func MakePrintableString(str string) []string {
 }
 
 func PrintLong(msg []string, yoffset int) {
-	log.Println(len(msg), msg)
 	for y, m := range msg {
 		ui.PrintInventory(m, ui.Inventory.XOffset, ui.Inventory.YOffset+y+yoffset, ui.Inventory.Width, termbox.ColorWhite, termbox.ColorDefault)
 	}
@@ -97,7 +108,6 @@ func PrintLong(msg []string, yoffset int) {
 }
 
 func PrintLongCyan(msg []string, yoffset int) {
-	log.Println(len(msg), msg)
 	for y, m := range msg {
 		ui.PrintInventory(m, ui.Inventory.XOffset, ui.Inventory.YOffset+y+yoffset, ui.Inventory.Width, termbox.ColorCyan, termbox.ColorDefault)
 	}

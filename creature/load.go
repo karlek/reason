@@ -7,7 +7,6 @@ import (
 	"github.com/karlek/reason/item"
 	"github.com/karlek/reason/util"
 
-	"github.com/karlek/worc/model"
 	"github.com/mewkiz/pkg/errutil"
 	"github.com/nsf/termbox-go"
 )
@@ -78,14 +77,12 @@ func load(filename string) (c *Creature, err error) {
 		Speed:     jc.Speed,
 		Sight:     jc.Sight,
 		Inventory: make(Inventory, len(item.Letters)),
-		M: model.Model{
-			G: termbox.Cell{
-				Ch: rune(jc.Graphics.Ch[0]),
-				Fg: fg,
-				Bg: bg,
-			},
-			Pathable: jc.Pathable,
-		},
 	}
+	c.SetPathable(jc.Pathable)
+	c.SetGraphics(termbox.Cell{
+		Ch: rune(jc.Graphics.Ch[0]),
+		Fg: fg,
+		Bg: bg,
+	})
 	return c, nil
 }

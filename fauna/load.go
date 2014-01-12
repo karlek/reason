@@ -6,7 +6,6 @@ import (
 
 	"github.com/karlek/reason/util"
 
-	"github.com/karlek/worc/model"
 	"github.com/mewkiz/pkg/errutil"
 	"github.com/nsf/termbox-go"
 )
@@ -65,14 +64,12 @@ func load(filename string) (fa *Doodad, err error) {
 
 	fa = &Doodad{
 		name: jc.Name,
-		M: model.Model{
-			G: termbox.Cell{
-				Ch: rune(jc.Graphics.Ch[0]),
-				Fg: fg,
-				Bg: bg,
-			},
-			Pathable: jc.Pathable,
-		},
 	}
+	fa.SetPathable(jc.Pathable)
+	fa.SetGraphics(termbox.Cell{
+		Ch: rune(jc.Graphics.Ch[0]),
+		Fg: fg,
+		Bg: bg,
+	})
 	return fa, nil
 }

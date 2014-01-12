@@ -1,62 +1,121 @@
 package item
 
 import (
+	"github.com/karlek/reason/name"
+
 	"github.com/karlek/worc/model"
-	"github.com/nsf/termbox-go"
 )
 
 var Letters string = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
+type Itemer interface {
+	IsStackable() bool
+	IsEquipable() bool
+	GetHotkey() string
+	GetNum() int
+	GetDescription() string
+	GetCategory() string
+	SetName(string)
+	SetDescription(string)
+	IncreaseNum(int)
+	SetCategory(string)
+	name.Namer
+	// model.Modelable
+}
+
 // Item is an object with a name.
 type Item struct {
-	M           model.Model
+	Itemer
+	model.Model
 	name        string
 	Hotkey      string
 	Category    string
 	Description string
 	FlavorText  string
 	Num         int
+	Effects     []Effect
 }
 
-func (i *Item) IsStackable() bool {
+type Effect struct {
+}
+
+type Armor struct {
+	Item
+	Protection int
+}
+
+type Jewelery struct {
+	Item
+}
+
+type Weapon struct {
+	Item
+	MinDamage int
+	MaxDamage int
+}
+
+type Boots Armor
+type Gloves Armor
+type Chestwear Armor
+type Headgear Armor
+type Legwear Armor
+type Amulet Jewelery
+type Ring Jewelery
+
+func (i Item) IsStackable() bool {
 	switch i.Category {
-	case "tool", "ring":
-		return false
+	case "potion":
+		return true
 	}
-	return true
+	return false
+}
+
+func (i Item) IsEquipable() bool {
+	switch i.Category {
+	case "weapon":
+		return true
+	}
+	return false
 }
 
 // Name returns the name of the item.
-func (i *Item) Name() string {
+func (i Item) Name() string {
 	return i.name
 }
 
-// NewX sets a new x value for the coordinate.
-func (i *Item) NewX(x int) {
-	i.M.NewX(x)
+/// GetHotkey
+func (i Item) GetHotkey() string {
+	return i.Hotkey
 }
 
-// NewY sets a new y value for the coordinate.
-func (i *Item) NewY(y int) {
-	i.M.NewY(y)
+/// GetNum
+func (i Item) GetNum() int {
+	return i.Num
 }
 
-// IsPathable returns whether objects can be stacked ontop of this object.
-func (i *Item) IsPathable() bool {
-	return i.M.IsPathable()
+/// GetDescription
+func (i Item) GetDescription() string {
+	return i.Description
 }
 
-// Graphic returns the graphic data of this object.
-func (i *Item) Graphic() termbox.Cell {
-	return i.M.Graphic()
+/// GetCategory
+func (i Item) GetCategory() string {
+	return i.Category
 }
 
-// X returns the x value of the current coordinate.
-func (i *Item) X() int {
-	return i.M.X()
+/// IncreaseNum
+func (i *Item) IncreaseNum(num int) {
+	i.Num += num
 }
 
-// Y returns the y value of the current coordinate.
-func (i *Item) Y() int {
-	return i.M.Y()
+func (i *Item) SetName(n string) {
+	i.name = n
+}
+
+func (i *Item) SetDescription(desc string) {
+	i.Description = desc
+}
+
+func (i *Item) SetCategory(cat string) {
+	i.Category = cat
 }

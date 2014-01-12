@@ -1,10 +1,10 @@
+/// Issue with saving and saving the current priority queue.
+/// Issue with saving and pointers.
 // Reason is a roguelike written on top of worc engine.
 package main
 
 import (
-	// "fmt"
 	"log"
-	// "math"
 
 	"github.com/karlek/reason/creature"
 	"github.com/karlek/reason/fauna"
@@ -12,9 +12,6 @@ import (
 	"github.com/karlek/reason/item"
 	"github.com/karlek/reason/save"
 	"github.com/karlek/reason/turn"
-	"github.com/karlek/reason/ui"
-	// "github.com/karlek/reason/ui/status"
-	// "github.com/karlek/reason/util"
 
 	"github.com/karlek/worc/area"
 	"github.com/karlek/worc/coord"
@@ -23,7 +20,7 @@ import (
 	"github.com/nsf/termbox-go"
 )
 
-// Error wrapper
+// Error wrapper.
 func main() {
 	err := reason()
 	if err != nil {
@@ -31,22 +28,24 @@ func main() {
 	}
 }
 
+// Main loop function.
 func reason() (err error) {
 	err = initGameLibs()
 	if err != nil {
 		return errutil.Err(err)
 	}
 
-	// Load or create new game.
 	var a area.Area
 	var hero creature.Creature
 
+	// Load or create new game.
 	// Load old values or initalize a new area and hero.
 	sav, err := loadOrCreateNewGameSession(&a, &hero)
 	if err != nil {
 		return errutil.Err(err)
 	}
 
+	// Initalize turn priority queue.
 	turn.Init(&a)
 
 	// Main loop.
@@ -56,6 +55,7 @@ func reason() (err error) {
 	return nil
 }
 
+// initGameLibs initializes creature, fauna and item libraries.
 func initGameLibs() (err error) {
 	// Init graphic library.
 	err = termbox.Init()
@@ -84,8 +84,9 @@ func initGameLibs() (err error) {
 	return nil
 }
 
+// loadOrCreateNewGameSession if a load file exists load the old game otherwise
+// create a new game session.
 func loadOrCreateNewGameSession(a *area.Area, hero *creature.Creature) (sav *save.Save, err error) {
-	// If save exists load old game session.
 	path, err := goutil.SrcDir("github.com/karlek/reason/")
 	if err != nil {
 		return nil, errutil.Err(err)
@@ -94,14 +95,16 @@ func loadOrCreateNewGameSession(a *area.Area, hero *creature.Creature) (sav *sav
 	if err != nil {
 		return nil, errutil.Err(err)
 	}
+
+	// If save exists load old game session.
+	// Otherwise create a new game session.
 	if sav.Exists() {
 		err = load(sav, a, hero)
-		if err != nil {
-			return nil, errutil.Err(err)
-		}
 	} else {
-		// Otherwise create a new game session.
 		newGame(a, hero)
+	}
+	if err != nil {
+		return nil, errutil.Err(err)
 	}
 	return sav, nil
 }
@@ -112,9 +115,9 @@ func load(sav *save.Save, a *area.Area, hero *creature.Creature) (err error) {
 	if err != nil {
 		return errutil.Err(err)
 	}
-	g := *s
-	*a = g.Area
-	*hero = g.Hero
+	// g := *s
+	*a = s.Area
+	*hero = s.Hero
 	return nil
 }
 
@@ -126,8 +129,8 @@ func newGame(a *area.Area, hero *creature.Creature) {
 
 	// Hero starting position.
 	*hero = creature.Creatures["hero"]
-	hero.NewX(ui.Area.Width / 2)
-	hero.NewY(ui.Area.Height / 2)
+	hero.NewX(a.Width / 2)
+	hero.NewY(a.Height / 2)
 
 	a.Monsters[coord.Coord{hero.X(), hero.Y()}] = hero
 }

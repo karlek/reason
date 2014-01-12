@@ -7,7 +7,6 @@ import (
 	"github.com/karlek/reason/ui"
 
 	"github.com/karlek/worc/area"
-	// "github.com/karlek/worc/screen"
 	"github.com/nsf/termbox-go"
 )
 

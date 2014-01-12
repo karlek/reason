@@ -6,14 +6,14 @@ import (
 	"github.com/karlek/reason/creature"
 	"github.com/karlek/reason/item"
 	"github.com/karlek/reason/ui"
-
 	"github.com/karlek/reason/ui/status"
+
 	"github.com/karlek/worc/area"
 
 	"github.com/nsf/termbox-go"
 )
 
-func DropItem(hero *creature.Creature, a *area.Area) bool {
+func DropItem(a *area.Area, hero *creature.Creature) bool {
 	PrintCategorizedInventory("Drop Item: currentWeight/maxPossibleWeight (usedSlots/totalSlots)", hero)
 
 	if len(hero.Inventory) == 0 {
@@ -39,11 +39,31 @@ dropItemLoop:
 
 func NarrativeDropItem(ch string, hero *creature.Creature, a *area.Area) {
 	i := hero.DropItem(ch, a)
+	if i == nil {
+		status.Print("I failed :(")
+	}
 	s := "You dropped "
 	if i.IsStackable() {
-		s += strconv.Itoa(i.Num) + " " + i.Name()
+		s += strconv.Itoa(i.GetNum()) + " " + i.Name()
 	} else {
-		s = i.Name()
+		s += i.Name()
+	}
+	s += "."
+	status.Print(s)
+}
+
+func NarrativeEquip(ch string, hero *creature.Creature) {
+	i := hero.Equip(ch)
+	if i == nil {
+		status.Print("That item can't be equipped.")
+		return
+	}
+
+	s := "You equipped "
+	if i.IsStackable() {
+		s += strconv.Itoa(i.GetNum()) + " " + i.Name()
+	} else {
+		s += i.Name()
 	}
 	s += "."
 	status.Print(s)
@@ -80,14 +100,21 @@ func PrintCategorizedInventory(title string, hero *creature.Creature) {
 		if i, ok := hero.Inventory[string(ch)]; ok {
 			var s string
 			if i.IsStackable() {
-				s = i.Hotkey + " - " + strconv.Itoa(i.Num) + " " + i.Name()
+				s = i.GetHotkey() + " - " + strconv.Itoa(i.GetNum()) + " " + i.Name()
 			} else {
-				s = i.Hotkey + " - " + i.Name()
+				s = i.GetHotkey() + " - " + i.Name()
 			}
-			if _, ok := categories[i.Category]; !ok {
+			if i.IsEquipable() {
+				if hero.Equipment.MainHand != nil {
+					if hero.Equipment.MainHand.GetHotkey() == i.GetHotkey() {
+						s += " (equipped)"
+					}
+				}
+			}
+			if _, ok := categories[i.GetCategory()]; !ok {
 				categories["unknown"] = append(categories["unknown"], s)
 			} else {
-				categories[i.Category] = append(categories[i.Category], s)
+				categories[i.GetCategory()] = append(categories[i.GetCategory()], s)
 			}
 		}
 	}

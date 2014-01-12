@@ -53,6 +53,7 @@ const (
 	SaveAndQuitKey   = 'p'
 	ShowInventoryKey = 'i'
 	DropItemKey      = 'd'
+	EquipItemKey     = 'e'
 
 	// Movement keys.
 	MoveUpKey    = termbox.KeyArrowUp

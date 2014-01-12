@@ -3,6 +3,8 @@
 package status
 
 import (
+	"fmt"
+
 	"github.com/karlek/reason/ui"
 
 	"github.com/nsf/termbox-go"
@@ -36,6 +38,11 @@ func Print(str string) {
 		str = str[strLen:]
 	}
 	Update()
+}
+
+// Print writes a string to the status buffer.
+func Printf(a string, args ...interface{}) {
+	Print(fmt.Sprintf(a, args...))
 }
 
 func Update() {

@@ -1,0 +1,13 @@
+{
+	"Name": "Iron Sword",
+	"Category": "weapon",
+	"Rarity":"common",
+	"Description":"A very normal iron sword.",
+	"Graphics": {
+		"Ch": ")",
+		"Fg": {"color": "black", "attr": "bold"},
+		"Bg": null
+	},
+	"Num": 1,
+	"Pathable": true
+}

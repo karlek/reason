@@ -6,14 +6,13 @@ import (
 
 	"github.com/karlek/reason/util"
 
-	"github.com/karlek/worc/model"
 	"github.com/mewkiz/pkg/errutil"
 	"github.com/nsf/termbox-go"
 )
 
 // Items is a map where names of the item is the key mapping to that
 // item object.
-var Items = map[string]Item{}
+var Items = map[string]*Item{}
 
 // Load initializes the Items map with creatures.
 func Load() (err error) {
@@ -26,7 +25,7 @@ func Load() (err error) {
 		if err != nil {
 			return errutil.Err(err)
 		}
-		Items[i.Name()] = *i
+		Items[i.Name()] = i
 	}
 	return nil
 }
@@ -68,19 +67,28 @@ func load(filename string) (i *Item, err error) {
 		return nil, errutil.Err(err)
 	}
 
-	i = &Item{
-		name:        jc.Name,
-		Category:    jc.Category,
-		Description: jc.Description,
-		Num:         jc.Num,
-		M: model.Model{
-			G: termbox.Cell{
-				Ch: rune(jc.Graphics.Ch[0]),
-				Fg: fg,
-				Bg: bg,
-			},
-			Pathable: jc.Pathable,
-		},
-	}
-	return i, nil
+	j := new(Item)
+	// j = &Item{
+	// 	name:        jc.Name,
+	// 	Category:    jc.Category,
+	// 	Description: jc.Description,
+	// 	Num:         jc.Num,
+	// }
+
+	j.name = jc.Name
+	j.Category = jc.Category
+	j.Description = jc.Description
+	j.Num = jc.Num
+
+	// if jc.Category == "weapon" {
+	// 	i = &Weapon{}
+	// }
+
+	j.SetPathable(jc.Pathable)
+	j.SetGraphics(termbox.Cell{
+		Ch: rune(jc.Graphics.Ch[0]),
+		Fg: fg,
+		Bg: bg,
+	})
+	return j, nil
 }
