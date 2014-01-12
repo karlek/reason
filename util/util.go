@@ -82,7 +82,7 @@ func DirFiles(srcDir string) (filnames []string, err error) {
 
 	var filenames []string
 	for _, v := range fi {
-		filename := folder + v.Name()
+		filename := folder + "/" + v.Name()
 		filenames = append(filenames, filename)
 	}
 	return filenames, nil
