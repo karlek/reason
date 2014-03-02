@@ -1,4 +1,4 @@
-package fauna
+package terrain
 
 import (
 	"encoding/json"
@@ -10,29 +10,29 @@ import (
 	"github.com/nsf/termbox-go"
 )
 
-var Doodads = map[string]Doodad{}
+var Fauna = map[string]Terrain{}
 
-// Load initializes the Doodads map with doodads.
+// Load initializes the fauna collection.
 func Load() (err error) {
-	filenames, err := util.DirFiles("github.com/karlek/reason/fauna/data/")
+	filenames, err := util.DirFiles("github.com/karlek/reason/terrain/data/")
 	if err != nil {
 		return errutil.Err(err)
 	}
 	for _, filename := range filenames {
-		d, err := load(filename)
+		t, err := load(filename)
 		if err != nil {
 			return errutil.Err(err)
 		}
-		Doodads[d.Name()] = *d
+		Fauna[t.Name()] = *t
 	}
 	return nil
 }
 
-// load parses a JSON data file into a go fauna object.
-func load(filename string) (fa *Doodad, err error) {
-	// jsonDoodad is a temporary struct for easier conversion between JSON and
+// load parses a JSON data file into a go terrain object.
+func load(filename string) (t *Terrain, err error) {
+	// jsonTerrain is a temporary struct for easier conversion between JSON and
 	// go structs.
-	type jsonDoodad struct {
+	type jsonTerrain struct {
 		Name     string
 		Graphics struct {
 			Ch string
@@ -47,29 +47,29 @@ func load(filename string) (fa *Doodad, err error) {
 		return nil, errutil.Err(err)
 	}
 
-	var jc jsonDoodad
-	err = json.Unmarshal(buf, &jc)
+	var jt jsonTerrain
+	err = json.Unmarshal(buf, &jt)
 	if err != nil {
 		return nil, errutil.Err(err)
 	}
 
-	fg, err := util.ParseColor(jc.Graphics.Fg)
+	fg, err := util.ParseColor(jt.Graphics.Fg)
 	if err != nil {
 		return nil, errutil.Err(err)
 	}
-	bg, err := util.ParseColor(jc.Graphics.Bg)
+	bg, err := util.ParseColor(jt.Graphics.Bg)
 	if err != nil {
 		return nil, errutil.Err(err)
 	}
 
-	fa = &Doodad{
-		name: jc.Name,
+	t = &Terrain{
+		name: jt.Name,
 	}
-	fa.SetPathable(jc.Pathable)
-	fa.SetGraphics(termbox.Cell{
-		Ch: rune(jc.Graphics.Ch[0]),
+	t.SetPathable(jt.Pathable)
+	t.SetGraphics(termbox.Cell{
+		Ch: rune(jt.Graphics.Ch[0]),
 		Fg: fg,
 		Bg: bg,
 	})
-	return fa, nil
+	return t, nil
 }

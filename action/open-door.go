@@ -2,7 +2,7 @@
 package action
 
 import (
-	"github.com/karlek/reason/fauna"
+	// "github.com/karlek/reason/fauna"
 	"github.com/karlek/reason/ui"
 	"github.com/karlek/reason/util"
 
@@ -57,10 +57,11 @@ func OpenDoorNarrative(a *area.Area, x, y int) bool {
 		if cancel {
 			return false
 		}
-		if a.Terrain[x][y] == fauna.Doodads["door (closed)"] {
-			a.Terrain[x][y] = fauna.Doodads["door (open)"]
-			return true
-		}
+		// if a.Terrain[x][y] == fauna.Doodads["door (closed)"] {
+		// 	a.Terrain[x][y] = fauna.Doodads["door (open)"]
+		// 	return true
+		// }
+		return true
 	}
 	status.Printf("You can't open that.")
 	status.Printf("%T", a.Terrain[x][y])
@@ -74,7 +75,7 @@ func WalkedIntoDoor(a *area.Area, x, y int) bool {
 
 	// user wants to open door?
 	if util.YesOrNo() {
-		a.Terrain[x][y] = fauna.Doodads["door (open)"]
+		// a.Terrain[x][y] = fauna.Doodads["door (open)"]
 		return true
 	}
 

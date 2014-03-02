@@ -21,17 +21,23 @@ type Turn struct {
 	index int // The index of the turn in the heap.
 }
 
-func Proccess(sav *save.Save, a *area.Area, hero *creature.Creature) {
+func Proccess(sav *save.Save, a *area.Area) {
+	// Pop the next turn.
 	t := heap.Pop(turnQueue).(*Turn)
+
+	// remove dead creatures from the queue.
 	if t.c.Hp <= 0 {
 		return
 	}
+
 	var timeTaken int
-	if t.c.Name() == hero.Name() {
-		timeTaken = action.HeroTurn(sav, a, hero)
+	if t.c.IsHero() {
+		timeTaken = action.HeroTurn(sav, a)
 	} else {
-		timeTaken = t.c.Action(a, hero)
+		timeTaken = t.c.Action(a)
 	}
+	// If no action was taken, reinsert the turn with the same priority so it
+	// will be popped again.
 	if timeTaken == 0 {
 		heap.Push(turnQueue, t)
 		return
@@ -40,7 +46,11 @@ func Proccess(sav *save.Save, a *area.Area, hero *creature.Creature) {
 	for k, _ := range *turnQueue {
 		(*turnQueue)[k].priority -= t.priority
 	}
+
+	// Update new priority.
 	t.priority = timeTaken
+
+	// Re-add to queue.
 	heap.Push(turnQueue, t)
 }
 

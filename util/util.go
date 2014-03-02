@@ -65,7 +65,7 @@ func NoOrYes() bool {
 	}
 }
 
-// DirFiles initializes the Doodads map with doodads.
+// DirFiles returns all filenames in a folder.
 func DirFiles(srcDir string) (filnames []string, err error) {
 	folder, err := goutil.SrcDir(srcDir)
 	if err != nil {

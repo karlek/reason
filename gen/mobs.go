@@ -11,9 +11,10 @@ import (
 // Mobs is a debug function to add mobs to the map.
 func Mobs(a *area.Area, num int) {
 	var mobList = []creature.Creature{
-		creature.Creatures["gobbal"],
-		creature.Creatures["tofu"],
-		creature.Creatures["arachnee"],
+		creature.Beastiary["gobbal"],
+		creature.Beastiary["tofu"],
+		creature.Beastiary["iop"],
+		creature.Beastiary["arachnee"],
 	}
 	for x := 0; x < a.Width; x++ {
 		for y := 0; y < a.Height; y++ {
@@ -30,10 +31,12 @@ func Mobs(a *area.Area, num int) {
 			}
 
 			g := mobList[util.RandInt(0, len(mobList))]
+			g.Inventory = make(creature.Inventory)
+
 			c := coord.Coord{x, y}
 
-			g.NewX(x)
-			g.NewY(y)
+			g.SetX(x)
+			g.SetY(y)
 
 			a.Monsters[c] = &g
 			num--

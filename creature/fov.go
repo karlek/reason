@@ -3,23 +3,27 @@ package creature
 import (
 	"math"
 
-	"github.com/karlek/reason/fauna"
 	"github.com/karlek/reason/ui"
 
 	"github.com/karlek/worc/area"
-	"github.com/nsf/termbox-go"
 )
 
+// DrawFOV draws a field of view around a creature as well as the creatures
+// memory of already explored areas.
 func (c Creature) DrawFOV(a *area.Area) {
-	termbox.Clear(termbox.ColorBlack, termbox.ColorBlack)
+	ui.Clear()
 
-	cameraX, cameraY := CameraXY(c, a)
-	a.DrawExplored(ui.Area, cameraX, cameraY)
+	// Get viewport coordinate offset.
+	camX, camY := camXY(c, a)
 
-	radius := c.Sight // Inclusive hero's square, so actually 8 from hero's "eyes".
+	// Draw already explored areas.
+	a.DrawExplored(ui.Area, camX, camY)
+
+	// Inclusive hero's square so it's from hero's eyes.
+	radius := c.Sight
 	for x := c.X() - radius; x <= c.X()+radius; x++ {
 		for y := c.Y() - radius; y <= c.Y()+radius; y++ {
-			// Descriminate coordinates which are out of bounds.
+			// Discriminate coordinates which are out of bounds.
 			if !a.ExistsXY(x, y) {
 				continue
 			}
@@ -34,38 +38,37 @@ func (c Creature) DrawFOV(a *area.Area) {
 			// Discriminate coordinates which are outside of the circle.
 			if dist > float64(radius) {
 				continue
-
 			}
-			/// workaround for pointer reciver on area.Tile problem.
-			tile := a.Terrain[x][y]
-			d, ok := tile.(fauna.Doodad)
-			if !ok {
-				continue
-			}
-			d.Explored = true
-			a.Terrain[x][y] = d
 
-			a.Draw(x, y, cameraX, cameraY, ui.Area)
+			// Set terrain as explored.
+			a.Terrain[x][y].IsExplored = true
+
+			// TODO(_): refactor cam.
+			a.Draw(x, y, camX, camY, ui.Area)
 		}
 	}
 }
 
-func CameraXY(c Creature, a *area.Area) (int, int) {
-	cameraX := c.X() - (ui.Area.Width / 2)
-	cameraY := c.Y() - (ui.Area.Height / 2)
+// camXY returns the coordinate of offset for the viewport. Since the area can
+// be larger than the viewport.
+func camXY(c Creature, a *area.Area) (int, int) {
+	// ui.Area is the viewport size.
 
-	if c.X() < (ui.Area.Width / 2) {
-		cameraX = 0
+	camX := c.X() - ui.Area.Width/2
+	camY := c.Y() - ui.Area.Height/2
+
+	if c.X() < ui.Area.Width/2 {
+		camX = 0
 	}
-	if c.Y() < (ui.Area.Height / 2) {
-		cameraY = 0
+	if c.Y() < ui.Area.Height/2 {
+		camY = 0
 	}
-	if c.X() >= a.Width-(ui.Area.Width/2) {
-		cameraX = a.Width - ui.Area.Width
+	if c.X() >= a.Width-ui.Area.Width/2 {
+		camX = a.Width - ui.Area.Width
 	}
-	if c.Y() > a.Height-(ui.Area.Height/2) {
-		cameraY = a.Height - ui.Area.Height
+	if c.Y() > a.Height-ui.Area.Height/2 {
+		camY = a.Height - ui.Area.Height
 	}
 
-	return cameraX, cameraY
+	return camX, camY
 }

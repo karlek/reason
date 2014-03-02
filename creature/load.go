@@ -11,13 +11,15 @@ import (
 	"github.com/nsf/termbox-go"
 )
 
-// TODO(_): rename to beastiary.
-
-// Creatures is a map where names of the creature is the key mapping to that
+// Beastiary is a map where names of the creature is the key mapping to that
 // creature object.
-var Creatures = map[string]Creature{}
+/// TOTO mapping to basic creature types.
+var Beastiary = map[string]Creature{}
 
-// Load initializes the Creatures map with creatures.
+// The protagonist.
+var Hero Creature
+
+// Load initializes the Beastiary map with creatures.
 func Load() (err error) {
 	filenames, err := util.DirFiles("github.com/karlek/reason/creature/data/")
 	if err != nil {
@@ -28,7 +30,7 @@ func Load() (err error) {
 		if err != nil {
 			return errutil.Err(err)
 		}
-		Creatures[c.Name()] = *c
+		Beastiary[c.Name()] = *c
 	}
 	return nil
 }
@@ -78,7 +80,7 @@ func load(filename string) (c *Creature, err error) {
 		Strength:  jc.Strength,
 		Speed:     jc.Speed,
 		Sight:     jc.Sight,
-		Inventory: make(Inventory, len(item.Letters)),
+		Inventory: make(Inventory, len(item.Positions)),
 	}
 	c.SetPathable(jc.Pathable)
 	c.SetGraphics(termbox.Cell{

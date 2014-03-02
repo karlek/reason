@@ -1,120 +1,161 @@
 package item
 
 import (
+	"fmt"
+	"log"
+	"strconv"
+
 	"github.com/karlek/reason/name"
 
+	"github.com/karlek/worc/area"
 	"github.com/karlek/worc/model"
 )
 
-var Letters string = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+var Positions string = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
-type ItemModeler interface {
-	Itemer
+type DrawItemer interface {
 	model.Modeler
+	area.DrawPather
+	Itemer
 }
 
 type Itemer interface {
-	IsStackable() bool
-	IsEquipable() bool
-	GetHotkey() string
-	/// TODO(_): rename to GetCount
-	GetNum() int
-	// TODO(_): implement GetFlavorText
-	GetDescription() string
-	// TODO(_): remove.
-	GetCategory() string
-	SetName(string)
-	SetDescription(string)
-	SetCategory(string)
-	// TODO(u): IncCount()
-	IncreaseNum(int)
+	SetHotkey(rune)
+	Hotkey() rune
+	Count() int
+	Rarity() int
+	Cat() string
+	FlavorText() string
+	SetCount(int)
+	fmt.Stringer
 	name.Namer
-	// model.Modelable
 }
+
+// Item rarity ranging from common to artifact.
+const (
+	Common = iota + 1
+	Magical
+	Artifact
+)
 
 // Item is an object with a name.
 type Item struct {
 	Itemer
 	model.Model
-	name        string
-	Hotkey      string
-	Category    string
-	Description string
-	Num         int
-	Effects     []Effect
+	name     string
+	rarity   int
+	hotkey   rune
+	flavor   string
+	category string
+	count    int
+	effects  []Effect
 }
 
-type Effect struct {
-}
-
-type Armor Item
-
-type Jewelery Item
-
-type Weapon Item
-
-type Boots Armor
-type Gloves Armor
-type Chestwear Armor
-type Headgear Armor
-type Legwear Armor
-type Amulet Jewelery
-type Ring Jewelery
-
-func (i Item) IsStackable() bool {
-	switch i.Category {
-	case "potion":
-		return true
-	}
-	return false
-}
-
-func (i Item) IsEquipable() bool {
-	switch i.Category {
-	case "weapon":
-		return true
-	}
-	return false
-}
+// Base types.
+type (
+	Effect    struct{}
+	Armor     struct{ Item }
+	Jewelery  struct{ Item }
+	Weapon    struct{ Item }
+	Potion    struct{ Item }
+	Tool      struct{ Item }
+	Boots     Armor
+	Gloves    Armor
+	Chestwear Armor
+	Headgear  Armor
+	Legwear   Armor
+	Amulet    Jewelery
+	Ring      Jewelery
+)
 
 // Name returns the name of the item.
 func (i Item) Name() string {
 	return i.name
 }
 
-/// GetHotkey
-func (i Item) GetHotkey() string {
-	return i.Hotkey
+/// Hotkey
+func (i Item) Hotkey() rune {
+	return i.hotkey
 }
 
-/// GetNum
-func (i Item) GetNum() int {
-	return i.Num
+/// Num
+func (i Item) Count() int {
+	return i.count
 }
 
-/// GetDescription
-func (i Item) GetDescription() string {
-	return i.Description
+/// FlavorText
+func (i Item) FlavorText() string {
+	return i.flavor
 }
 
-/// GetCategory
-func (i Item) GetCategory() string {
-	return i.Category
+/// Cat
+func (i Item) Cat() string {
+	return i.category
+}
+
+/// Rarity
+func (i Item) Rarity() int {
+	return i.rarity
 }
 
 /// IncreaseNum
-func (i *Item) IncreaseNum(num int) {
-	i.Num += num
+func (i *Item) SetCount(n int) {
+	i.count = n
 }
 
-func (i *Item) SetName(n string) {
-	i.name = n
+func (i *Item) SetHotkey(ch rune) {
+	i.hotkey = ch
 }
 
-func (i *Item) SetDescription(desc string) {
-	i.Description = desc
+func (i *Item) String() string {
+	msg := ""
+	if IsStackable(i) {
+		if i.Count() != 0 {
+			msg += strconv.Itoa(i.Count()) + " "
+		}
+	} else {
+		log.Println("you are here")
+		log.Println(i.Name(), "not stackable")
+	}
+	msg += i.Name()
+	return msg
 }
 
-func (i *Item) SetCategory(cat string) {
-	i.Category = cat
+func (i *Potion) String() string {
+	msg := ""
+	if IsStackable(i) {
+		if i.Count() != 0 {
+			msg += strconv.Itoa(i.Count()) + " "
+		}
+	}
+	msg += i.Name()
+	return msg
+}
+
+func IsStackable(i Itemer) bool {
+	switch e := i.(type) {
+	case *Potion:
+		return true
+	default:
+		log.Printf("%T, not stackable %s", e, e.Name())
+		return false
+	}
+}
+
+func IsEquipable(i Itemer) bool {
+	switch i.(type) {
+	case *Weapon, *Ring:
+		return true
+	default:
+		return false
+	}
+}
+
+func IsUsable(i Itemer) bool {
+	switch i.(type) {
+	case *Potion:
+		return true
+	default:
+		return false
+	}
 }

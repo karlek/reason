@@ -2,7 +2,7 @@
 	"Name": "Potion of Increase Weight",
 	"Category": "potion",
 	"Rarity": "common",
-	"Description":"I'm not written yet :)",
+	"Flavor":"I'm not written yet :)",
 	"Graphics": {
 		"Ch": "!",
 		"Fg": {"color": "yellow", "attr": "bold"},

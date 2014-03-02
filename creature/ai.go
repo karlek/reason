@@ -2,7 +2,9 @@ package creature
 
 import (
 	"fmt"
+	"strings"
 
+	// "github.com/karlek/reason/item"
 	"github.com/karlek/reason/ui/status"
 	"github.com/karlek/reason/util"
 
@@ -12,16 +14,28 @@ import (
 )
 
 // Action performs simple AI for a creature.
-func (c *Creature) Action(a *area.Area, hero *Creature) int {
+func (c *Creature) Action(a *area.Area) int {
+	if i := a.Items[c.Coord()].Peek(); i != nil {
+		c.PickUp(a)
+		return c.Speed
+	}
+	//  else if len(c.Inventory) > 1 {
+	// 	for _, pos := range item.Positions {
+	// 		if _, ok := c.Inventory[pos]; ok {
+	// 			c.DropItem(pos, a)
+	// 			return c.Speed
+	// 		}
+	// 	}
+	// }
 	var col *area.Collision
 	var err error
-	if c.X() < hero.X() {
+	if c.X() < Hero.X() {
 		col, err = a.MoveRight(c)
-	} else if c.X() > hero.X() {
+	} else if c.X() > Hero.X() {
 		col, err = a.MoveLeft(c)
-	} else if c.Y() < hero.Y() {
+	} else if c.Y() < Hero.Y() {
 		col, err = a.MoveDown(c)
-	} else if c.Y() > hero.Y() {
+	} else if c.Y() > Hero.Y() {
 		col, err = a.MoveUp(c)
 	}
 	if err != nil {
@@ -31,39 +45,48 @@ func (c *Creature) Action(a *area.Area, hero *Creature) int {
 		return c.Speed
 	}
 	if mob, ok := col.S.(*Creature); ok {
-		if mob.Name() == "hero" {
-			battleNarrative(a, hero, c)
+		if mob.IsHero() {
+			c.Battle(mob, a)
 			return c.Speed
 		}
 	}
 
-	/// this simulates waiting.
+	// If all fails, creature waits.
 	return c.Speed
 }
 
-// battle between to non player characters.
-func battle(a *area.Area, defender *Creature, attacker *Creature) {
+func (attacker *Creature) Battle(defender *Creature, a *area.Area) {
+	var s string
+	if defender.IsHero() {
+		s = fmt.Sprintf("You take %d damage from %s!", attacker.Strength, attacker.Name())
+	} else if attacker.IsHero() {
+		s = fmt.Sprintf("You inflict %d damage to %s!", attacker.Strength, defender.Name())
+	} else {
+		s = fmt.Sprintf("%s takes %d damage from %s!", strings.Title(defender.Name()), attacker.Strength, attacker.Name())
+	}
+
 	defender.Hp -= attacker.Strength
 	if defender.Hp <= 0 {
+		if defender.IsHero() {
+			Hero.DrawFOV(a)
+			status.Print(s)
+			status.Print("You die. Press any key to quit.")
+			termbox.Flush()
+			termbox.PollEvent()
+			util.Quit()
+		} else if attacker.IsHero() {
+			s += fmt.Sprintf(" You killed %s!", defender.Name())
+		}
 		a.Monsters[coord.Coord{defender.X(), defender.Y()}] = nil
+		_, ok := a.Items[defender.Coord()]
+		if !ok {
+			a.Items[defender.Coord()] = new(area.Stack)
+		}
+		for _, i := range defender.Inventory {
+			a.Items[defender.Coord()].Push(i)
+		}
 	}
-}
-
-func battleNarrative(a *area.Area, hero *Creature, attacker *Creature) {
-	hero.Hp -= attacker.Strength
-	status.Print(fmt.Sprintf("You take %d damage from %s!", attacker.Strength, attacker.Name()))
-	if hero.Hp <= 0 {
-		hero.DrawFOV(a)
-		status.Print("You die. Press any key to quit.")
-		termbox.Flush()
-		termbox.PollEvent()
-		util.Quit()
-	}
-}
-
-// Actions performs a number of actions for the creature.
-func (c *Creature) Actions(turns int, a *area.Area, hero *Creature) {
-	for ; turns > 0; turns-- {
-		c.Action(a, hero)
+	if attacker.dist() <= Hero.Sight {
+		status.Print(s)
 	}
 }

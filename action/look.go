@@ -2,12 +2,12 @@
 package action
 
 import (
-	"github.com/karlek/reason/name"
+	// "github.com/karlek/reason/name"
 	"github.com/karlek/reason/ui"
 
-	"github.com/karlek/reason/ui/status"
+	// "github.com/karlek/reason/ui/status"
 	"github.com/karlek/worc/area"
-	"github.com/karlek/worc/coord"
+	// "github.com/karlek/worc/coord"
 	"github.com/nsf/termbox-go"
 )
 
@@ -66,28 +66,28 @@ lookLoop:
 			termbox.SetCursor(x, y)
 			termbox.Flush()
 
-			c := coord.Coord{x, y}
+			// c := coord.Coord{x, y}
 
-			// Message is originally about terrain, but is then overwritten.
-			msg := a.Terrain[x][y].(name.Namer).Name()
-			if o, found := a.Objects[c]; found {
-				if n, ok := o.(name.Namer); ok {
-					msg = n.Name()
-				}
-			}
-			if m, found := a.Monsters[c]; found {
-				if n, ok := m.(name.Namer); ok {
-					msg = n.Name()
-				}
-			}
-			if s, found := a.Items[c]; found {
-				if i := s.Peek(); i != nil {
-					if n, ok := i.(name.Namer); ok {
-						msg = n.Name()
-					}
-				}
-			}
-			status.Print("You see " + msg + ".")
+			// // Message is originally about terrain, but is then overwritten.
+			// msg := a.Terrain[x][y].(name.Namer).Name()
+			// if o, found := a.Objects[c]; found {
+			// 	if n, ok := o.(name.Namer); ok {
+			// 		msg = n.Name()
+			// 	}
+			// }
+			// if m, found := a.Monsters[c]; found {
+			// 	if n, ok := m.(name.Namer); ok {
+			// 		msg = n.Name()
+			// 	}
+			// }
+			// if s, found := a.Items[c]; found {
+			// 	if i := s.Peek(); i != nil {
+			// 		if n, ok := i.(name.Namer); ok {
+			// 			msg = n.Name()
+			// 		}
+			// 	}
+			// }
+			// status.Print("You see " + msg + ".")
 		}
 	}
 }

@@ -1,6 +1,7 @@
 package action
 
 import (
+	"fmt"
 	"strconv"
 
 	"github.com/karlek/reason/creature"
@@ -13,10 +14,20 @@ import (
 	"github.com/nsf/termbox-go"
 )
 
-func DropItem(a *area.Area, hero *creature.Creature) bool {
-	PrintCategorizedInventory("Drop Item: currentWeight/maxPossibleWeight (usedSlots/totalSlots)", hero)
+const (
+	DropTitleFmt  = "Drop Item: %s (%s)"
+	EmptyInv      = "You aren't carrying anything."
+	UnableToEquip = "That item can't be equipped."
+	UnableToDrop  = "Couldn't drop item."
+)
 
-	if len(hero.Inventory) == 0 {
+var (
+	InvInfo = "currentWeight/maxPossibleWeight (usedSlots/totalSlots)"
+)
+
+func DropItem(a *area.Area) bool {
+	categorizedInv(fmt.Sprintf(DropTitleFmt, WeightStr, slotsString()))
+	if len(creature.Hero.Inventory) == 0 {
 		return false
 	}
 
@@ -27,9 +38,8 @@ dropItemLoop:
 			if ev.Key == ui.CancelKey {
 				break dropItemLoop
 			}
-			hotkey := string(ev.Ch)
-			if _, ok := hero.Inventory[hotkey]; ok {
-				NarrativeDropItem(hotkey, hero, a)
+			if _, ok := creature.Hero.Inventory[ev.Ch]; ok {
+				creature.Hero.DropItem(ev.Ch, a)
 				return true
 			}
 		}
@@ -37,31 +47,16 @@ dropItemLoop:
 	return false
 }
 
-func NarrativeDropItem(ch string, hero *creature.Creature, a *area.Area) {
-	i := hero.DropItem(ch, a)
+func NarrativeEquip(pos rune) {
+	i := creature.Hero.Equip(pos)
 	if i == nil {
-		status.Print("I failed :(")
-	}
-	s := "You dropped "
-	if i.IsStackable() {
-		s += strconv.Itoa(i.GetNum()) + " " + i.Name()
-	} else {
-		s += i.Name()
-	}
-	s += "."
-	status.Print(s)
-}
-
-func NarrativeEquip(ch string, hero *creature.Creature) {
-	i := hero.Equip(ch)
-	if i == nil {
-		status.Print("That item can't be equipped.")
+		status.Print(UnableToEquip)
 		return
 	}
 
 	s := "You equipped "
-	if i.IsStackable() {
-		s += strconv.Itoa(i.GetNum()) + " " + i.Name()
+	if item.IsStackable(i) {
+		s += strconv.Itoa(i.Count()) + " " + i.Name()
 	} else {
 		s += i.Name()
 	}
@@ -69,72 +64,116 @@ func NarrativeEquip(ch string, hero *creature.Creature) {
 	status.Print(s)
 }
 
-func PrintCategorizedInventory(title string, hero *creature.Creature) {
-	termbox.Clear(termbox.ColorBlack, termbox.ColorBlack)
-	if len(hero.Inventory) == 0 {
-		ui.PrintInventory("You aren't carrying anything.", 0, 0, ui.Whole.Width, termbox.ColorWhite+termbox.AttrBold, termbox.ColorDefault)
+func NarrativeUse(pos rune) {
+	creature.Hero.Use(creature.Hero.Inventory[pos])
+}
+
+func NarrativeUnEquip(pos rune) {
+	creature.Hero.UnEquip(creature.Hero.Inventory[pos])
+}
+
+func InvText(i item.DrawItemer) string {
+	s := ""
+	if item.IsStackable(i) {
+		s = string(i.Hotkey()) + " - " + strconv.Itoa(i.Count()) + " " + i.Name()
+	} else {
+		s = string(i.Hotkey()) + " - " + i.Name()
+	}
+
+	if item.IsEquipable(i) {
+		if creature.Hero.IsEquipped(i) {
+			s += " (wielding)"
+		}
+	}
+	return s
+}
+
+func InvAttr(i item.DrawItemer) termbox.Attribute {
+	attr := RarityAttr(i)
+	if item.IsEquipable(i) {
+		if creature.Hero.IsEquipped(i) {
+			attr = termbox.ColorGreen + termbox.AttrBold
+		}
+	}
+	return attr
+}
+
+func RarityAttr(i item.DrawItemer) termbox.Attribute {
+	var Attr termbox.Attribute
+	switch i.Rarity() {
+	case item.Common:
+		Attr = termbox.ColorWhite
+	case item.Magical:
+		Attr = termbox.ColorBlue + termbox.AttrBold
+	case item.Artifact:
+		Attr = termbox.ColorWhite + termbox.AttrBold
+	}
+	return Attr
+}
+
+func categorizedInv(title string) {
+	// Make screen black.
+	ui.Clear()
+
+	// If inventory is empty, warn the user.
+	if len(creature.Hero.Inventory) == 0 {
+		t := ui.NewText(termbox.ColorWhite+termbox.AttrBold, EmptyInv)
+		ui.Print(t, 0, 0, ui.Whole.Width)
+
+		// Show the text and draw.
 		termbox.Flush()
 		termbox.PollEvent()
 		return
 	}
-	ui.PrintInventory(title, 0, 0, ui.Whole.Width, termbox.ColorWhite+termbox.AttrBold, termbox.ColorDefault)
 
-	// item category is the key to which plural category it will be placed under.
-	var categories = map[string][]string{
-		"tool":   {},
-		"armour": {},
-		"ring":   {},
-		"weapon": {},
-	}
+	// Print inventory title.
+	t := ui.NewText(termbox.ColorWhite+termbox.AttrBold, title)
+	ui.Print(t, 0, 0, ui.Whole.Width)
 
-	var properCategory = map[string]string{
-		"tool":    "Tools",
-		"armour":  "Armours",
-		"ring":    "Rings",
-		"weapon":  "Weapons",
-		"unknown": "Unknown",
-	}
+	// categories contains the item texts sorted in item categories.
+	var categories = map[string][]*ui.Text{}
 
-	// We do this the quirky we to get the inventory list sorted.
-	for _, ch := range item.Letters {
-		if i, ok := hero.Inventory[string(ch)]; ok {
-			var s string
-			if i.IsStackable() {
-				s = i.GetHotkey() + " - " + strconv.Itoa(i.GetNum()) + " " + i.Name()
-			} else {
-				s = i.GetHotkey() + " - " + i.Name()
-			}
-			if i.IsEquipable() {
-				if hero.Equipment.MainHand != nil {
-					if hero.Equipment.MainHand.GetHotkey() == i.GetHotkey() {
-						s += " (equipped)"
-					}
-				}
-			}
-			if _, ok := categories[i.GetCategory()]; !ok {
-				categories["unknown"] = append(categories["unknown"], s)
-			} else {
-				categories[i.GetCategory()] = append(categories[i.GetCategory()], s)
+	// Sort items into categories.
+	for _, pos := range item.Positions {
+		if i, ok := creature.Hero.Inventory[pos]; ok {
+			t = ui.NewText(InvAttr(i), InvText(i))
+			switch i.(type) {
+			case *item.Weapon:
+				categories["Weapons"] = append(categories["Weapons"], t)
+			case *item.Tool:
+				categories["Tools"] = append(categories["Tools"], t)
+			case *item.Ring:
+				categories["Rings"] = append(categories["Rings"], t)
+			case *item.Potion:
+				categories["Potions"] = append(categories["Potions"], t)
+			default:
+				categories["Unknown"] = append(categories["Unknown"], t)
 			}
 		}
 	}
 
-	yOffset := 2
-	xOffset := 1
-	row := 0
+	// Rows written to screen.
+	rowOffset := 0
 
-	/// Make inventory screen in ui
-	for cat, items := range categories {
+	// Print categories and the items in that category to screen.
+	for catStr, items := range categories {
 		if len(items) == 0 {
 			continue
 		}
-		ui.PrintInventory(properCategory[cat], 0, row+yOffset, ui.Whole.Width, termbox.ColorCyan+termbox.AttrBold, termbox.ColorDefault)
-		row++
-		for _, itemStr := range items {
-			ui.PrintInventory(itemStr, xOffset, row+yOffset, ui.Whole.Width, termbox.ColorWhite, termbox.ColorDefault)
-			row++
+
+		// Item category.
+		cat := ui.NewText(termbox.ColorCyan+termbox.AttrBold, catStr)
+		ui.Print(cat, 0, rowOffset+ui.Inventory.YOffset, ui.Whole.Width)
+		rowOffset++
+
+		// Items in that category.
+		for _, t := range items {
+			ui.Print(t, ui.Inventory.XOffset, rowOffset+ui.Inventory.YOffset, ui.Whole.Width)
+			rowOffset++
 		}
-		row++
+
+		// Empty line.
+		rowOffset++
 	}
 	termbox.Flush()
 }

@@ -10,12 +10,11 @@ import (
 
 // Items is a debug function to add mobs to the map.
 func Items(a *area.Area, num int) {
-	var itemList = []item.Item{
-		// item.Items["Star-Eye Map"],
-		// item.Items["Potion of Increase Weight"],
-		// item.Items["Potion of Increase Weight"],
-		// item.Items["Ring of Orihalcon"],
-		*item.Items["Iron Sword"],
+	var itemList = []item.DrawItemer{
+		item.Items["Iron Sword"],
+		item.Items["Potion of Increase Weight"],
+		item.Items["Star-Eye Map"],
+		item.Items["Ring of Orihalcon"],
 	}
 	for x := 0; x < a.Width; x++ {
 		for y := 0; y < a.Height; y++ {
@@ -31,11 +30,11 @@ func Items(a *area.Area, num int) {
 				continue
 			}
 
-			i := itemList[util.RandInt(0, len(itemList))]
 			c := coord.Coord{x, y}
+			i := item.New(itemList[util.RandInt(0, len(itemList))])
 
-			i.NewX(x)
-			i.NewY(y)
+			i.SetX(x)
+			i.SetY(y)
 
 			if a.Items[c] == nil {
 				a.Items[c] = new(area.Stack)

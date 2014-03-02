@@ -7,8 +7,8 @@ import (
 	"os"
 
 	"github.com/karlek/reason/creature"
-	"github.com/karlek/reason/fauna"
 	"github.com/karlek/reason/item"
+	"github.com/karlek/reason/terrain"
 
 	"github.com/karlek/worc/area"
 	"github.com/karlek/worc/model"
@@ -24,7 +24,7 @@ type Save struct {
 func init() {
 	// Register types to be saved / loaded.
 	gob.Register(new(creature.Creature))
-	gob.Register(new(fauna.Doodad))
+	gob.Register(new(terrain.Terrain))
 	gob.Register(new(item.Item))
 	gob.Register(new(model.Model))
 	gob.Register(new(area.Area))
@@ -51,10 +51,10 @@ type Skeleton struct {
 }
 
 // Save writes the current game session to disk.
-func (sav *Save) Save(a area.Area, hero creature.Creature) (err error) {
+func (sav *Save) Save(a area.Area) (err error) {
 	sBlob := Skeleton{
 		a,
-		hero,
+		creature.Hero,
 	}
 	var buffer bytes.Buffer
 	err = gob.NewEncoder(&buffer).Encode(&sBlob)

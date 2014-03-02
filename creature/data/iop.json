@@ -1,0 +1,12 @@
+{
+	"Name": "iop",
+	"Graphics": {
+		"Ch": "I",
+		"Fg": {"color": "white", "attr": "bold"},
+		"Bg": null
+	},
+	"HP": 14,
+	"Speed": 90,
+	"Strength": 4,
+	"Pathable": false
+}

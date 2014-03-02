@@ -5,8 +5,8 @@ import (
 	"log"
 
 	"github.com/karlek/reason/creature"
-	"github.com/karlek/reason/fauna"
 	"github.com/karlek/reason/save"
+	"github.com/karlek/reason/terrain"
 	"github.com/karlek/reason/ui"
 	"github.com/karlek/reason/ui/status"
 	"github.com/karlek/reason/util"
@@ -16,10 +16,10 @@ import (
 )
 
 // HeroTurn listens on user input and then acts on it.
-func HeroTurn(sav *save.Save, a *area.Area, hero *creature.Creature) int {
-	hero.DrawFOV(a)
+func HeroTurn(sav *save.Save, a *area.Area) int {
+	creature.Hero.DrawFOV(a)
 	status.Update()
-	ui.UpdateHp(hero.Hp, hero.MaxHp)
+	ui.UpdateHp(creature.Hero.Hp, creature.Hero.MaxHp)
 	termbox.Flush()
 
 	// Listen for keystrokes.
@@ -30,35 +30,35 @@ func HeroTurn(sav *save.Save, a *area.Area, hero *creature.Creature) int {
 	switch ev.Ch {
 	case ui.LookKey:
 		// user wants to look around.
-		return look(a, hero)
+		return look(a)
 	case 'm':
 		// user wants to try debug function.
 		return debug()
 	case ui.PickUpItemKey:
 		// user wants to pick up an item.
-		return pickUp(a, hero)
+		return pickUp(a)
 	case ui.ShowInventoryKey:
 		// user wants to look at inventory.
-		return showInventory(a, hero)
+		return showInventory(a)
 	case ui.DropItemKey:
 		// user wants to drop an item.
-		return dropItem(a, hero)
+		return dropItem(a)
 	case ui.OpenDoorKey:
 		// user wants to open a door.
-		return openDoor(a, hero)
+		return openDoor(a)
 	case ui.CloseDoorKey:
 		// user wants to close a door.
-		return closeDoor(a, hero)
+		return closeDoor(a)
 	case ui.QuitKey:
 		// user wants to quit game.
 		util.Quit()
 	case ui.SaveAndQuitKey:
 		// user wants to save and exit.
-		saveQuit(a, hero, sav)
+		saveQuit(a, sav)
 	}
 
-	// user wants to move hero.
-	return heroMovement(ev, a, hero)
+	// user wants to move creature.Hero.
+	return HeroMovement(ev, a)
 }
 
 func debug() int {
@@ -67,71 +67,71 @@ func debug() int {
 	return 0
 }
 
-func look(a *area.Area, hero *creature.Creature) int {
-	Look(*a, hero.X(), hero.Y())
+func look(a *area.Area) int {
+	Look(*a, creature.Hero.X(), creature.Hero.Y())
 	return 0
 }
 
-func saveQuit(a *area.Area, hero *creature.Creature, sav *save.Save) {
-	err := sav.Save(*a, *hero)
+func saveQuit(a *area.Area, sav *save.Save) {
+	err := sav.Save(*a)
 	if err != nil {
 		log.Println(err)
 	}
 	util.Quit()
 }
 
-func closeDoor(a *area.Area, hero *creature.Creature) int {
-	actionTaken := CloseDoorNarrative(a, hero.X(), hero.Y())
+func closeDoor(a *area.Area) int {
+	actionTaken := CloseDoorNarrative(a, creature.Hero.X(), creature.Hero.Y())
 	if actionTaken {
-		return hero.Speed
+		return creature.Hero.Speed
 	}
 	return 0
 }
 
-func openDoor(a *area.Area, hero *creature.Creature) int {
-	actionTaken := OpenDoorNarrative(a, hero.X(), hero.Y())
+func openDoor(a *area.Area) int {
+	actionTaken := OpenDoorNarrative(a, creature.Hero.X(), creature.Hero.Y())
 	if actionTaken {
-		return hero.Speed
+		return creature.Hero.Speed
 	}
 	return 0
 }
 
-func pickUp(a *area.Area, hero *creature.Creature) int {
-	actionTaken := PickUpNarrative(a, hero)
+func pickUp(a *area.Area) int {
+	actionTaken := creature.Hero.PickUp(a)
 	if actionTaken {
-		return hero.Speed
+		return creature.Hero.Speed
 	}
 	return 0
 }
 
-func showInventory(a *area.Area, hero *creature.Creature) int {
-	actionTaken := ShowInventory(a, hero)
+func showInventory(a *area.Area) int {
+	actionTaken := ShowInventory(a)
 	if actionTaken {
-		return hero.Speed
+		return creature.Hero.Speed
 	}
 	return 0
 }
 
-func dropItem(a *area.Area, hero *creature.Creature) int {
-	actionTaken := DropItem(a, hero)
+func dropItem(a *area.Area) int {
+	actionTaken := DropItem(a)
 	if actionTaken {
-		return hero.Speed
+		return creature.Hero.Speed
 	}
 	return 0
 }
 
-func heroMovement(ev termbox.Event, a *area.Area, hero *creature.Creature) int {
+func HeroMovement(ev termbox.Event, a *area.Area) int {
 	var col *area.Collision
 	var err error
 	switch ev.Key {
 	case ui.MoveUpKey:
-		col, err = a.MoveUp(hero)
+		col, err = a.MoveUp(&creature.Hero)
 	case ui.MoveDownKey:
-		col, err = a.MoveDown(hero)
+		col, err = a.MoveDown(&creature.Hero)
 	case ui.MoveLeftKey:
-		col, err = a.MoveLeft(hero)
+		col, err = a.MoveLeft(&creature.Hero)
 	case ui.MoveRightKey:
-		col, err = a.MoveRight(hero)
+		col, err = a.MoveRight(&creature.Hero)
 	default:
 		return 0
 	}
@@ -140,17 +140,17 @@ func heroMovement(ev termbox.Event, a *area.Area, hero *creature.Creature) int {
 		return 0
 	}
 	if col == nil {
-		return hero.Speed
+		return creature.Hero.Speed
 	}
 	if c, ok := col.S.(*creature.Creature); ok {
-		Attack(a, hero, c)
-		return hero.Speed
+		creature.Hero.Battle(c, a)
+		return creature.Hero.Speed
 	}
-	if fa, ok := col.S.(fauna.Doodad); ok {
+	if fa, ok := col.S.(terrain.Terrain); ok {
 		if fa.Name() == "door (closed)" {
 			actionTaken := WalkedIntoDoor(a, col.X, col.Y)
 			if actionTaken {
-				return hero.Speed
+				return creature.Hero.Speed
 			}
 		}
 	}

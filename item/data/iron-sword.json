@@ -1,8 +1,8 @@
 {
 	"Name": "Iron Sword",
 	"Category": "weapon",
-	"Rarity":"common",
-	"Description":"A very normal iron sword.",
+	"Rarity":"magical",
+	"Flavor":"A very normal iron sword.",
 	"Graphics": {
 		"Ch": ")",
 		"Fg": {"color": "black", "attr": "bold"},

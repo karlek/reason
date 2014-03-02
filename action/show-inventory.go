@@ -3,6 +3,7 @@ package action
 import (
 	"fmt"
 	"strconv"
+	"strings"
 
 	"github.com/karlek/reason/creature"
 	"github.com/karlek/reason/item"
@@ -10,15 +11,23 @@ import (
 
 	"github.com/karlek/worc/area"
 
+	"github.com/mewkiz/pkg/stringsutil"
 	"github.com/nsf/termbox-go"
 )
 
-func ShowInventory(a *area.Area, hero *creature.Creature) bool {
-	weightStr := "Current Weight/Max Possible Weight To Carry kg"
-	slotsStr := strconv.Itoa(hero.Inventory.GetUsedSlots()) + "/" + strconv.Itoa(len(item.Letters))
-	inventoryDetailStr := fmt.Sprintf("Inventory: %s (%s)", weightStr, slotsStr)
-	PrintCategorizedInventory(inventoryDetailStr, hero)
-	if len(hero.Inventory) == 0 {
+const (
+	InvTitleFmt = "Inventory: %s (%s)"
+	WeightStr   = "Current Weight/Max Possible Weight To Carry kg"
+	dropAction  = "You can (d)rop this item."
+)
+
+func slotsString() string {
+	return strconv.Itoa(creature.Hero.Inventory.UsedSlots()) + "/" + strconv.Itoa(len(item.Positions))
+}
+
+func ShowInventory(a *area.Area) bool {
+	categorizedInv(fmt.Sprintf(InvTitleFmt, WeightStr, slotsString()))
+	if len(creature.Hero.Inventory) == 0 {
 		return false
 	}
 
@@ -30,12 +39,11 @@ inventoryLoop:
 				break inventoryLoop
 			}
 
-			hotkey := string(ev.Ch)
-			if i, ok := hero.Inventory[hotkey]; ok {
-				if actionTaken := ShowItemDetails(i, hero, a); actionTaken {
+			if i, ok := creature.Hero.Inventory[ev.Ch]; ok {
+				if actionTaken := ShowItemDetails(i, a); actionTaken {
 					return true
 				} else {
-					PrintCategorizedInventory(inventoryDetailStr, hero)
+					categorizedInv(fmt.Sprintf(InvTitleFmt, WeightStr, slotsString()))
 				}
 			}
 		}
@@ -43,23 +51,35 @@ inventoryLoop:
 	return false
 }
 
-func ShowItemDetails(i item.Itemer, hero *creature.Creature, a *area.Area) bool {
-	termbox.Clear(termbox.ColorBlack, termbox.ColorBlack)
+func ShowItemDetails(i item.Itemer, a *area.Area) bool {
+	ui.Clear()
 
-	rows := 0
-	msg := MakePrintableString(i.GetHotkey() + " - " + i.Name())
-	PrintLong(msg, rows)
-	rows += len(msg) + 1
-	msg = MakePrintableString(i.GetDescription())
-	PrintLong(msg, rows)
-	rows += len(msg) + 1
+	// Print item title.
+	msgs := makeDrawable(string(i.Hotkey()) + " - " + i.Name())
+	PrintLong(msgs, 0)
+	rows := len(msgs)
 
-	str := "You can (d)rop this item."
-	if i.IsEquipable() {
-		str += " You can (e)quip this " + i.GetCategory() + "."
+	// Print flavor text.
+	msgs = makeDrawable(i.FlavorText())
+	PrintLong(msgs, rows)
+	rows += len(msgs)
+
+	actionStr := dropAction
+	if item.IsEquipable(i) && !creature.Hero.IsEquipped(i) {
+		actionStr += " You can (e)quip this " + strings.ToLower(i.Cat()) + "."
 	}
-	msg = MakePrintableString(str)
-	PrintLongCyan(msg, rows)
+	if creature.Hero.IsEquipped(i) {
+		actionStr += " You can (r)emove this " + strings.ToLower(i.Cat()) + "."
+	}
+	if item.IsUsable(i) {
+		actionStr += " You can (u)se this " + strings.ToLower(i.Cat()) + "."
+	}
+
+	msgs = makeDrawable(actionStr)
+	for y, m := range msgs {
+		t := ui.NewText(termbox.ColorCyan, m)
+		ui.Print(t, ui.Inventory.XOffset, y+rows, ui.Inventory.Width)
+	}
 
 	termbox.Flush()
 
@@ -73,43 +93,33 @@ itemDetailLoop:
 
 			itemAction := string(detailsEvent.Ch)
 			if itemAction == string(ui.DropItemKey) {
-				NarrativeDropItem(i.GetHotkey(), hero, a)
+				creature.Hero.DropItem(i.Hotkey(), a)
 			}
 			if itemAction == string(ui.EquipItemKey) {
-				NarrativeEquip(i.GetHotkey(), hero)
+				NarrativeEquip(i.Hotkey())
+				return true
 			}
-			return true
+			if itemAction == string(ui.UseItemKey) {
+				NarrativeUse(i.Hotkey())
+				return true
+			}
+			if itemAction == string(ui.UnEquipItemKey) {
+				NarrativeUnEquip(i.Hotkey())
+				return true
+			}
 		}
 	}
 	return false
 }
 
-// Print writes a string to the status buffer.
-func MakePrintableString(str string) []string {
-	var msg []string
-	for {
-		if len(str) < ui.Inventory.Width {
-			msg = append(msg, str)
-			break
-		}
-		strLen := ui.Inventory.Width
-
-		msg = append(msg, str[:strLen])
-		str = str[strLen:]
-	}
-	return msg
+func makeDrawable(str string) []string {
+	return strings.Split(stringsutil.WordWrap(str, ui.Inventory.Width), "\n")
 }
 
 func PrintLong(msg []string, yoffset int) {
 	for y, m := range msg {
-		ui.PrintInventory(m, ui.Inventory.XOffset, ui.Inventory.YOffset+y+yoffset, ui.Inventory.Width, termbox.ColorWhite, termbox.ColorDefault)
-	}
-	termbox.Flush()
-}
-
-func PrintLongCyan(msg []string, yoffset int) {
-	for y, m := range msg {
-		ui.PrintInventory(m, ui.Inventory.XOffset, ui.Inventory.YOffset+y+yoffset, ui.Inventory.Width, termbox.ColorCyan, termbox.ColorDefault)
+		t := ui.NewText(termbox.ColorWhite, m)
+		ui.Print(t, 0, y+yoffset, ui.Inventory.Width)
 	}
 	termbox.Flush()
 }

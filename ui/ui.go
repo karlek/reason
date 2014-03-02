@@ -11,6 +11,13 @@ import (
 )
 
 var (
+	// Main menu screen size.
+	Main = screen.Screen{
+		Width:   35,
+		Height:  20,
+		YOffset: 50,
+	}
+
 	// Area screen size.
 	Area = screen.Screen{
 		Width:   35,
@@ -38,22 +45,26 @@ var (
 	}
 
 	Inventory = screen.Screen{
-		Width: 60,
+		Width:   105,
+		YOffset: 2,
+		XOffset: 1,
 	}
 )
 
 const (
 	// Keybindings.
 	// Action keys.
-	LookKey          = 'l'
-	OpenDoorKey      = 'o'
 	CloseDoorKey     = 'c'
-	QuitKey          = 'q'
-	PickUpItemKey    = 'g'
-	SaveAndQuitKey   = 'p'
-	ShowInventoryKey = 'i'
 	DropItemKey      = 'd'
 	EquipItemKey     = 'e'
+	UnEquipItemKey   = 'r'
+	UseItemKey       = 'u'
+	LookKey          = 'l'
+	OpenDoorKey      = 'o'
+	PickUpItemKey    = 'g'
+	QuitKey          = 'q'
+	SaveAndQuitKey   = 'p'
+	ShowInventoryKey = 'i'
 
 	// Movement keys.
 	MoveUpKey    = termbox.KeyArrowUp
@@ -64,6 +75,33 @@ const (
 	// General keys.
 	CancelKey = termbox.KeyEsc
 )
+
+type Text struct {
+	Attr termbox.Attribute
+	Text string
+}
+
+func NewText(attr termbox.Attribute, str string) *Text {
+	return &Text{Attr: attr, Text: str}
+}
+
+func Clear() {
+	termbox.Clear(termbox.ColorBlack, termbox.ColorBlack)
+}
+
+func ClearLine(line int) {
+	/// Make relative to window size.
+	for x := 0; x < 170; x++ {
+		termbox.SetCell(x, line, ' ', termbox.ColorDefault, termbox.ColorDefault)
+	}
+}
+
+func ClearLineOffset(line, x int) {
+	/// Make relative to window size.
+	for ; x < 170; x++ {
+		termbox.SetCell(x, line, ' ', termbox.ColorDefault, termbox.ColorDefault)
+	}
+}
 
 func print(str string, x, y, width int, fg termbox.Attribute, bg termbox.Attribute) {
 	// Clears the line from old characters.
@@ -76,14 +114,14 @@ func print(str string, x, y, width int, fg termbox.Attribute, bg termbox.Attribu
 	}
 }
 
-func PrintInventory(str string, x, y, width int, fg termbox.Attribute, bg termbox.Attribute) {
+func Print(t *Text, x, y, width int) {
 	// Clears the line from old characters.
-	for i := len(str); i < width; i++ {
+	for i := len(t.Text); i < width; i++ {
 		termbox.SetCell(x+i, y, ' ', termbox.ColorDefault, termbox.ColorDefault)
 	}
 
-	for charOffset, char := range str {
-		termbox.SetCell(x+charOffset, y, char, fg, bg)
+	for charOffset, char := range t.Text {
+		termbox.SetCell(x+charOffset, y, char, t.Attr, termbox.ColorDefault)
 	}
 }
 

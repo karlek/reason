@@ -2,7 +2,7 @@
 	"Name": "Ring of Orihalcon",
 	"Category": "ring",
 	"Rarity":"artifact",
-	"Description":"The Ring of Orihalcon is a ring that will help Shion from losing his memories when he uses his Reverse Broom Magic. It was created by Faust with the Good Memory Sacrifice ritual.",
+	"Flavor":"The Ring of Orihalcon is a ring that will help Shion from losing his memories when he uses his Reverse Broom Magic. It was created by Faust with the Good Memory Sacrifice ritual.",
 	"Graphics": {
 		"Ch": "=",
 		"Fg": {"color": "red", "attr": ""},
