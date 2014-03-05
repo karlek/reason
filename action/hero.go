@@ -6,6 +6,7 @@ import (
 
 	"github.com/karlek/reason/creature"
 	"github.com/karlek/reason/save"
+	"github.com/karlek/reason/state"
 	"github.com/karlek/reason/terrain"
 	"github.com/karlek/reason/ui"
 	"github.com/karlek/reason/ui/status"
@@ -16,7 +17,7 @@ import (
 )
 
 // HeroTurn listens on user input and then acts on it.
-func HeroTurn(sav *save.Save, a *area.Area) int {
+func HeroTurn(sav *save.Save, a *area.Area) (int, state.State) {
 	creature.Hero.DrawFOV(a)
 	status.Update()
 	ui.UpdateHp(creature.Hero.Hp, creature.Hero.MaxHp)
@@ -25,30 +26,30 @@ func HeroTurn(sav *save.Save, a *area.Area) int {
 	// Listen for keystrokes.
 	ev := termbox.PollEvent()
 	if ev.Type != termbox.EventKey {
-		return 0
+		return 0, state.Wilderness
 	}
 	switch ev.Ch {
 	case ui.LookKey:
 		// user wants to look around.
-		return look(a)
+		return look(a), state.Look
 	case 'm':
 		// user wants to try debug function.
-		return debug()
+		return debug(), state.Wilderness
 	case ui.PickUpItemKey:
 		// user wants to pick up an item.
-		return pickUp(a)
+		return pickUp(a), state.Wilderness
 	case ui.ShowInventoryKey:
 		// user wants to look at inventory.
-		return showInventory(a)
+		return showInventory(a), state.Inventory
 	case ui.DropItemKey:
 		// user wants to drop an item.
-		return dropItem(a)
+		return dropItem(a), state.Drop
 	case ui.OpenDoorKey:
 		// user wants to open a door.
-		return openDoor(a)
+		return openDoor(a), state.Open
 	case ui.CloseDoorKey:
 		// user wants to close a door.
-		return closeDoor(a)
+		return closeDoor(a), state.Close
 	case ui.QuitKey:
 		// user wants to quit game.
 		util.Quit()
@@ -58,12 +59,13 @@ func HeroTurn(sav *save.Save, a *area.Area) int {
 	}
 
 	// user wants to move creature.Hero.
-	return HeroMovement(ev, a)
+	return HeroMovement(ev, a), state.Wilderness
 }
 
 func debug() int {
 	status.Print("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
 	status.Print("bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb")
+	creature.Hero.Equipment.Power()
 	return 0
 }
 

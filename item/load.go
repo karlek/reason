@@ -70,6 +70,10 @@ func load(filename string) (i DrawItemer, err error) {
 			Fg map[string]string
 			Bg map[string]string
 		}
+		Effects []struct {
+			Type      string
+			Magnitude int
+		}
 		Pathable bool
 	}
 
@@ -98,12 +102,18 @@ func load(filename string) (i DrawItemer, err error) {
 		return nil, errutil.Err(err)
 	}
 
+	effs, err := parseEffects(ji.Effects)
+	if err != nil {
+		return nil, errutil.Err(err)
+	}
+	log.Printf("%#v\n", effs)
 	j := Item{
 		name:     ji.Name,
 		flavor:   ji.Flavor,
 		rarity:   rarity,
 		count:    ji.Num,
 		category: ji.Category,
+		effects:  effs,
 	}
 	j.SetPathable(ji.Pathable)
 	j.SetGraphics(termbox.Cell{
@@ -138,4 +148,24 @@ func parseRarity(rarity string) (int, error) {
 	default:
 		return 0, errutil.NewNoPosf("invalid rarity: %s", rarity)
 	}
+}
+
+func parseEffects(jsEffects []struct {
+	Type      string
+	Magnitude int
+}) (map[Effect]Magnitude, error) {
+	itemEffects := make(map[Effect]Magnitude)
+	for _, eff := range jsEffects {
+		var e Effect
+		switch eff.Type {
+		case "Strength":
+			e = Strength
+		case "Defense":
+			e = Defense
+		default:
+			return nil, errutil.Newf("invalid type: %s", eff.Type)
+		}
+		itemEffects[e] = Magnitude(eff.Magnitude)
+	}
+	return itemEffects, nil
 }

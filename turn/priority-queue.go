@@ -32,11 +32,10 @@ func (pq *PriorityQueue) Push(x interface{}) {
 }
 
 func (pq *PriorityQueue) Pop() interface{} {
-	old := *pq
-	n := len(old)
-	turn := old[n-1]
+	n := len(*pq)
+	turn := (*pq)[n-1]
 	turn.index = -1 // for safety
-	*pq = old[0 : n-1]
+	*pq = (*pq)[:n-1]
 	return turn
 }
 

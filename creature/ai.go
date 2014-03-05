@@ -39,7 +39,9 @@ func (c *Creature) Action(a *area.Area) int {
 		col, err = a.MoveUp(c)
 	}
 	if err != nil {
-		return 0
+		// log.Println("err / collide?")
+		return c.Speed
+		// return 0
 	}
 	if col == nil {
 		return c.Speed
@@ -55,17 +57,33 @@ func (c *Creature) Action(a *area.Area) int {
 	return c.Speed
 }
 
+func (c *Creature) power() int {
+	return c.Strength + c.Equipment.Power()
+}
+
+func (c *Creature) defense() int {
+	return c.Equipment.Defense()
+}
+
+// func (dodger *Creature) hitChance(attacker *Creature) int {
+// 	return
+// }
+
 func (attacker *Creature) Battle(defender *Creature, a *area.Area) {
 	var s string
+	lossOfHp := attacker.power() - defender.defense()
+	if lossOfHp < 0 {
+		lossOfHp = 0
+	}
 	if defender.IsHero() {
-		s = fmt.Sprintf("You take %d damage from %s!", attacker.Strength, attacker.Name())
+		s = fmt.Sprintf("You take %d damage from %s!", lossOfHp, attacker.Name())
 	} else if attacker.IsHero() {
-		s = fmt.Sprintf("You inflict %d damage to %s!", attacker.Strength, defender.Name())
+		s = fmt.Sprintf("You inflict %d damage to %s!", lossOfHp, defender.Name())
 	} else {
-		s = fmt.Sprintf("%s takes %d damage from %s!", strings.Title(defender.Name()), attacker.Strength, attacker.Name())
+		s = fmt.Sprintf("%s takes %d damage from %s!", strings.Title(defender.Name()), lossOfHp, attacker.Name())
 	}
 
-	defender.Hp -= attacker.Strength
+	defender.Hp -= lossOfHp
 	if defender.Hp <= 0 {
 		if defender.IsHero() {
 			Hero.DrawFOV(a)
@@ -89,4 +107,8 @@ func (attacker *Creature) Battle(defender *Creature, a *area.Area) {
 	if attacker.dist() <= Hero.Sight {
 		status.Print(s)
 	}
+}
+
+func (attacker *Creature) battle(defender *Creature, a *area.Area) {
+
 }

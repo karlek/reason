@@ -91,19 +91,17 @@ itemDetailLoop:
 				break itemDetailLoop
 			}
 
-			itemAction := string(detailsEvent.Ch)
-			if itemAction == string(ui.DropItemKey) {
+			switch string(detailsEvent.Ch) {
+			case string(ui.DropItemKey):
 				creature.Hero.DropItem(i.Hotkey(), a)
-			}
-			if itemAction == string(ui.EquipItemKey) {
+				return true
+			case string(ui.EquipItemKey):
 				NarrativeEquip(i.Hotkey())
 				return true
-			}
-			if itemAction == string(ui.UseItemKey) {
+			case string(ui.UseItemKey):
 				NarrativeUse(i.Hotkey())
 				return true
-			}
-			if itemAction == string(ui.UnEquipItemKey) {
+			case string(ui.UnEquipItemKey):
 				NarrativeUnEquip(i.Hotkey())
 				return true
 			}

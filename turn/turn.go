@@ -2,10 +2,12 @@ package turn
 
 import (
 	"container/heap"
+	// "log"
 
 	"github.com/karlek/reason/action"
 	"github.com/karlek/reason/creature"
 	"github.com/karlek/reason/save"
+	"github.com/karlek/reason/state"
 
 	"github.com/karlek/worc/area"
 )
@@ -21,18 +23,27 @@ type Turn struct {
 	index int // The index of the turn in the heap.
 }
 
+func deferWrap(sta *state.State) {
+	state.Stack.Push(*sta)
+}
+
 func Proccess(sav *save.Save, a *area.Area) {
+	var sta *state.State = new(state.State)
+	*sta = state.Wilderness
+
+	defer deferWrap(sta)
 	// Pop the next turn.
 	t := heap.Pop(turnQueue).(*Turn)
 
 	// remove dead creatures from the queue.
 	if t.c.Hp <= 0 {
+
 		return
 	}
 
 	var timeTaken int
 	if t.c.IsHero() {
-		timeTaken = action.HeroTurn(sav, a)
+		timeTaken, *sta = action.HeroTurn(sav, a)
 	} else {
 		timeTaken = t.c.Action(a)
 	}

@@ -23,6 +23,7 @@ type Itemer interface {
 	SetHotkey(rune)
 	Hotkey() rune
 	Count() int
+	Effects() map[Effect]Magnitude
 	Rarity() int
 	Cat() string
 	FlavorText() string
@@ -48,12 +49,19 @@ type Item struct {
 	flavor   string
 	category string
 	count    int
-	effects  []Effect
+	effects  map[Effect]Magnitude
 }
+
+// Item effects
+const (
+	Strength = iota + 1
+	Defense
+)
 
 // Base types.
 type (
-	Effect    struct{}
+	Effect    int
+	Magnitude int
 	Armor     struct{ Item }
 	Jewelery  struct{ Item }
 	Weapon    struct{ Item }
@@ -71,6 +79,11 @@ type (
 // Name returns the name of the item.
 func (i Item) Name() string {
 	return i.name
+}
+
+// Name returns the name of the item.
+func (i Item) Effects() map[Effect]Magnitude {
+	return i.effects
 }
 
 /// Hotkey
@@ -153,7 +166,7 @@ func IsEquipable(i Itemer) bool {
 
 func IsUsable(i Itemer) bool {
 	switch i.(type) {
-	case *Potion:
+	case *Potion, *Tool:
 		return true
 	default:
 		return false

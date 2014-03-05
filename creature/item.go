@@ -1,6 +1,8 @@
 package creature
 
 import (
+	"fmt"
+	"log"
 	"strconv"
 	"strings"
 
@@ -27,6 +29,36 @@ type Equipment struct {
 	Gloves    *item.Gloves
 	Chestwear *item.Chestwear
 	Legwear   *item.Legwear
+}
+
+func (eq Equipment) Power() int {
+	if eq.MainHand == nil {
+		log.Println("no weapon")
+		return 0
+	}
+	if len(eq.MainHand.Effects()) < 1 {
+		log.Println("no effect")
+		return 0
+	}
+	if str, ok := eq.MainHand.Effects()[item.Strength]; ok {
+		return int(str)
+	}
+	return 0
+}
+
+func (eq Equipment) Defense() int {
+	if eq.MainHand == nil {
+		log.Println("no weapon")
+		return 0
+	}
+	if len(eq.MainHand.Effects()) < 1 {
+		log.Println("no effect")
+		return 0
+	}
+	if def, ok := eq.MainHand.Effects()[item.Defense]; ok {
+		return int(def)
+	}
+	return 0
 }
 
 func (c *Creature) Equip(pos rune) item.Itemer {
@@ -94,12 +126,14 @@ func (c *Creature) use(i item.Itemer) {
 	case "Potion of Increase Weight":
 		status.Print("You drink the potion.")
 		status.Print("It tastes like metal. Your backpack feels much heavier!")
+	case "Star-Eye Map":
+		status.Print("You try to read the map.")
+		status.Print("It's exhausting, but you know exactly how to reach your goal!")
 	}
 }
 
 func (c *Creature) UnEquip(i item.Itemer) {
 	if !c.IsEquipped(i) {
-		status.Print("That item isn't equipped!")
 		return
 	}
 
@@ -120,12 +154,7 @@ func (c *Creature) UnEquip(i item.Itemer) {
 			c.Equipment.Amulet = nil
 		}
 	case (*item.Ring):
-		for index, ring := range c.Equipment.Rings {
-			if obj == ring {
-				c.Equipment.Rings[index] = nil
-				break
-			}
-		}
+		c.removeRing(obj)
 	case (*item.Boots):
 		if c.Equipment.Boots == obj {
 			c.Equipment.Boots = nil
@@ -146,52 +175,76 @@ func (c *Creature) UnEquip(i item.Itemer) {
 	status.Printf("You unequip %s.", i.Name())
 }
 
+func (c *Creature) removeRing(obj *item.Ring) {
+	for index, ring := range c.Equipment.Rings {
+		if obj == ring {
+			c.Equipment.Rings[index] = nil
+			return
+		}
+	}
+}
+
 func (c *Creature) PickUp(a *area.Area) (actionTaken bool) {
 	msg := "There's no item here."
-	i := c.pickUp(a)
-	if i != nil {
-		if c.IsHero() {
-			msg = string(i.Hotkey()) + " - " + i.String() + " picked up."
-		} else {
-			msg = strings.Title(c.Name()) + " picked up " + i.String()
-		}
-		actionTaken = true
+	i, err := c.pickUp(a)
+	if i == nil {
+		status.Print(msg)
+		return false
 	}
+
+	// Print status message if hero's inventory is full.
+	if c.IsHero() {
+		if err != nil {
+			msg = err.Error()
+		} else {
+			msg = fmt.Sprintf("%c - %s picked up.", i.Hotkey(), i.String())
+		}
+	} else {
+		msg = fmt.Sprintf("%s picked up %s.", strings.Title(c.Name()), i.String())
+	}
+
+	// If the distance to the creature is within the sight radius, print the
+	// status message.
 	if c.dist() <= Hero.Sight {
 		status.Print(msg)
 	}
-	return actionTaken
+
+	return true
 }
 
-func (c *Creature) pickUp(a *area.Area) item.DrawItemer {
+func (c *Creature) pickUp(a *area.Area) (item.DrawItemer, error) {
+	// Take the topmost item of the cell the creature is standing on.
 	stk, ok := a.Items[c.Coord()]
 	if !ok || stk.Len() == 0 {
-		return nil
+		return nil, nil
 	}
 	i, ok := stk.Pop().(item.DrawItemer)
 	if !ok {
-		return nil
+		return nil, nil
 	}
 
-	if hotkey, ok := c.findStack(i); ok {
-		i.SetHotkey(hotkey)
-		c.Inventory[i.Hotkey()].SetCount(i.Count() + 1)
+	var hotkey rune
+	var err error
+	// Tries to find existing stack of item and increase it's count, otherwise
+	// try to add it to the inventory if it's not full.
+	if hotkey, ok = c.findStack(i); ok {
+		inv := c.Inventory[hotkey]
+		inv.SetCount(inv.Count() + i.Count())
 	} else {
-		hotkey, err := c.findHotkey()
+		hotkey, err = c.findHotkey()
 		if err != nil {
-			status.Print(err.Error())
-			return nil
+			return nil, err
 		}
-		i.SetHotkey(hotkey)
 		c.Inventory[hotkey] = i
 	}
-	return i
+	i.SetHotkey(hotkey)
+	return i, nil
 }
 
 func (c *Creature) DropItem(pos rune, a *area.Area) {
 	i := c.Inventory[pos]
-	delete(c.Inventory, pos)
 	c.UnEquip(i)
+	delete(c.Inventory, pos)
 
 	cor := c.Coord()
 	if a.Items[cor] == nil {

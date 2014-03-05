@@ -4,20 +4,28 @@ package main
 import (
 	"log"
 	"os"
+	"unicode"
 
 	"github.com/karlek/reason/creature"
 	"github.com/karlek/reason/gen"
 	"github.com/karlek/reason/item"
 	"github.com/karlek/reason/save"
+	"github.com/karlek/reason/state"
 	"github.com/karlek/reason/terrain"
 	"github.com/karlek/reason/turn"
 	"github.com/karlek/reason/ui"
 	"github.com/karlek/reason/ui/status"
+	"github.com/karlek/reason/util"
 
 	"github.com/karlek/worc/area"
 	"github.com/mewkiz/pkg/errutil"
 	"github.com/mewkiz/pkg/goutil"
 	"github.com/nsf/termbox-go"
+)
+
+const (
+	nameStr    = "What's your name?"
+	journeyStr = "Do you really need a reason to begin your journey?"
 )
 
 // Main loop function.
@@ -29,122 +37,161 @@ func main() {
 }
 
 func reason() (err error) {
-	// Init graphic library.
-	err = termbox.Init()
-	if err != nil {
-		return errutil.Err(err)
-	}
-
 	var sav *save.Save
-	var a area.Area
+	a := new(area.Area)
+
+	state.Stack.Push(state.Init)
 	for {
-		Tick(sav, &a)
+		tick(sav, a)
 	}
 }
 
-var gameStarted = false
-var inited = false
 var name string
 
 func mainMenu() {
-	const journeyStr = "Do you really need a reason to begin your journey?"
-	const nameStr = "What's your name?"
+	printJourney()
+	printEnterSign()
+	waitForInput()
+	removeEnterSign()
+	printNameQuestion()
+	askName()
+}
 
+func printEnterSign() {
 	width, height := termbox.Size()
 
-	journeyX := width/2 - len(journeyStr)/2
+	msgPos := width/2 + len(journeyStr)/2
+	t := ui.NewText(termbox.AttrBold, "↵")
+	ui.Print(t, msgPos+1, height/2, 0)
+	termbox.Flush()
+}
+
+func removeEnterSign() {
+	width, height := termbox.Size()
+	msgPos := width/2 + len(journeyStr)/2
+
+	ui.ClearLineOffset(height/2, msgPos)
+}
+
+func printJourney() {
+	width, height := termbox.Size()
+	msgPos := width/2 - len(journeyStr)/2
+
+	ui.ClearLineOffset(height/2, msgPos)
 
 	t := ui.NewText(termbox.AttrBold, journeyStr)
-	ui.Print(t, journeyX, height/2, 0)
-	termbox.Flush()
+	ui.Print(t, msgPos, height/2, 0)
+}
 
+func printNameQuestion() {
+	width, height := termbox.Size()
+
+	offsetY := height/2 + 2
+	msgPos := width/2 - len(journeyStr)/2
+
+	t := ui.NewText(termbox.AttrBold, nameStr)
+	ui.Print(t, msgPos, offsetY, 0)
+}
+
+func printName() {
+	width, height := termbox.Size()
+
+	offsetX := width/2 - len(nameStr)/2
+	offsetY := height/2 + 2
+	ui.ClearLineOffset(offsetY, offsetX)
+
+	t := ui.NewText(termbox.AttrBold+termbox.ColorBlack, name)
+	ui.Print(t, offsetX+1, offsetY, 0)
+}
+
+func waitForInput() {
 	ev := termbox.PollEvent()
 	if ev.Key == ui.CancelKey {
 		termbox.Close()
 		os.Exit(0)
 	}
+}
 
-	t = ui.NewText(termbox.AttrBold, nameStr)
+func backspace() {
+	// Remove the last character from name.
+	if len(name) > 0 {
+		name = name[:len(name)-1]
+	}
+	printNameQuestion()
+	printName()
+}
 
-	offsetX := width/2 - len(nameStr)/2
-	offsetY := height/2 + 2
+func addToName(r rune) {
+	// Ignore non-printable characters or if the name is to long.
+	if !unicode.IsPrint(r) || len(name) > 30 {
+		log.Printf("%v\n", r)
+		return
+	}
+	name += string(r)
+	printName()
+}
 
-	ui.Print(t, journeyX, offsetY, 0)
-	termbox.Flush()
-
-nameLoop:
+func askName() {
 	for {
+		termbox.Flush()
 		ev := termbox.PollEvent()
+		// Listen only for keyboard events.
 		if ev.Type != termbox.EventKey {
 			return
 		}
 		switch ev.Key {
 		// Name entered.
 		case termbox.KeyEnter:
-			break nameLoop
-
+			return
 		// Exit game.
 		case ui.CancelKey:
-			termbox.Close()
-			os.Exit(0)
-			return
+			util.Quit()
 
 		// Erase last character.
 		case termbox.KeyBackspace2, termbox.KeyBackspace:
-			// Remove the last character from name.
-			if len(name) > 0 {
-				name = name[:len(name)-1]
-			}
-			ui.ClearLineOffset(offsetY, offsetX)
-
-			t = ui.NewText(termbox.AttrBold+termbox.ColorBlack, name)
-			nameT := ui.NewText(termbox.AttrBold, nameStr)
-			ui.Print(nameT, journeyX, offsetY, 0)
-			ui.Print(t, offsetX+1, offsetY, 0)
-			termbox.Flush()
+			backspace()
+			continue
+		// In termbox ev.Ch == 0x00 for ev.Key declared variables. So we need
+		// this workaround.
+		case termbox.KeySpace:
+			addToName(0x20)
 			continue
 		}
-
-		// Add new character to name.
-		switch ev.Ch {
-		default:
-			if len(name) > 30 {
-				break
-			}
-			name += string(ev.Ch)
-			t = ui.NewText(termbox.AttrBold+termbox.ColorBlack, name)
-			ui.Print(t, offsetX+1, offsetY, 0)
-			termbox.Flush()
-		}
+		addToName(ev.Ch)
 	}
-	gameStarted = true
 }
 
-func Tick(sav *save.Save, a *area.Area) (err error) {
-	if !gameStarted {
-		mainMenu()
-		return nil
-	}
-
-	if !inited {
+func tick(sav *save.Save, a *area.Area) (err error) {
+	switch state.Stack.Pop() {
+	case state.Init:
 		// Load or create new game.
 		// Load old values or initalize a new area and hero.
 		sav, err = initGameSession(a)
 		if err != nil {
 			return errutil.Err(err)
 		}
-
-		// Initalize turn priority queue.
-		turn.Init(a)
-		inited = true
+		state.Stack.Push(state.Intro)
+	case state.Intro:
+		mainMenu()
 		status.Print("You will change the world.")
+		state.Stack.Push(state.Wilderness)
+	case state.Wilderness:
+		turn.Proccess(sav, a)
+	// case state.Inventory:
+	default:
+		state.Stack.Push(state.Wilderness)
 	}
-	turn.Proccess(sav, a)
 	return nil
 }
 
 // initGameLibs initializes creature, fauna and item libraries.
 func initGameLibs() (err error) {
+	// Init graphic library.
+	err = termbox.Init()
+	if err != nil {
+		return errutil.Err(err)
+	}
+
 	// Initialize creature.
 	err = creature.Load()
 	if err != nil {
@@ -188,11 +235,14 @@ func initGameSession(a *area.Area) (sav *save.Save, err error) {
 	if sav.Exists() {
 		err = load(sav, a)
 	} else {
-		newGame(a)
+		err = newGame(a)
 	}
 	if err != nil {
 		return nil, errutil.Err(err)
 	}
+	// Initalize turn priority queue.
+	turn.Init(a)
+
 	return sav, nil
 }
 

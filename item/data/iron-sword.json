@@ -9,5 +9,9 @@
 		"Bg": null
 	},
 	"Num": 1,
-	"Pathable": true
+	"Pathable": true,
+	"Effects": [{
+		"Type": "Strength",
+		"Magnitude": 3
+	}]
 }
