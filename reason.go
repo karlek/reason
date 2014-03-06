@@ -26,6 +26,18 @@ import (
 const (
 	nameStr    = "What's your name?"
 	journeyStr = "Do you really need a reason to begin your journey?"
+	logo       = `     ..      ...                               .x+=:.                             ` +
+		/* 	  */ "  :~\"8888x :\"%888x                            z`    ^%                            " +
+		/* 	  */ ` 8    8888Xf  8888>                              .   <k        u.      u.    u.   ` +
+		/* 	  */ `X88x. ?8888k  8888X       .u          u        .@8Ned8"  ...ue888b   x@88k u@88c. ` +
+		/* 	  */ `'8888L'8888X  '%88X    ud8888.     us888u.   .@^%8888"   888R Y888r ^"8888""8888" ` +
+		/* 	  */ " \"888X 8888X:xnHH(`` :888'8888. .@88 \"8888\" x88:  `)8b.  888R I888>   8888  888R  " +
+		/* 	  */ `   ?8~ 8888X X8888   d888 '88%" 9888  9888  8888N=*8888  888R I888>   8888  888R  ` +
+		/* 	  */ " -~`   8888> X8888   8888.+\"    9888  9888   %8\"    R88  888R I888>   8888  888R  " +
+		/* 	  */ ` :H8x  8888  X8888   8888L      9888  9888    @8Wou 9%  u8888cJ888    8888  888R  ` +
+		/* 	  */ " 8888> 888~  X8888   '8888c. .+ 9888  9888  .888888P`    \"*888*P\"    \"*88*\" 8888\" " +
+		/* 	  */ " 48\"` '8*~   `8888!`  \"88888%   \"888*\"\"888\" `   ^\"F        'Y\"         \"\"   'Y\"   " +
+		/* 	  */ "  ^-==\"\"      `\"\"       \"YP'     ^Y\"   ^Y'                                        "
 )
 
 // Main loop function.
@@ -50,11 +62,26 @@ var name string
 
 func mainMenu() {
 	printJourney()
+	printLogo()
 	printEnterSign()
 	waitForInput()
 	removeEnterSign()
 	printNameQuestion()
 	askName()
+}
+
+func printLogo() {
+	width, height := termbox.Size()
+	logoH := 12
+	logoW := 82
+
+	for x := 0; x < logoW; x++ {
+		for y := 0; y < logoH; y++ {
+			t := ui.NewText(termbox.ColorRed, string(logo[y*logoW+x]))
+			ui.Print(t, width/2-logoW/2+x, height/2-15+y, 0)
+		}
+	}
+	termbox.Flush()
 }
 
 func printEnterSign() {
