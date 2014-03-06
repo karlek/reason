@@ -5,6 +5,7 @@ import (
 	"log"
 	"strconv"
 
+	"github.com/karlek/reason/item/effect"
 	"github.com/karlek/reason/name"
 
 	"github.com/karlek/worc/area"
@@ -23,7 +24,7 @@ type Itemer interface {
 	SetHotkey(rune)
 	Hotkey() rune
 	Count() int
-	Effects() map[Effect]Magnitude
+	Effects() map[effect.Type]effect.Magnitude
 	Rarity() int
 	Cat() string
 	FlavorText() string
@@ -49,19 +50,11 @@ type Item struct {
 	flavor   string
 	category string
 	count    int
-	effects  map[Effect]Magnitude
+	effects  map[effect.Type]effect.Magnitude
 }
-
-// Item effects
-const (
-	Strength = iota + 1
-	Defense
-)
 
 // Base types.
 type (
-	Effect    int
-	Magnitude int
 	Armor     struct{ Item }
 	Jewelery  struct{ Item }
 	Weapon    struct{ Item }
@@ -82,7 +75,7 @@ func (i Item) Name() string {
 }
 
 // Name returns the name of the item.
-func (i Item) Effects() map[Effect]Magnitude {
+func (i Item) Effects() map[effect.Type]effect.Magnitude {
 	return i.effects
 }
 
@@ -167,6 +160,15 @@ func IsEquipable(i Itemer) bool {
 func IsUsable(i Itemer) bool {
 	switch i.(type) {
 	case *Potion, *Tool:
+		return true
+	default:
+		return false
+	}
+}
+
+func IsPermanent(i Itemer) bool {
+	switch i.(type) {
+	case *Tool:
 		return true
 	default:
 		return false

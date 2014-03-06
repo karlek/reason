@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"log"
 
+	"github.com/karlek/reason/item/effect"
 	"github.com/karlek/reason/util"
 
 	"github.com/mewkiz/pkg/errutil"
@@ -153,19 +154,19 @@ func parseRarity(rarity string) (int, error) {
 func parseEffects(jsEffects []struct {
 	Type      string
 	Magnitude int
-}) (map[Effect]Magnitude, error) {
-	itemEffects := make(map[Effect]Magnitude)
+}) (map[effect.Type]effect.Magnitude, error) {
+	itemEffects := make(map[effect.Type]effect.Magnitude)
 	for _, eff := range jsEffects {
-		var e Effect
+		var t effect.Type
 		switch eff.Type {
 		case "Strength":
-			e = Strength
+			t = effect.Strength
 		case "Defense":
-			e = Defense
+			t = effect.Defense
 		default:
 			return nil, errutil.Newf("invalid type: %s", eff.Type)
 		}
-		itemEffects[e] = Magnitude(eff.Magnitude)
+		itemEffects[t] = effect.Magnitude(eff.Magnitude)
 	}
 	return itemEffects, nil
 }

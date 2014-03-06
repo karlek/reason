@@ -4,8 +4,11 @@ package creature
 import (
 	"math"
 
+	"github.com/karlek/reason/creature/equipment"
 	"github.com/karlek/reason/name"
 
+	"github.com/karlek/worc/area"
+	"github.com/karlek/worc/coord"
 	"github.com/karlek/worc/model"
 )
 
@@ -20,7 +23,7 @@ type Creature struct {
 	Sight     int
 	Speed     int
 	Inventory Inventory
-	Equipment Equipment
+	Equipment equipment.Equipment
 }
 
 // Name returns the name of the creature.
@@ -39,4 +42,41 @@ func (c Creature) dist() int {
 	y := math.Pow(float64(Hero.Y()-c.Y()), 2)
 
 	return int(math.Sqrt(x + y))
+}
+
+func (c *Creature) MonstersInRange(a *area.Area) []*Creature {
+	var monsters []*Creature
+
+	// Inclusive hero's square so it's from hero's eyes.
+	radius := c.Sight
+	for x := c.X() - radius; x <= c.X()+radius; x++ {
+		for y := c.Y() - radius; y <= c.Y()+radius; y++ {
+			// Discriminate coordinates which are out of bounds.
+			if !a.ExistsXY(x, y) {
+				continue
+			}
+
+			// Distance between creature x and y coordinates and sight radius.
+			dx := float64(x - c.X())
+			dy := float64(y - c.Y())
+
+			// Distance between creature and sight radius.
+			dist := math.Sqrt(math.Pow(dx, 2) + math.Pow(dy, 2))
+
+			// Discriminate coordinates which are outside of the circle.
+			if dist > float64(radius) {
+				continue
+			}
+
+			//
+			cor := coord.Coord{x, y}
+			if monst, ok := a.Monsters[cor]; ok {
+				if monst == nil || monst.Name() == "hero" {
+					continue
+				}
+				monsters = append(monsters, monst.(*Creature))
+			}
+		}
+	}
+	return monsters
 }

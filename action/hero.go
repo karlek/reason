@@ -16,11 +16,34 @@ import (
 	"github.com/nsf/termbox-go"
 )
 
+func MonsterInfo(monsters []*creature.Creature) []ui.MonstInfo {
+	mInfo := make([]ui.MonstInfo, len(monsters))
+	for i, monst := range monsters {
+		mInfo[i] = ui.MonstInfo{Name: monst.Name(), HpLevel: hpLevel(monst), Graphics: monst.Graphic()}
+	}
+	return mInfo
+}
+
+func hpLevel(c *creature.Creature) int {
+	switch {
+	case float64(c.Hp)/float64(c.MaxHp) > 0.75:
+		return 1
+	case float64(c.Hp)/float64(c.MaxHp) > 0.5:
+		return 2
+	case float64(c.Hp)/float64(c.MaxHp) > 0.25:
+		return 3
+	case float64(c.Hp)/float64(c.MaxHp) >= 0:
+		return 4
+	}
+	return 0
+}
+
 // HeroTurn listens on user input and then acts on it.
 func HeroTurn(sav *save.Save, a *area.Area) (int, state.State) {
 	creature.Hero.DrawFOV(a)
 	status.Update()
 	ui.UpdateHp(creature.Hero.Hp, creature.Hero.MaxHp)
+	ui.UpdateMonsterInfo(MonsterInfo(creature.Hero.MonstersInRange(a)))
 	termbox.Flush()
 
 	// Listen for keystrokes.
@@ -34,7 +57,7 @@ func HeroTurn(sav *save.Save, a *area.Area) (int, state.State) {
 		return look(a), state.Look
 	case 'm':
 		// user wants to try debug function.
-		return debug(), state.Wilderness
+		return debug(a), state.Wilderness
 	case ui.PickUpItemKey:
 		// user wants to pick up an item.
 		return pickUp(a), state.Wilderness
@@ -62,10 +85,7 @@ func HeroTurn(sav *save.Save, a *area.Area) (int, state.State) {
 	return HeroMovement(ev, a), state.Wilderness
 }
 
-func debug() int {
-	status.Print("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
-	status.Print("bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb")
-	creature.Hero.Equipment.Power()
+func debug(a *area.Area) int {
 	return 0
 }
 

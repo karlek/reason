@@ -2,7 +2,6 @@ package creature
 
 import (
 	"fmt"
-	"log"
 	"strconv"
 	"strings"
 
@@ -18,48 +17,6 @@ const (
 )
 
 type Inventory map[rune]item.DrawItemer
-
-type Equipment struct {
-	MainHand  *item.Weapon
-	OffHand   *item.Weapon
-	Head      *item.Headgear
-	Amulet    *item.Amulet
-	Rings     []*item.Ring
-	Boots     *item.Boots
-	Gloves    *item.Gloves
-	Chestwear *item.Chestwear
-	Legwear   *item.Legwear
-}
-
-func (eq Equipment) Power() int {
-	if eq.MainHand == nil {
-		log.Println("no weapon")
-		return 0
-	}
-	if len(eq.MainHand.Effects()) < 1 {
-		log.Println("no effect")
-		return 0
-	}
-	if str, ok := eq.MainHand.Effects()[item.Strength]; ok {
-		return int(str)
-	}
-	return 0
-}
-
-func (eq Equipment) Defense() int {
-	if eq.MainHand == nil {
-		log.Println("no weapon")
-		return 0
-	}
-	if len(eq.MainHand.Effects()) < 1 {
-		log.Println("no effect")
-		return 0
-	}
-	if def, ok := eq.MainHand.Effects()[item.Defense]; ok {
-		return int(def)
-	}
-	return 0
-}
 
 func (c *Creature) Equip(pos rune) item.Itemer {
 	i := c.Inventory[pos]
@@ -113,10 +70,12 @@ func (c *Creature) Use(i item.Itemer) {
 		status.Print("You can't use that item!")
 		return
 	}
-	if i.Count() > 1 {
-		i.SetCount(i.Count() - 1)
-	} else {
-		delete(c.Inventory, i.Hotkey())
+	if !item.IsPermanent(i) {
+		if i.Count() > 1 {
+			i.SetCount(i.Count() - 1)
+		} else {
+			delete(c.Inventory, i.Hotkey())
+		}
 	}
 	c.use(i)
 }

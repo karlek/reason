@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	// "github.com/karlek/reason/item"
+	"github.com/karlek/reason/item"
 	"github.com/karlek/reason/ui/status"
 	"github.com/karlek/reason/util"
 
@@ -19,14 +19,21 @@ func (c *Creature) Action(a *area.Area) int {
 		c.PickUp(a)
 		return c.Speed
 	}
-	//  else if len(c.Inventory) > 1 {
-	// 	for _, pos := range item.Positions {
-	// 		if _, ok := c.Inventory[pos]; ok {
-	// 			c.DropItem(pos, a)
-	// 			return c.Speed
-	// 		}
-	// 	}
-	// }
+	if c.Equipment.MainHand == nil && len(c.Inventory) > 0 {
+		for _, pos := range item.Positions {
+			if i, ok := c.Inventory[pos]; ok {
+				if !item.IsEquipable(i) {
+					break
+				}
+				if i.Name() != "Iron Sword" {
+					break
+				}
+				c.Equip(pos)
+				return c.Speed
+			}
+		}
+	}
+
 	var col *area.Collision
 	var err error
 	if c.X() < Hero.X() {

@@ -3,9 +3,9 @@ package ui
 import (
 	"fmt"
 	"log"
+	"strings"
 
 	"github.com/karlek/progress/barcli"
-	// "github.com/karlek/worc/area"
 	"github.com/karlek/worc/screen"
 	"github.com/nsf/termbox-go"
 )
@@ -30,6 +30,13 @@ var (
 		Height:  Area.Height,
 		YOffset: 0,
 		XOffset: 1,
+	}
+
+	MonsterInfo = screen.Screen{
+		Width:   20,
+		Height:  Area.Height,
+		YOffset: Area.YOffset,
+		XOffset: Area.Width + 2,
 	}
 
 	Message = screen.Screen{
@@ -148,4 +155,37 @@ func UpdateHp(curHp, maxHp int) {
 	print(filled, CharacterInfo.XOffset+xOffset, CharacterInfo.YOffset, CharacterInfo.Width, termbox.ColorGreen+termbox.AttrBold, termbox.ColorDefault)
 	xOffset += len(filled)
 	print(unfilled, CharacterInfo.XOffset+xOffset, CharacterInfo.YOffset, CharacterInfo.Width, termbox.ColorBlack+termbox.AttrBold, termbox.ColorDefault)
+}
+
+type MonstInfo struct {
+	Name     string
+	HpLevel  int
+	Graphics termbox.Cell
+}
+
+func (mi MonstInfo) Color() termbox.Attribute {
+	switch mi.HpLevel {
+	case 1:
+		return termbox.ColorGreen + termbox.AttrBold
+	case 2:
+		return termbox.ColorYellow + termbox.AttrBold
+	case 3:
+		return termbox.ColorMagenta + termbox.AttrBold
+	case 4:
+		return termbox.ColorRed
+	}
+	return termbox.ColorBlack
+}
+
+func UpdateMonsterInfo(info []MonstInfo) {
+	for yOffset, monst := range info[:] {
+		t := NewText(monst.Graphics.Fg, string(monst.Graphics.Ch))
+		Print(t, MonsterInfo.XOffset, MonsterInfo.YOffset+yOffset, MonsterInfo.Width)
+
+		t = NewText(monst.Color(), "█")
+		Print(t, MonsterInfo.XOffset+2, MonsterInfo.YOffset+yOffset, MonsterInfo.Width)
+
+		t = NewText(termbox.ColorWhite, strings.Title(monst.Name))
+		Print(t, MonsterInfo.XOffset+4, MonsterInfo.YOffset+yOffset, MonsterInfo.Width)
+	}
 }
