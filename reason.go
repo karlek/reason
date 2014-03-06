@@ -26,7 +26,9 @@ import (
 const (
 	nameStr    = "What's your name?"
 	journeyStr = "Do you really need a reason to begin your journey?"
-	logo       = `     ..      ...                               .x+=:.                             ` +
+
+	// Credits to Fraktur @ http://patorjk.com/software/taag
+	logo = `     ..      ...                               .x+=:.                             ` +
 		/* 	  */ "  :~\"8888x :\"%888x                            z`    ^%                            " +
 		/* 	  */ ` 8    8888Xf  8888>                              .   <k        u.      u.    u.   ` +
 		/* 	  */ `X88x. ?8888k  8888X       .u          u        .@8Ned8"  ...ue888b   x@88k u@88c. ` +
