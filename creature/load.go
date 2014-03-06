@@ -46,11 +46,12 @@ func load(filename string) (c *Creature, err error) {
 			Fg map[string]string
 			Bg map[string]string
 		}
-		Hp       int
-		Strength int
-		Sight    int
-		Speed    int
-		Pathable bool
+		Hp           int
+		Strength     int
+		Sight        int
+		Speed        int
+		Regeneration int
+		Pathable     bool
 	}
 
 	buf, err := ioutil.ReadFile(filename)
@@ -74,13 +75,14 @@ func load(filename string) (c *Creature, err error) {
 	}
 
 	c = &Creature{
-		name:      jc.Name,
-		Hp:        jc.Hp,
-		MaxHp:     jc.Hp,
-		Strength:  jc.Strength,
-		Speed:     jc.Speed,
-		Sight:     jc.Sight,
-		Inventory: make(Inventory, len(item.Positions)),
+		name:         jc.Name,
+		Hp:           jc.Hp,
+		MaxHp:        jc.Hp,
+		Strength:     jc.Strength,
+		Speed:        jc.Speed,
+		Sight:        jc.Sight,
+		Regeneration: jc.Regeneration,
+		Inventory:    make(Inventory, len(item.Positions)),
 	}
 	c.SetPathable(jc.Pathable)
 	c.SetGraphics(termbox.Cell{

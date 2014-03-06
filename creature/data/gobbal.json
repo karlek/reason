@@ -7,6 +7,7 @@
 	},
 	"HP": 7,
 	"Speed": 150,
+	"Regeneration": 10,
 	"Strength": 3,
 	"Pathable": false
 }

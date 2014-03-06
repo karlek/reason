@@ -16,14 +16,16 @@ import (
 type Creature struct {
 	name.Namer
 	model.Model
-	name      string
-	MaxHp     int
-	Hp        int
-	Strength  int
-	Sight     int
-	Speed     int
-	Inventory Inventory
-	Equipment equipment.Equipment
+	name         string
+	MaxHp        int
+	Hp           int
+	Strength     int
+	Sight        int
+	Speed        int
+	Regeneration int
+	RegCounter   int
+	Inventory    Inventory
+	Equipment    equipment.Equipment
 }
 
 // Name returns the name of the creature.
@@ -79,4 +81,19 @@ func (c *Creature) MonstersInRange(a *area.Area) []*Creature {
 		}
 	}
 	return monsters
+}
+
+func (c *Creature) Reg() {
+	if c.Hp == c.MaxHp {
+		return
+	}
+	// Unit doesn't have regeneration.
+	if c.Regeneration == 0 {
+		return
+	}
+	c.RegCounter++
+	if c.RegCounter == c.Regeneration {
+		c.Hp++
+		c.RegCounter = 0
+	}
 }

@@ -58,6 +58,9 @@ func HeroTurn(sav *save.Save, a *area.Area) (int, state.State) {
 	case 'm':
 		// user wants to try debug function.
 		return debug(a), state.Wilderness
+	case '5', 's':
+		// user wants to try debug function.
+		return creature.Hero.Speed, state.Wilderness
 	case ui.PickUpItemKey:
 		// user wants to pick up an item.
 		return pickUp(a), state.Wilderness

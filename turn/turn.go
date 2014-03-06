@@ -53,6 +53,8 @@ func Proccess(sav *save.Save, a *area.Area) {
 		heap.Push(turnQueue, t)
 		return
 	}
+	// If some action was taken, reg unit.
+	t.c.Reg()
 
 	for k, _ := range *turnQueue {
 		(*turnQueue)[k].priority -= t.priority
