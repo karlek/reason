@@ -7,6 +7,7 @@ import (
 
 	"github.com/karlek/reason/creature"
 	"github.com/karlek/reason/item"
+	"github.com/karlek/reason/item/effect"
 	"github.com/karlek/reason/ui"
 
 	"github.com/karlek/worc/area"
@@ -51,16 +52,29 @@ inventoryLoop:
 	return false
 }
 
+func StringEffects(effs map[effect.Type]effect.Magnitude) string {
+	var effStr string
+	for t, mag := range effs {
+		effStr += fmt.Sprintf("+%d to %s\n", mag, t)
+	}
+	return effStr
+}
+
 func ShowItemDetails(i item.Itemer, a *area.Area) bool {
 	ui.Clear()
 
 	// Print item title.
-	msgs := makeDrawable(string(i.Hotkey()) + " - " + i.Name())
+	msgs := makeDrawable(fmt.Sprintf("%c - %s", i.Hotkey(), i.Name()))
 	PrintLong(msgs, 0)
 	rows := len(msgs)
 
 	// Print flavor text.
 	msgs = makeDrawable(i.FlavorText())
+	PrintLong(msgs, rows)
+	rows += len(msgs)
+
+	// Print flavor text.
+	msgs = makeDrawable(StringEffects(i.Effects()))
 	PrintLong(msgs, rows)
 	rows += len(msgs)
 
