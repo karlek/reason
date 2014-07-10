@@ -12,6 +12,7 @@ import (
 	"github.com/karlek/reason/state"
 	"github.com/karlek/reason/terrain"
 	"github.com/karlek/reason/turn"
+	"github.com/karlek/reason/ui"
 	"github.com/karlek/reason/ui/status"
 
 	"github.com/karlek/worc/area"
@@ -37,7 +38,10 @@ func main() {
 func reason() (err error) {
 	state.Stack.Push(state.Init)
 	for {
-		tick()
+		err := tick()
+		if err != nil {
+			return err
+		}
 	}
 }
 
@@ -54,7 +58,7 @@ func tick() (err error) {
 	case state.Intro:
 		// Show entry screen, and ask player for character name.
 		name = intro.Intro()
-		status.Printf("%s. You will change the world.", name)
+		status.Printf("%s. You will change the world.\n", termbox.ColorYellow, name)
 		state.Stack.Push(state.Wilderness)
 	case state.Wilderness:
 		turn.Proccess(sav, a)
@@ -90,6 +94,7 @@ func initGameLibs() (err error) {
 	if err != nil {
 		return errutil.Err(err)
 	}
+	ui.SetTerminal()
 
 	return nil
 }

@@ -8,5 +8,6 @@
 	"HP": 4,
 	"Speed": 50,
 	"Strength": 1,
-	"Pathable": false
+	"ProducesCorpse": false,
+	"Inventory": null
 }

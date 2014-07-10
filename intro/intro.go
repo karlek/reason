@@ -6,6 +6,7 @@ import (
 	"unicode"
 
 	"github.com/karlek/reason/ui"
+	"github.com/karlek/reason/ui/text"
 	"github.com/karlek/reason/util"
 
 	"github.com/nsf/termbox-go"
@@ -52,7 +53,7 @@ func printLogo() {
 
 	for x := 0; x < logoW; x++ {
 		for y := 0; y < logoH; y++ {
-			t := ui.NewText(termbox.ColorRed, string(logo[y*logoW+x]))
+			t := text.New(string(logo[y*logoW+x]), termbox.ColorRed)
 			ui.Print(t, width/2-logoW/2+x, height/2-15+y, 0)
 		}
 	}
@@ -63,7 +64,7 @@ func printEnterSign() {
 	width, height := termbox.Size()
 
 	msgPos := width/2 + len(journeyStr)/2
-	t := ui.NewText(termbox.AttrBold, "↵")
+	t := text.New("↵", termbox.AttrBold)
 	ui.Print(t, msgPos+1, height/2, 0)
 	termbox.Flush()
 }
@@ -81,7 +82,7 @@ func printJourney() {
 
 	ui.ClearLineOffset(height/2, msgPos)
 
-	t := ui.NewText(termbox.AttrBold, journeyStr)
+	t := text.New(journeyStr, termbox.AttrBold)
 	ui.Print(t, msgPos, height/2, 0)
 }
 
@@ -91,7 +92,7 @@ func printNameQuestion() {
 	offsetY := height/2 + 2
 	msgPos := width/2 - len(journeyStr)/2
 
-	t := ui.NewText(termbox.AttrBold, nameStr)
+	t := text.New(nameStr, termbox.AttrBold)
 	ui.Print(t, msgPos, offsetY, 0)
 }
 
@@ -102,7 +103,7 @@ func printName() {
 	offsetY := height/2 + 2
 	ui.ClearLineOffset(offsetY, offsetX)
 
-	t := ui.NewText(termbox.AttrBold+termbox.ColorBlack, name)
+	t := text.New(name, termbox.AttrBold+termbox.ColorBlack)
 	ui.Print(t, offsetX+1, offsetY, 0)
 }
 

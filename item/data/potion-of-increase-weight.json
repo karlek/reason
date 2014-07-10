@@ -3,6 +3,7 @@
 	"Category": "potion",
 	"Rarity": "common",
 	"Flavor":"I'm not written yet :)",
+	"Use":"It tastes like metal. Your backpack feels much heavier!",
 	"Graphics": {
 		"Ch": "!",
 		"Fg": {"color": "yellow", "attr": "bold"},

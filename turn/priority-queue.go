@@ -14,7 +14,7 @@ func (pq PriorityQueue) Len() int {
 }
 
 func (pq PriorityQueue) Less(i, j int) bool {
-	// We want Pop to give us the highest, not lowest, priority so we use greater than here.
+	// We want Pop to give us the highest, not lowest, priority so we use lesser than here.
 	return pq[i].priority < pq[j].priority
 }
 

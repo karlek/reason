@@ -1,7 +1,7 @@
 {
 	"Name": "gobbal",
 	"Graphics": {
-		"Ch": "G",
+		"Ch": "g",
 		"Fg": {"color": "white", "attr": "bold"},
 		"Bg": null
 	},
@@ -9,5 +9,6 @@
 	"Speed": 150,
 	"Regeneration": 10,
 	"Strength": 3,
-	"Pathable": false
+	"ProducesCorpse": false,
+	"Inventory": null
 }

@@ -52,14 +52,8 @@ func HeroTurn(sav *save.Save, a *area.Area) (int, state.State) {
 		return 0, state.Wilderness
 	}
 	switch ev.Ch {
-	case ui.LookKey:
-		// user wants to look around.
-		return look(a), state.Look
-	case 'm':
-		// user wants to try debug function.
-		return debug(a), state.Wilderness
 	case '5', 's':
-		// user wants to try debug function.
+		// user wants to wait one turn.
 		return creature.Hero.Speed, state.Wilderness
 	case ui.PickUpItemKey:
 		// user wants to pick up an item.
@@ -67,15 +61,21 @@ func HeroTurn(sav *save.Save, a *area.Area) (int, state.State) {
 	case ui.ShowInventoryKey:
 		// user wants to look at inventory.
 		return showInventory(a), state.Inventory
-	case ui.DropItemKey:
-		// user wants to drop an item.
-		return dropItem(a), state.Drop
-	case ui.OpenDoorKey:
-		// user wants to open a door.
-		return openDoor(a), state.Open
-	case ui.CloseDoorKey:
-		// user wants to close a door.
-		return closeDoor(a), state.Close
+	// case ui.LookKey:
+	// 	// user wants to look around.
+	// 	return look(a), state.Look
+	// case 'm':
+	// 	// user wants to try debug function.
+	// 	return debug(a), state.Wilderness
+	// case ui.DropItemKey:
+	// user wants to drop an item.
+	// return dropItem(a), state.Drop
+	// case ui.OpenDoorKey:
+	// user wants to open a door.
+	// return openDoor(a), state.Open
+	// case ui.CloseDoorKey:
+	// user wants to close a door.
+	// return closeDoor(a), state.Close
 	case ui.QuitKey:
 		// user wants to quit game.
 		util.Quit()

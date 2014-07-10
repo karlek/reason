@@ -9,6 +9,7 @@ import (
 	"github.com/karlek/reason/item"
 	"github.com/karlek/reason/item/effect"
 	"github.com/karlek/reason/ui"
+	"github.com/karlek/reason/ui/text"
 
 	"github.com/karlek/worc/area"
 
@@ -91,7 +92,7 @@ func ShowItemDetails(i item.Itemer, a *area.Area) bool {
 
 	msgs = makeDrawable(actionStr)
 	for y, m := range msgs {
-		t := ui.NewText(termbox.ColorCyan, m)
+		t := text.New(m, termbox.ColorCyan)
 		ui.Print(t, ui.Inventory.XOffset, y+rows, ui.Inventory.Width)
 	}
 
@@ -130,7 +131,7 @@ func makeDrawable(str string) []string {
 
 func PrintLong(msg []string, yoffset int) {
 	for y, m := range msg {
-		t := ui.NewText(termbox.ColorWhite, m)
+		t := text.New(m, termbox.ColorWhite)
 		ui.Print(t, 0, y+yoffset, ui.Inventory.Width)
 	}
 	termbox.Flush()

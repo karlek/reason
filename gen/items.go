@@ -10,11 +10,11 @@ import (
 
 // Items is a debug function to add mobs to the map.
 func Items(a *area.Area, num int) {
-	var itemList = []item.DrawItemer{
-		item.Items["Iron Sword"],
-		item.Items["Potion of Increase Weight"],
-		item.Items["Star-Eye Map"],
-		item.Items["Ring of Orihalcon"],
+	var itemList = make([]item.DrawItemer, len(item.Items))
+	var index int
+	for _, i := range item.Items {
+		itemList[index] = i
+		index++
 	}
 	for x := 0; x < a.Width; x++ {
 		for y := 0; y < a.Height; y++ {
@@ -32,7 +32,9 @@ func Items(a *area.Area, num int) {
 
 			c := coord.Coord{x, y}
 			i := item.New(itemList[util.RandInt(0, len(itemList))])
-
+			if i == nil {
+				continue
+			}
 			i.SetX(x)
 			i.SetY(y)
 

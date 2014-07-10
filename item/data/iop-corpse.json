@@ -1,0 +1,13 @@
+{
+	"Name": "iop corpse",
+	"Category": "corpse",
+	"Rarity": "common",
+	"Flavor":"Corpse of an Iop. Doesn't look very tasty..",
+	"Graphics": {
+		"Ch": "%",
+		"Fg": {"color": "white", "attr": "bold"},
+		"Bg": null
+	},
+	"Num": 1,
+	"Pathable": true
+}

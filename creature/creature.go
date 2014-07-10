@@ -5,6 +5,7 @@ import (
 	"math"
 
 	"github.com/karlek/reason/creature/equipment"
+	"github.com/karlek/reason/item"
 	"github.com/karlek/reason/name"
 
 	"github.com/karlek/worc/area"
@@ -31,6 +32,10 @@ type Creature struct {
 // Name returns the name of the creature.
 func (c *Creature) Name() string {
 	return c.name
+}
+
+func (c *Creature) Corpse() item.DrawItemer {
+	return item.Items[c.Name()+" corpse"]
 }
 
 // IsHero compares creature c with Hero.

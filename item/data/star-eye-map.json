@@ -2,7 +2,8 @@
 	"Name": "Star-Eye Map",
 	"Category": "tool",
 	"Rarity": "artifact",
-	"Flavor":"Star-Eye Map is a magical map that uses the eyes of the stars floating in the sky. It allows the user to navigate his/her way by having them show the ways to his/her destination. ",
+	"Flavor":"Star-Eye Map is a magical map that uses the eyes of the stars floating in the sky. It allows the user to navigate his/her way by having them show the ways to his/her destination.",
+	"Use":"It's exhausting, but you know exactly how to reach your goal!",
 	"Graphics": {
 		"Ch": ":",
 		"Fg": {"color": "yellow", "attr": "bold"},

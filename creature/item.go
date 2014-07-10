@@ -10,6 +10,7 @@ import (
 
 	"github.com/karlek/worc/area"
 	"github.com/mewkiz/pkg/errutil"
+	"github.com/nsf/termbox-go"
 )
 
 const (
@@ -67,7 +68,7 @@ func inRings(needle *item.Ring, rings []*item.Ring) bool {
 
 func (c *Creature) Use(i item.Itemer) {
 	if !item.IsUsable(i) {
-		status.Print("You can't use that item!")
+		status.Println("You can't use that item!", termbox.ColorRed+termbox.AttrBold)
 		return
 	}
 	if !item.IsPermanent(i) {
@@ -81,14 +82,16 @@ func (c *Creature) Use(i item.Itemer) {
 }
 
 func (c *Creature) use(i item.Itemer) {
-	switch i.Name() {
-	case "Potion of Increase Weight":
-		status.Print("You drink the potion.")
-		status.Print("It tastes like metal. Your backpack feels much heavier!")
-	case "Star-Eye Map":
-		status.Print("You try to read the map.")
-		status.Print("It's exhausting, but you know exactly how to reach your goal!")
+	switch i.(type) {
+	case *item.Potion:
+		status.Println("You drink the potion.", termbox.ColorWhite)
+	case *item.Tool:
+		switch i.Name() {
+		case "Star-Eye Map":
+			status.Println("You try to read the map.", termbox.ColorWhite)
+		}
 	}
+	status.Print(i.UseText(), termbox.ColorWhite)
 }
 
 func (c *Creature) UnEquip(i item.Itemer) {
@@ -131,7 +134,7 @@ func (c *Creature) UnEquip(i item.Itemer) {
 			c.Equipment.Legwear = nil
 		}
 	}
-	status.Printf("You unequip %s.", i.Name())
+	status.Printf("You unequip %s.\n", termbox.ColorWhite, i.Name())
 }
 
 func (c *Creature) removeRing(obj *item.Ring) {
@@ -147,7 +150,6 @@ func (c *Creature) PickUp(a *area.Area) (actionTaken bool) {
 	msg := "There's no item here."
 	i, err := c.pickUp(a)
 	if i == nil {
-		status.Print(msg)
 		return false
 	}
 
@@ -165,7 +167,7 @@ func (c *Creature) PickUp(a *area.Area) (actionTaken bool) {
 	// If the distance to the creature is within the sight radius, print the
 	// status message.
 	if c.dist() <= Hero.Sight {
-		status.Print(msg)
+		status.Println(msg, termbox.ColorWhite)
 	}
 
 	return true
@@ -214,7 +216,7 @@ func (c *Creature) DropItem(pos rune, a *area.Area) {
 	// If the item couldn't be dropped (cursed for example), print unable to
 	// drop message.
 	if i == nil {
-		status.Print(UnableToDrop)
+		status.Println(UnableToDrop, termbox.ColorRed+termbox.AttrBold)
 		return
 	}
 
@@ -229,7 +231,7 @@ func (c *Creature) DropItem(pos rune, a *area.Area) {
 	}
 
 	if c.dist() <= Hero.Sight {
-		status.Printf(fmtStr, cName, iName)
+		status.Printf(fmtStr, termbox.ColorWhite, cName, iName)
 	}
 }
 

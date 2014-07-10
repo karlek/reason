@@ -52,23 +52,36 @@ func (c Creature) DrawFOV(a *area.Area) {
 // camXY returns the coordinate of offset for the viewport. Since the area can
 // be larger than the viewport.
 func camXY(c Creature, a *area.Area) (int, int) {
-	// ui.Area is the viewport size.
+	cameraX, cameraY := camX(c, a), camY(c, a)
+	if ui.Area.Width > len(a.Terrain) {
+		cameraX = 0
+	}
+	if ui.Area.Height > len(a.Terrain[0]) {
+		cameraY = 0
+	}
+	return cameraX, cameraY
+}
 
-	camX := c.X() - ui.Area.Width/2
-	camY := c.Y() - ui.Area.Height/2
+func camX(c Creature, a *area.Area) int {
+	// ui.Area is the viewport size.
+	cameraX := c.X() - ui.Area.Width/2
 
 	if c.X() < ui.Area.Width/2 {
-		camX = 0
-	}
-	if c.Y() < ui.Area.Height/2 {
-		camY = 0
+		cameraX = 0
 	}
 	if c.X() >= a.Width-ui.Area.Width/2 {
-		camX = a.Width - ui.Area.Width
+		cameraX = a.Width - ui.Area.Width
+	}
+	return cameraX
+}
+
+func camY(c Creature, a *area.Area) int {
+	cameraY := c.Y() - ui.Area.Height/2
+	if c.Y() < ui.Area.Height/2 {
+		cameraY = 0
 	}
 	if c.Y() > a.Height-ui.Area.Height/2 {
-		camY = a.Height - ui.Area.Height
+		cameraY = a.Height - ui.Area.Height
 	}
-
-	return camX, camY
+	return cameraY
 }

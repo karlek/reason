@@ -51,7 +51,6 @@ func load(filename string) (c *Creature, err error) {
 		Sight        int
 		Speed        int
 		Regeneration int
-		Pathable     bool
 	}
 
 	buf, err := ioutil.ReadFile(filename)
@@ -84,7 +83,7 @@ func load(filename string) (c *Creature, err error) {
 		Regeneration: jc.Regeneration,
 		Inventory:    make(Inventory, len(item.Positions)),
 	}
-	c.SetPathable(jc.Pathable)
+	c.SetPathable(false)
 	c.SetGraphics(termbox.Cell{
 		Ch: rune(jc.Graphics.Ch[0]),
 		Fg: fg,

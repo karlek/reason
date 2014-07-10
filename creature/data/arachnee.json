@@ -1,12 +1,13 @@
 {
 	"Name": "arachnee",
 	"Graphics": {
-		"Ch": "A",
+		"Ch": "a",
 		"Fg": {"color": "black", "attr": "bold"},
 		"Bg": null
 	},
 	"HP": 5,
 	"Speed": 80,
 	"Strength": 2,
-	"Pathable": false
+	"ProducesCorpse": false,
+	"Inventory": null
 }

@@ -9,7 +9,7 @@ import (
 )
 
 func CloseDoorNarrative(a *area.Area, x, y int) bool {
-	status.Print("Close door - In which direction lies the door?")
+	status.Println("Close door - In which direction lies the door?", termbox.ColorWhite)
 	termbox.Flush()
 
 	switch ev := termbox.PollEvent(); ev.Type {
@@ -24,6 +24,6 @@ func CloseDoorNarrative(a *area.Area, x, y int) bool {
 		// 	return true
 		// }
 	}
-	status.Print("You can't close that.")
+	status.Println("You can't close that.", termbox.ColorWhite)
 	return false
 }

@@ -30,6 +30,16 @@ func New(di DrawItemer) DrawItemer {
 	case *Ring:
 		j := *i
 		return &j
+	case *Scroll:
+		j := *i
+		return &j
+	case *Amulet:
+		j := *i
+		return &j
+	case *Gold:
+		j := *i
+		return &j
+	case *Corpse:
 	default:
 		log.Printf("new: unknown type %T", i)
 	}
@@ -64,6 +74,7 @@ func load(filename string) (i DrawItemer, err error) {
 		Name     string
 		Category string
 		Flavor   string
+		Use      string
 		Rarity   string
 		Num      int
 		Graphics struct {
@@ -111,6 +122,7 @@ func load(filename string) (i DrawItemer, err error) {
 	j := Item{
 		name:     ji.Name,
 		flavor:   ji.Flavor,
+		use:      ji.Use,
 		rarity:   rarity,
 		count:    ji.Num,
 		category: ji.Category,
@@ -131,6 +143,14 @@ func load(filename string) (i DrawItemer, err error) {
 		i = &Tool{Item: j}
 	case "ring":
 		i = &Ring{Item: j}
+	case "corpse":
+		i = &Corpse{Item: j}
+	case "amulet":
+		i = &Amulet{Item: j}
+	case "gold":
+		i = &Gold{Item: j}
+	case "scroll":
+		i = &Scroll{Item: j}
 	default:
 		log.Fatalln("implement %s", ji.Category)
 	}

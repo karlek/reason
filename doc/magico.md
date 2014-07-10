@@ -57,27 +57,37 @@ continuously hit a rock a million times.
 Numbers
 -------
 
-There are two versions currently known of the Chain Summon Magic. They are the Palm Exchange Magic and the Chain Leg Summon. Each of them shows off a certain number:
+There are two versions currently known of the Chain Summon Magic. They are the
+Palm Exchange Magic and the Chain Leg Summon. Each of them shows off a certain
+number:
 
 Number 4
 
-    Penalty Scythe: Is the chain attack from the Chain Leg Summon. The boot transformed into a scythe which comes with a powerful kick. 
+    Penalty Scythe: Is the chain attack from the Chain Leg Summon. The boot
+    transformed into a scythe which comes with a powerful kick.
 
 Number 5
 
-    Iomante: Is the 5th number of the Chain summon magic. When it hits five it changed into a very hairy fist that evenly can bring a dragon down. 
+    Iomante: Is the 5th number of the Chain summon magic. When it hits five it
+    changed into a very hairy fist that evenly can bring a dragon down.
 
 Number 7
 
-    Sylph: It is the seventh number of the Chain Summon Magic. It contains a big hairy fist that can knock out the enemy and can pass through the rocks. The technique comes from the Wind and the Sky. 
+    Sylph: It is the seventh number of the Chain Summon Magic. It contains a big
+    hairy fist that can knock out the enemy and can pass through the rocks. The
+    technique comes from the Wind and the Sky.
 
 Number 10
 
-    Red Dragon: It is the tenth number of the Chain Summon Magic. When it hits ten it changed into a gauntlet with two trails of dragon scales, two whispers on the back of her hand and claws or fangs on each knuckle. 
+    Red Dragon: It is the tenth number of the Chain Summon Magic. When it hits
+    ten it changed into a gauntlet with two trails of dragon scales, two
+    whispers on the back of her hand and claws or fangs on each knuckle.
 
 Number 100
 
-    Cinderella Fever: Is the the most powerful attack of the Chain Summon Magic, it counters on 100 punches. The user transforms into an adult and obtains 100 extra bonus time to attack his enemies with powerful attacks. 
+    Cinderella Fever: Is the the most powerful attack of the Chain Summon Magic,
+    it counters on 100 punches. The user transforms into an adult and obtains
+    100 extra bonus time to attack his enemies with powerful attacks.
 
 Broom Magic
 ===========
@@ -117,32 +127,49 @@ Transmutation magic
 Mage ranks
 ==========
 
-Toto recording every kind of mage and the ritual they undergo. The status of mages is defined by the colour and rank. Mages can be divided in four types according to the specific type of magic they use. The different colours are - Red, Blue, Green and White mages. Their strength will rank them up from D to SS. The only mages who can perform many different types of Magics are known as a "Black Magician". 
+Toto recording every kind of mage and the ritual they undergo. The status of
+mages is defined by the colour and rank. Mages can be divided in four types
+according to the specific type of magic they use. The different colours are -
+Red, Blue, Green and White mages. Their strength will rank them up from D to SS.
+The only mages who can perform many different types of Magics are known as a
+"Black Magician".
 
 Red Magician
 ------------
 
-Red Mages are people who use offensive magic, designed for battle and direct combat. They must undergo rituals which physically hurt, challenge, damage and punish the body.  This usualy involves the mage physically attacking a hard object or leaving themselves incapacitated for long periods of time. 
+Red Mages are people who use offensive magic, designed for battle and direct
+combat. They must undergo rituals which physically hurt, challenge, damage and
+punish the body.  This usualy involves the mage physically attacking a hard
+object or leaving themselves incapacitated for long periods of time.
 
 Blue Magician
 -------------
 
-Blue Mages are Magic users who use proffesional-type magic, magic that they use alongside their profession. Ritualists, teachers and people who invent magic for profit can be included in this category; the rituals involved in using this magic are combining offerings and prayers 
+Blue Mages are Magic users who use proffesional-type magic, magic that they use
+alongside their profession. Ritualists, teachers and people who invent magic for
+profit can be included in this category; the rituals involved in using this
+magic are combining offerings and prayers
 
 Green Magician
 --------------
 
-Those are mages that use forms of magic which can create something from nothing; using complex offerings as a ritual one can obtain such a magic. This is also the only known magic in which users have been seen using a Magic Wand to use magic. 
+Those are mages that use forms of magic which can create something from nothing;
+using complex offerings as a ritual one can obtain such a magic. This is also
+the only known magic in which users have been seen using a Magic Wand to use
+magic.
 
 White Magician
 --------------
 
-White Magicians can use heaing types of magic. It is unknown wht kind of ritual they must undergo to utilise magic, Rosetta has apparently learned hers and Lily inherited hers from her Mother. 
+White Magicians can use heaing types of magic. It is unknown wht kind of ritual
+they must undergo to utilise magic, Rosetta has apparently learned hers and Lily
+inherited hers from her Mother.
 
 Black Magician
 --------------
 
-A Black Magician is a type of mage who can use several different types of magic. They are notably the most powerful type of mage. 
+A Black Magician is a type of mage who can use several different types of magic.
+They are notably the most powerful type of mage.
 
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 

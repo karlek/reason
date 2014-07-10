@@ -48,7 +48,7 @@ func direction(ev termbox.Event, x, y *int, a *area.Area) bool {
 }
 
 func OpenDoorNarrative(a *area.Area, x, y int) bool {
-	status.Print("Open door - In which direction lies the door?")
+	status.Println("Open door - In which direction lies the door?", termbox.ColorWhite)
 	termbox.Flush()
 
 	switch ev := termbox.PollEvent(); ev.Type {
@@ -63,14 +63,14 @@ func OpenDoorNarrative(a *area.Area, x, y int) bool {
 		// }
 		return true
 	}
-	status.Printf("You can't open that.")
-	status.Printf("%T", a.Terrain[x][y])
+	status.Println("You can't open that.", termbox.ColorRed+termbox.AttrBold)
+	status.Printf("%T\n", termbox.ColorMagenta, a.Terrain[x][y])
 
 	return false
 }
 
 func WalkedIntoDoor(a *area.Area, x, y int) bool {
-	status.Print("Do you want to open door? [Y/n]")
+	status.Println("Do you want to open door? [Y/n]", termbox.ColorWhite)
 	termbox.Flush()
 
 	// user wants to open door?

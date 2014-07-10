@@ -1,0 +1,13 @@
+{
+	"Name": "gobbal corpse",
+	"Category": "corpse",
+	"Rarity": "common",
+	"Flavor":"A sweaty gobbal corpse, yuck.",
+	"Graphics": {
+		"Ch": "%",
+		"Fg": {"color": "white", "attr": "bold"},
+		"Bg": null
+	},
+	"Num": 1,
+	"Pathable": true
+}

@@ -2,10 +2,12 @@ package creature
 
 import (
 	"fmt"
+	// "math/rand"
 	"strings"
 
 	"github.com/karlek/reason/item"
 	"github.com/karlek/reason/ui/status"
+	"github.com/karlek/reason/ui/text"
 	"github.com/karlek/reason/util"
 
 	"github.com/karlek/worc/area"
@@ -72,12 +74,35 @@ func (c *Creature) defense() int {
 	return c.Equipment.Defense()
 }
 
-// func (dodger *Creature) hitChance(attacker *Creature) int {
-// 	return
-// }
+func (attacker *Creature) isHit(defender *Creature) bool {
+	return true
+}
 
 func (attacker *Creature) Battle(defender *Creature, a *area.Area) {
-	var s string
+	t := text.New("", termbox.ColorWhite)
+	if attacker.isHit(defender) {
+		t.Text = attacker.damage(defender, a)
+	} else {
+		t.Text = attacker.hitFail(defender)
+		t.Attr = termbox.ColorBlack
+	}
+	if attacker.dist() <= Hero.Sight {
+		status.PrintTextln(t)
+	}
+}
+
+func (attacker *Creature) hitFail(defender *Creature) (s string) {
+	if defender.IsHero() {
+		s = fmt.Sprintf("%s misses you!", strings.Title(attacker.Name()))
+	} else if attacker.IsHero() {
+		s = fmt.Sprint("You miss!")
+	} else {
+		s = fmt.Sprintf("%s misses!", strings.Title(defender.Name()))
+	}
+	return s
+}
+
+func (attacker *Creature) damage(defender *Creature, a *area.Area) (s string) {
 	lossOfHp := attacker.power() - defender.defense()
 	if lossOfHp < 0 {
 		lossOfHp = 0
@@ -94,8 +119,9 @@ func (attacker *Creature) Battle(defender *Creature, a *area.Area) {
 	if defender.Hp <= 0 {
 		if defender.IsHero() {
 			Hero.DrawFOV(a)
-			status.Print(s)
-			status.Print("You die. Press any key to quit.")
+			status.Println(s, termbox.ColorWhite)
+			status.Println("You die. Press any key to quit.", termbox.ColorWhite)
+			status.Update()
 			termbox.Flush()
 			termbox.PollEvent()
 			util.Quit()
@@ -110,12 +136,11 @@ func (attacker *Creature) Battle(defender *Creature, a *area.Area) {
 		for _, i := range defender.Inventory {
 			a.Items[defender.Coord()].Push(i)
 		}
+		a.Items[defender.Coord()].Push(defender.Corpse())
 	}
-	if attacker.dist() <= Hero.Sight {
-		status.Print(s)
-	}
+	return s
 }
 
-func (attacker *Creature) battle(defender *Creature, a *area.Area) {
+// func (attacker *Creature) battle(defender *Creature, a *area.Area) {
 
-}
+// }

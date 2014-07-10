@@ -1,0 +1,13 @@
+{
+	"Name": "Gold",
+	"Category": "gold",
+	"Rarity": "common",
+	"Flavor":"no description",
+	"Graphics": {
+		"Ch": "$",
+		"Fg": {"color": "yellow", "attr": "bold"},
+		"Bg": null
+	},
+	"Num": 1,
+	"Pathable": true
+}

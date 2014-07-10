@@ -7,6 +7,7 @@ import (
 	"github.com/karlek/reason/item"
 	"github.com/karlek/reason/ui"
 	"github.com/karlek/reason/ui/status"
+	"github.com/karlek/reason/ui/text"
 
 	"github.com/karlek/worc/area"
 
@@ -54,7 +55,7 @@ func dropInput(a *area.Area) (actionTaken bool) {
 func NarrativeEquip(pos rune) {
 	i := creature.Hero.Equip(pos)
 	if i == nil {
-		status.Print(unableToEquip)
+		status.Println(unableToEquip, termbox.ColorRed+termbox.AttrBold)
 		return
 	}
 
@@ -63,7 +64,7 @@ func NarrativeEquip(pos rune) {
 		equipStr += fmt.Sprintf("%d ", i.Count())
 	}
 	equipStr += i.Name()
-	status.Printf("You equipped %s.", equipStr)
+	status.Printf("You equipped %s.\n", termbox.ColorWhite, equipStr)
 }
 
 func NarrativeUse(pos rune) {
@@ -132,7 +133,7 @@ func categorizedInv(title string) (isEmpty bool) {
 
 	// categories contains the item texts sorted in item categories.
 	// Sort items into categories.
-	var categories = map[string][]*ui.Text{}
+	var categories = map[string][]*text.Text{}
 	for _, pos := range item.Positions {
 		if i, ok := creature.Hero.Inventory[pos]; ok {
 			addToCategory(i, categories)
@@ -155,8 +156,8 @@ func categorizedInv(title string) (isEmpty bool) {
 	return false
 }
 
-func addToCategory(i item.Itemer, categories map[string][]*ui.Text) {
-	t := ui.NewText(InvAttr(i), InvText(i))
+func addToCategory(i item.Itemer, categories map[string][]*text.Text) {
+	t := text.New(InvText(i), InvAttr(i))
 	switch i.(type) {
 	case *item.Weapon:
 		categories["Weapons"] = append(categories["Weapons"], t)
@@ -172,17 +173,17 @@ func addToCategory(i item.Itemer, categories map[string][]*ui.Text) {
 }
 
 func invTitle(title string) {
-	t := ui.NewText(termbox.ColorWhite+termbox.AttrBold, title)
+	t := text.New(title, termbox.ColorWhite+termbox.AttrBold)
 	ui.Print(t, 0, 0, ui.Whole.Width)
 }
 
 func emptyInvMsg() {
-	t := ui.NewText(termbox.ColorWhite+termbox.AttrBold, emptyInv)
+	t := text.New(emptyInv, termbox.ColorWhite+termbox.AttrBold)
 	ui.Print(t, 0, 0, ui.Whole.Width)
 }
 
-func printCategory(catStr string, items []*ui.Text, rowOffset *int) {
-	cat := ui.NewText(termbox.ColorCyan+termbox.AttrBold, catStr)
+func printCategory(catStr string, items []*text.Text, rowOffset *int) {
+	cat := text.New(catStr, termbox.ColorCyan+termbox.AttrBold)
 	ui.Print(cat, 0, *rowOffset+ui.Inventory.YOffset, ui.Whole.Width)
 	*rowOffset = *rowOffset + 1
 

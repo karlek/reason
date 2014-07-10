@@ -1,0 +1,13 @@
+{
+	"Name": "arachnee corpse",
+	"Category": "corpse",
+	"Rarity": "common",
+	"Flavor":"This look really poisonous. Seriously, don't eat this.",
+	"Graphics": {
+		"Ch": "%",
+		"Fg": {"color": "black", "attr": "bold"},
+		"Bg": null
+	},
+	"Num": 1,
+	"Pathable": true
+}

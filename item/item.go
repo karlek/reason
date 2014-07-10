@@ -28,6 +28,7 @@ type Itemer interface {
 	Rarity() int
 	Cat() string
 	FlavorText() string
+	UseText() string
 	SetCount(int)
 	fmt.Stringer
 	name.Namer
@@ -48,6 +49,7 @@ type Item struct {
 	rarity   int
 	hotkey   rune
 	flavor   string
+	use      string
 	category string
 	count    int
 	effects  map[effect.Type]effect.Magnitude
@@ -60,6 +62,9 @@ type (
 	Weapon    struct{ Item }
 	Potion    struct{ Item }
 	Tool      struct{ Item }
+	Corpse    struct{ Item }
+	Gold      struct{ Item }
+	Scroll    struct{ Item }
 	Boots     Armor
 	Gloves    Armor
 	Chestwear Armor
@@ -92,6 +97,11 @@ func (i Item) Count() int {
 /// FlavorText
 func (i Item) FlavorText() string {
 	return i.flavor
+}
+
+/// UseText
+func (i Item) UseText() string {
+	return i.use
 }
 
 /// Cat

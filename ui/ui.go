@@ -5,12 +5,16 @@ import (
 	"log"
 	"strings"
 
+	"github.com/karlek/reason/ui/text"
+
 	"github.com/karlek/progress/barcli"
 	"github.com/karlek/worc/screen"
 	"github.com/nsf/termbox-go"
 )
 
 var (
+	Terminal = screen.Screen{}
+
 	// Main menu screen size.
 	Main = screen.Screen{
 		Width:   35,
@@ -19,18 +23,23 @@ var (
 	}
 
 	// Area screen size.
+	// Area = screen.Screen{
+	// 	Width:   35,
+	// 	Height:  20,
+	// 	YOffset: 2,
+	// }
 	Area = screen.Screen{
-		Width:   35,
-		Height:  20,
-		YOffset: 2,
+		Width:  35,
+		Height: 20,
 	}
+	CharacterInfo = screen.Screen{}
 
-	CharacterInfo = screen.Screen{
-		Width:   25,
-		Height:  Area.Height,
-		YOffset: 0,
-		XOffset: 1,
-	}
+	// CharacterInfo = screen.Screen{
+	// 	Width:   25,
+	// 	Height:  Area.Height,
+	// 	YOffset: 0,
+	// 	XOffset: 1,
+	// }
 
 	MonsterInfo = screen.Screen{
 		Width:   20,
@@ -83,22 +92,49 @@ const (
 	CancelKey = termbox.KeyEsc
 )
 
-type Text struct {
-	Attr termbox.Attribute
-	Text string
-}
-
-func NewText(attr termbox.Attribute, str string) *Text {
-	return &Text{Attr: attr, Text: str}
+func SetTerminal() {
+	Terminal.Width, Terminal.Height = termbox.Size()
+	Area = screen.Screen{
+		Width:  Area.Width,
+		Height: Area.Height,
+		// YOffset: Terminal.Height/2 - Area.Height + Area.Height/4,
+		// XOffset: Terminal.Width/2 - Area.Width + Area.Width/4,
+		YOffset: 2,
+		XOffset: Terminal.Width/2 - Area.Width/2,
+	}
+	CharacterInfo = screen.Screen{
+		Width:   25,
+		Height:  Area.Height,
+		YOffset: 0,
+		XOffset: Area.XOffset,
+	}
+	MonsterInfo = screen.Screen{
+		Width:   20,
+		Height:  Area.Height,
+		YOffset: Area.YOffset,
+		XOffset: Area.XOffset + Area.Width + 2,
+	}
+	Message = screen.Screen{
+		Width:   Whole.Width,
+		Height:  5,
+		YOffset: Area.Height + Area.YOffset + 1,
+		XOffset: Area.XOffset + 1,
+	}
 }
 
 func Clear() {
 	termbox.Clear(termbox.ColorBlack, termbox.ColorBlack)
 }
 
+// // clearLine clears the line from old characters.
+// func ClearLine(x, y, length, width int) {
+// 	for i := length; i < width; i++ {
+// 		termbox.SetCell(x+i, y, ' ', termbox.ColorDefault, termbox.ColorDefault)
+// 	}
+// }
+
 func ClearLine(line int) {
-	/// Make relative to window size.
-	for x := 0; x < 170; x++ {
+	for x := 0; x < Terminal.Width; x++ {
 		termbox.SetCell(x, line, ' ', termbox.ColorDefault, termbox.ColorDefault)
 	}
 }
@@ -121,7 +157,7 @@ func print(str string, x, y, width int, fg termbox.Attribute, bg termbox.Attribu
 	}
 }
 
-func Print(t *Text, x, y, width int) {
+func Print(t *text.Text, x, y, width int) {
 	// Clears the line from old characters.
 	for i := len(t.Text); i < width; i++ {
 		termbox.SetCell(x+i, y, ' ', termbox.ColorDefault, termbox.ColorDefault)
@@ -179,13 +215,13 @@ func (mi MonstInfo) Color() termbox.Attribute {
 
 func UpdateMonsterInfo(info []MonstInfo) {
 	for yOffset, monst := range info[:] {
-		t := NewText(monst.Graphics.Fg, string(monst.Graphics.Ch))
+		t := text.New(string(monst.Graphics.Ch), monst.Graphics.Fg)
 		Print(t, MonsterInfo.XOffset, MonsterInfo.YOffset+yOffset, MonsterInfo.Width)
 
-		t = NewText(monst.Color(), "█")
+		t = text.New("█", monst.Color())
 		Print(t, MonsterInfo.XOffset+2, MonsterInfo.YOffset+yOffset, MonsterInfo.Width)
 
-		t = NewText(termbox.ColorWhite, strings.Title(monst.Name))
+		t = text.New(strings.Title(monst.Name), termbox.ColorWhite)
 		Print(t, MonsterInfo.XOffset+4, MonsterInfo.YOffset+yOffset, MonsterInfo.Width)
 	}
 }

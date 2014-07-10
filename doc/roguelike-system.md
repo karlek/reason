@@ -1,13 +1,3 @@
-Combat
-======
-
-http://roguebasin.roguelikedevelopment.org/index.php?title=Thoughts_on_Combat_Models
-
-Ranged combat
--------------
-
-http://roguebasin.roguelikedevelopment.org/index.php?title=Two-Key_Targeting
-
 Ritual system
 =============
 
@@ -65,18 +55,19 @@ Standard
 --------
 
 	$ gold
+	: magic book
 	! potions
 	% corpse
-	^ trap
 	= ring
+	" amulet
+	? scroll
+	
+	^ trap
 	+-/ doors
 	_ altar
 	> stairs down
 	< stairs up
 	. soil
-	" amulet
-	: magic book
-	? scroll
 
 Monsters
 --------
@@ -91,6 +82,16 @@ Unused
 ------
 
 	&*()`]}[{\/',;
+
+Combat
+======
+
+http://roguebasin.roguelikedevelopment.org/index.php?title=Thoughts_on_Combat_Models
+
+Ranged combat
+-------------
+
+http://roguebasin.roguelikedevelopment.org/index.php?title=Two-Key_Targeting
 
 Races
 =====
@@ -141,17 +142,14 @@ http://roguebasin.roguelikedevelopment.org/index.php?title=Save_Files
 http://roguebasin.roguelikedevelopment.org/index.php?title=Scrolling_map
 http://roguebasin.roguelikedevelopment.org/index.php?title=Roguelike_Dev_FAQ
 
-Field of vision
-===============
+Line of sight
+=============
 
 http://roguebasin.roguelikedevelopment.org/index.php?title=Restrictive_Precise_Angle_Shadowcasting
 http://roguebasin.roguelikedevelopment.org/index.php?title=Line_of_sight
 http://roguebasin.roguelikedevelopment.org/index.php?title=Field_of_Vision
 http://roguebasin.roguelikedevelopment.org/index.php?title=Discussion:Field_of_Vision
 http://roguebasin.roguelikedevelopment.org/index.php?title=FOV_using_recursive_shadowcasting_-_improved
-
-
-
 
 Later
 =====

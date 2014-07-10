@@ -1,6 +1,6 @@
 Step 10 - Magic
 
-Add item effects, special monster attacks, spells. Add items and monsters to test them. You don't need all the possible effects right away, just the ones that are needed for the next step.
+Add special monster attacks, spells. You don't need all the possible effects right away, just the ones that are needed for the next step.
 
 Step 11 - Simple game
 
