@@ -24,12 +24,6 @@ func Print(str string, attr termbox.Attribute) {
 	PrintText(text.New(str, attr))
 }
 
-// Printf formats a string with an attribute and various amount of variables
-// status buffer.
-func Printf(a string, attr termbox.Attribute, args ...interface{}) {
-	Print(fmt.Sprintf(a, args...), attr)
-}
-
 // Println takes a string, an attribute and adds it to the status buffer
 // suffixed with a newline '\n'.
 func Println(str string, attr termbox.Attribute) {

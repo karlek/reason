@@ -57,21 +57,23 @@ type Item struct {
 
 // Base types.
 type (
+	Weapon struct{ Item }
+	Potion struct{ Item }
+	Tool   struct{ Item }
+	Corpse struct{ Item }
+	Gold   struct{ Item }
+	Scroll struct{ Item }
+
 	Armor     struct{ Item }
-	Jewelery  struct{ Item }
-	Weapon    struct{ Item }
-	Potion    struct{ Item }
-	Tool      struct{ Item }
-	Corpse    struct{ Item }
-	Gold      struct{ Item }
-	Scroll    struct{ Item }
 	Boots     Armor
 	Gloves    Armor
 	Chestwear Armor
 	Headgear  Armor
 	Legwear   Armor
-	Amulet    Jewelery
-	Ring      Jewelery
+
+	Jewelery struct{ Item }
+	Amulet   Jewelery
+	Ring     Jewelery
 )
 
 // Name returns the name of the item.
@@ -124,33 +126,20 @@ func (i *Item) SetHotkey(ch rune) {
 }
 
 func (i *Item) String() string {
-	msg := ""
-	if IsStackable(i) {
-		if i.Count() != 0 {
-			msg += strconv.Itoa(i.Count()) + " "
-		}
-	} else {
-		log.Println("you are here")
-		log.Println(i.Name(), "not stackable")
-	}
-	msg += i.Name()
-	return msg
+	return i.Name()
 }
 
 func (i *Potion) String() string {
-	msg := ""
-	if IsStackable(i) {
-		if i.Count() != 0 {
-			msg += strconv.Itoa(i.Count()) + " "
-		}
-	}
-	msg += i.Name()
-	return msg
+	return strconv.Itoa(i.Count()) + " " + i.Name()
+}
+
+func (i *Scroll) String() string {
+	return strconv.Itoa(i.Count()) + " " + i.Name()
 }
 
 func IsStackable(i Itemer) bool {
 	switch e := i.(type) {
-	case *Potion:
+	case *Potion, *Scroll:
 		return true
 	default:
 		log.Printf("%T, not stackable %s", e, e.Name())

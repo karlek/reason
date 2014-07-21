@@ -2,6 +2,8 @@
 package action
 
 import (
+	"fmt"
+
 	// "github.com/karlek/reason/fauna"
 	"github.com/karlek/reason/ui"
 	"github.com/karlek/reason/util"
@@ -64,7 +66,7 @@ func OpenDoorNarrative(a *area.Area, x, y int) bool {
 		return true
 	}
 	status.Println("You can't open that.", termbox.ColorRed+termbox.AttrBold)
-	status.Printf("%T\n", termbox.ColorMagenta, a.Terrain[x][y])
+	status.Println(fmt.Sprintf("%T", a.Terrain[x][y]), termbox.ColorMagenta)
 
 	return false
 }

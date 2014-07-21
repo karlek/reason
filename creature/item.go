@@ -134,7 +134,7 @@ func (c *Creature) UnEquip(i item.Itemer) {
 			c.Equipment.Legwear = nil
 		}
 	}
-	status.Printf("You unequip %s.\n", termbox.ColorWhite, i.Name())
+	status.Println(fmt.Sprintf("You unequip %s.", i.Name()), termbox.ColorWhite)
 }
 
 func (c *Creature) removeRing(obj *item.Ring) {
@@ -231,7 +231,7 @@ func (c *Creature) DropItem(pos rune, a *area.Area) {
 	}
 
 	if c.dist() <= Hero.Sight {
-		status.Printf(fmtStr, termbox.ColorWhite, cName, iName)
+		status.Println(fmt.Sprintf(fmtStr, cName, iName), termbox.ColorWhite)
 	}
 }
 

@@ -16,34 +16,12 @@ import (
 	"github.com/nsf/termbox-go"
 )
 
-func MonsterInfo(monsters []*creature.Creature) []ui.MonstInfo {
-	mInfo := make([]ui.MonstInfo, len(monsters))
-	for i, monst := range monsters {
-		mInfo[i] = ui.MonstInfo{Name: monst.Name(), HpLevel: hpLevel(monst), Graphics: monst.Graphic()}
-	}
-	return mInfo
-}
-
-func hpLevel(c *creature.Creature) int {
-	switch {
-	case float64(c.Hp)/float64(c.MaxHp) > 0.75:
-		return 1
-	case float64(c.Hp)/float64(c.MaxHp) > 0.5:
-		return 2
-	case float64(c.Hp)/float64(c.MaxHp) > 0.25:
-		return 3
-	case float64(c.Hp)/float64(c.MaxHp) >= 0:
-		return 4
-	}
-	return 0
-}
-
 // HeroTurn listens on user input and then acts on it.
 func HeroTurn(sav *save.Save, a *area.Area) (int, state.State) {
 	creature.Hero.DrawFOV(a)
 	status.Update()
-	ui.UpdateHp(creature.Hero.Hp, creature.Hero.MaxHp)
-	ui.UpdateMonsterInfo(MonsterInfo(creature.Hero.MonstersInRange(a)))
+	ui.Hp(creature.Hero.Hp, creature.Hero.MaxHp)
+	ui.Monsters(monsterInfo(creature.Hero.MonstersInRange(a)))
 	termbox.Flush()
 
 	// Listen for keystrokes.
@@ -164,13 +142,16 @@ func HeroMovement(ev termbox.Event, a *area.Area) int {
 	if err != nil {
 		return 0
 	}
+	// Successful movement.
 	if col == nil {
 		return creature.Hero.Speed
 	}
+	// Another creature occupied that tile -> battle!
 	if c, ok := col.S.(*creature.Creature); ok {
 		creature.Hero.Battle(c, a)
 		return creature.Hero.Speed
 	}
+	// Walked into a door -> ask if it should be open!
 	if fa, ok := col.S.(terrain.Terrain); ok {
 		if fa.Name() == "door (closed)" {
 			actionTaken := WalkedIntoDoor(a, col.X, col.Y)

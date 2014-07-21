@@ -2,6 +2,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 
 	"github.com/karlek/reason/creature"
@@ -58,7 +59,8 @@ func tick() (err error) {
 	case state.Intro:
 		// Show entry screen, and ask player for character name.
 		name = intro.Intro()
-		status.Printf("%s. You will change the world.\n", termbox.ColorYellow, name)
+		status.Println(fmt.Sprintf("%s. You will change the world.", name), termbox.ColorWhite)
+		status.Println("Find Echnida and kill her.", termbox.ColorRed+termbox.AttrBold)
 		state.Stack.Push(state.Wilderness)
 	case state.Wilderness:
 		turn.Proccess(sav, a)

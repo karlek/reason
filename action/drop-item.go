@@ -64,7 +64,7 @@ func NarrativeEquip(pos rune) {
 		equipStr += fmt.Sprintf("%d ", i.Count())
 	}
 	equipStr += i.Name()
-	status.Printf("You equipped %s.\n", termbox.ColorWhite, equipStr)
+	status.Println(fmt.Sprintf("You equipped %s.", equipStr), termbox.ColorWhite)
 }
 
 func NarrativeUse(pos rune) {

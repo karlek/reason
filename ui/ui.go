@@ -3,7 +3,6 @@ package ui
 import (
 	"fmt"
 	"log"
-	"strings"
 
 	"github.com/karlek/reason/ui/text"
 
@@ -24,13 +23,12 @@ var (
 
 	// Area screen size.
 	// Area = screen.Screen{
-	// 	Width:   35,
-	// 	Height:  20,
-	// 	YOffset: 2,
+	// 	Width:  35,
+	// 	Height: 20,
 	// }
 	Area = screen.Screen{
-		Width:  35,
-		Height: 20,
+		Width:  50,
+		Height: 30,
 	}
 	CharacterInfo = screen.Screen{}
 
@@ -158,70 +156,61 @@ func print(str string, x, y, width int, fg termbox.Attribute, bg termbox.Attribu
 }
 
 func Print(t *text.Text, x, y, width int) {
-	// Clears the line from old characters.
-	for i := len(t.Text); i < width; i++ {
-		termbox.SetCell(x+i, y, ' ', termbox.ColorDefault, termbox.ColorDefault)
-	}
-
-	for charOffset, char := range t.Text {
-		termbox.SetCell(x+charOffset, y, char, t.Attr, termbox.ColorDefault)
-	}
+	print(t.Text, x, y, width, t.Attr, termbox.ColorDefault)
 }
 
-// UpdateHp updates the hero health bar.
-func UpdateHp(curHp, maxHp int) {
-	hpMsg := fmt.Sprintf("%d/%d", curHp, maxHp)
-
+// Hp updates the hero health bar.
+// Health: 17/17 =====================
+func Hp(curHp, maxHp int) {
 	xOffset := 0
-	print("Health: ", CharacterInfo.XOffset, CharacterInfo.YOffset, CharacterInfo.Width, termbox.ColorWhite, termbox.ColorDefault)
+
+	t := text.New("Health: ", termbox.ColorWhite)
+	Print(
+		t,
+		CharacterInfo.XOffset,
+		CharacterInfo.YOffset,
+		CharacterInfo.Width,
+	)
+	// len("Health: ")
 	xOffset += 8
-	print(hpMsg, CharacterInfo.XOffset+xOffset, CharacterInfo.YOffset, CharacterInfo.Width, termbox.ColorRed, termbox.ColorDefault)
-	xOffset += len(hpMsg) + 1
+
+	t.Text = fmt.Sprintf("%d/%d", curHp, maxHp)
+	t.Attr = termbox.ColorRed
+	Print(
+		t,
+		CharacterInfo.XOffset+xOffset,
+		CharacterInfo.YOffset,
+		CharacterInfo.Width,
+	)
+	xOffset += len(t.Text) + 1
 
 	bar, err := barcli.New(maxHp)
 	if err != nil {
 		log.Println(err)
 	}
 	bar.IncN(curHp)
+
 	filled, unfilled, err := bar.StringSize(20)
 	if err != nil {
 		log.Println(err)
 	}
 
-	print(filled, CharacterInfo.XOffset+xOffset, CharacterInfo.YOffset, CharacterInfo.Width, termbox.ColorGreen+termbox.AttrBold, termbox.ColorDefault)
+	t.Text = filled
+	t.Attr = termbox.ColorGreen + termbox.AttrBold
+	Print(
+		t,
+		CharacterInfo.XOffset+xOffset,
+		CharacterInfo.YOffset,
+		CharacterInfo.Width,
+	)
 	xOffset += len(filled)
-	print(unfilled, CharacterInfo.XOffset+xOffset, CharacterInfo.YOffset, CharacterInfo.Width, termbox.ColorBlack+termbox.AttrBold, termbox.ColorDefault)
-}
 
-type MonstInfo struct {
-	Name     string
-	HpLevel  int
-	Graphics termbox.Cell
-}
-
-func (mi MonstInfo) Color() termbox.Attribute {
-	switch mi.HpLevel {
-	case 1:
-		return termbox.ColorGreen + termbox.AttrBold
-	case 2:
-		return termbox.ColorYellow + termbox.AttrBold
-	case 3:
-		return termbox.ColorMagenta + termbox.AttrBold
-	case 4:
-		return termbox.ColorRed
-	}
-	return termbox.ColorBlack
-}
-
-func UpdateMonsterInfo(info []MonstInfo) {
-	for yOffset, monst := range info[:] {
-		t := text.New(string(monst.Graphics.Ch), monst.Graphics.Fg)
-		Print(t, MonsterInfo.XOffset, MonsterInfo.YOffset+yOffset, MonsterInfo.Width)
-
-		t = text.New("█", monst.Color())
-		Print(t, MonsterInfo.XOffset+2, MonsterInfo.YOffset+yOffset, MonsterInfo.Width)
-
-		t = text.New(strings.Title(monst.Name), termbox.ColorWhite)
-		Print(t, MonsterInfo.XOffset+4, MonsterInfo.YOffset+yOffset, MonsterInfo.Width)
-	}
+	t.Text = unfilled
+	t.Attr = termbox.ColorBlack + termbox.AttrBold
+	Print(
+		t,
+		CharacterInfo.XOffset+xOffset,
+		CharacterInfo.YOffset,
+		CharacterInfo.Width,
+	)
 }
