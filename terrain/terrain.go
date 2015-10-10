@@ -15,7 +15,7 @@ type Terrain struct {
 	IsExplored bool
 }
 
-// Name returns the name of the creature.
+// Name returns the name of the terrain.
 func (t Terrain) Name() string {
 	return t.name
 }

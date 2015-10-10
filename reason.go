@@ -9,6 +9,7 @@ import (
 	"github.com/karlek/reason/gen"
 	"github.com/karlek/reason/intro"
 	"github.com/karlek/reason/item"
+	"github.com/karlek/reason/object"
 	"github.com/karlek/reason/save"
 	"github.com/karlek/reason/state"
 	"github.com/karlek/reason/terrain"
@@ -23,9 +24,14 @@ import (
 )
 
 var (
+	// Hero's name.
 	name string
-	sav  *save.Save
-	a    = new(area.Area)
+
+	// Save file.
+	sav *save.Save
+
+	// Current area.
+	a = new(area.Area)
 )
 
 // Main loop function.
@@ -39,7 +45,7 @@ func main() {
 func reason() (err error) {
 	state.Stack.Push(state.Init)
 	for {
-		err := tick()
+		err = tick()
 		if err != nil {
 			return err
 		}
@@ -60,44 +66,17 @@ func tick() (err error) {
 		// Show entry screen, and ask player for character name.
 		name = intro.Intro()
 		status.Println(fmt.Sprintf("%s. You will change the world.", name), termbox.ColorWhite)
-		status.Println("Find Echnida and kill her.", termbox.ColorRed+termbox.AttrBold)
+		status.Println("Find Echidna and kill her.", termbox.ColorRed+termbox.AttrBold)
 		state.Stack.Push(state.Wilderness)
 	case state.Wilderness:
 		turn.Proccess(sav, a)
-	// case state.Inventory:
+	case state.Inventory:
+		fallthrough
+	case state.Drop:
+		fallthrough
 	default:
 		state.Stack.Push(state.Wilderness)
 	}
-	return nil
-}
-
-// initGameLibs initializes creature, fauna and item libraries.
-func initGameLibs() (err error) {
-	// Init graphic library.
-	err = termbox.Init()
-	if err != nil {
-		return errutil.Err(err)
-	}
-
-	// Initialize creature.
-	err = creature.Load()
-	if err != nil {
-		return errutil.Err(err)
-	}
-
-	// Initialize fauna.
-	err = terrain.Load()
-	if err != nil {
-		return errutil.Err(err)
-	}
-
-	// Initialize items.
-	err = item.Load()
-	if err != nil {
-		return errutil.Err(err)
-	}
-	ui.SetTerminal()
-
 	return nil
 }
 
@@ -134,6 +113,42 @@ func initGameSession(a *area.Area) (sav *save.Save, err error) {
 	return sav, nil
 }
 
+// initGameLibs initializes creature, fauna and item libraries.
+func initGameLibs() (err error) {
+	// Init graphic library.
+	err = termbox.Init()
+	if err != nil {
+		return errutil.Err(err)
+	}
+
+	// Initialize creatures.
+	err = creature.Load()
+	if err != nil {
+		return errutil.Err(err)
+	}
+
+	// Initialize fauna.
+	err = terrain.Load()
+	if err != nil {
+		return errutil.Err(err)
+	}
+
+	// Initialize items.
+	err = item.Load()
+	if err != nil {
+		return errutil.Err(err)
+	}
+
+	// Initialize Objects.
+	err = object.Load()
+	if err != nil {
+		return errutil.Err(err)
+	}
+	ui.SetTerminal()
+
+	return nil
+}
+
 // load loads old information from a save file.
 func load(sav *save.Save, a *area.Area) (err error) {
 	s, err := sav.Load()
@@ -147,9 +162,11 @@ func load(sav *save.Save, a *area.Area) (err error) {
 
 // newGame initalizes a new game session.
 func newGame(a *area.Area) error {
+	// *a = gen.AreaPrim(100, 30)
 	*a = gen.Area(100, 30)
 	gen.Mobs(a, 16)
 	gen.Items(a, 20)
+	gen.Objects(a, 50)
 
 	// Hero starting position.
 	var ok bool

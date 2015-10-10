@@ -1,4 +1,4 @@
-package action
+package inventory
 
 import (
 	"fmt"
@@ -27,7 +27,7 @@ func slotsString() string {
 	return strconv.Itoa(creature.Hero.Inventory.UsedSlots()) + "/" + strconv.Itoa(len(item.Positions))
 }
 
-func ShowInventory(a *area.Area) bool {
+func Show(a *area.Area) bool {
 	categorizedInv(fmt.Sprintf(InvTitleFmt, WeightStr, slotsString()))
 	if len(creature.Hero.Inventory) == 0 {
 		return false

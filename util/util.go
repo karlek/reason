@@ -10,6 +10,7 @@ import (
 	"github.com/nsf/termbox-go"
 )
 
+// Quit quits the game.
 func Quit() {
 	/// Add on release.
 	// status.Print("Do you want to quit the game? [y/N]")

@@ -12,10 +12,11 @@ import (
 )
 
 var (
+	// Terminal is users Terminal window's width and height.
 	Terminal = screen.Screen{}
 
-	// Main menu screen size.
-	Main = screen.Screen{
+	// mainScreen menu screen size.
+	mainScreen = screen.Screen{
 		Width:   35,
 		Height:  20,
 		YOffset: 50,
@@ -30,29 +31,30 @@ var (
 		Width:  50,
 		Height: 30,
 	}
-	CharacterInfo = screen.Screen{}
+	healthBar = screen.Screen{}
 
-	// CharacterInfo = screen.Screen{
+	// healthBar = screen.Screen{
 	// 	Width:   25,
 	// 	Height:  Area.Height,
 	// 	YOffset: 0,
 	// 	XOffset: 1,
 	// }
 
-	MonsterInfo = screen.Screen{
+	monsterInfo = screen.Screen{
 		Width:   20,
 		Height:  Area.Height,
 		YOffset: Area.YOffset,
 		XOffset: Area.Width + 2,
 	}
 
-	Message = screen.Screen{
+	// Status contains status messages.
+	Status = screen.Screen{
 		Width:   Whole.Width,
 		Height:  5,
 		YOffset: Area.Height + Area.YOffset + 1,
 		XOffset: 1,
 	}
-
+	// Whole is the whole screen.
 	Whole = screen.Screen{
 		Width:  34 + 25 + 2,
 		Height: 44,
@@ -100,19 +102,19 @@ func SetTerminal() {
 		YOffset: 2,
 		XOffset: Terminal.Width/2 - Area.Width/2,
 	}
-	CharacterInfo = screen.Screen{
+	healthBar = screen.Screen{
 		Width:   25,
 		Height:  Area.Height,
 		YOffset: 0,
 		XOffset: Area.XOffset,
 	}
-	MonsterInfo = screen.Screen{
+	monsterInfo = screen.Screen{
 		Width:   20,
 		Height:  Area.Height,
 		YOffset: Area.YOffset,
 		XOffset: Area.XOffset + Area.Width + 2,
 	}
-	Message = screen.Screen{
+	Status = screen.Screen{
 		Width:   Whole.Width,
 		Height:  5,
 		YOffset: Area.Height + Area.YOffset + 1,
@@ -156,7 +158,7 @@ func print(str string, x, y, width int, fg termbox.Attribute, bg termbox.Attribu
 }
 
 func Print(t *text.Text, x, y, width int) {
-	print(t.Text, x, y, width, t.Attr, termbox.ColorDefault)
+	print(t.Text, x, y, width, t.Attr, t.Bg)
 }
 
 // Hp updates the hero health bar.
@@ -167,9 +169,9 @@ func Hp(curHp, maxHp int) {
 	t := text.New("Health: ", termbox.ColorWhite)
 	Print(
 		t,
-		CharacterInfo.XOffset,
-		CharacterInfo.YOffset,
-		CharacterInfo.Width,
+		healthBar.XOffset,
+		healthBar.YOffset,
+		healthBar.Width,
 	)
 	// len("Health: ")
 	xOffset += 8
@@ -178,9 +180,9 @@ func Hp(curHp, maxHp int) {
 	t.Attr = termbox.ColorRed
 	Print(
 		t,
-		CharacterInfo.XOffset+xOffset,
-		CharacterInfo.YOffset,
-		CharacterInfo.Width,
+		healthBar.XOffset+xOffset,
+		healthBar.YOffset,
+		healthBar.Width,
 	)
 	xOffset += len(t.Text) + 1
 
@@ -199,9 +201,9 @@ func Hp(curHp, maxHp int) {
 	t.Attr = termbox.ColorGreen + termbox.AttrBold
 	Print(
 		t,
-		CharacterInfo.XOffset+xOffset,
-		CharacterInfo.YOffset,
-		CharacterInfo.Width,
+		healthBar.XOffset+xOffset,
+		healthBar.YOffset,
+		healthBar.Width,
 	)
 	xOffset += len(filled)
 
@@ -209,8 +211,8 @@ func Hp(curHp, maxHp int) {
 	t.Attr = termbox.ColorBlack + termbox.AttrBold
 	Print(
 		t,
-		CharacterInfo.XOffset+xOffset,
-		CharacterInfo.YOffset,
-		CharacterInfo.Width,
+		healthBar.XOffset+xOffset,
+		healthBar.YOffset,
+		healthBar.Width,
 	)
 }

@@ -1,0 +1,14 @@
+{
+	"Name": "echidna",
+	"Graphics": {
+		"Ch": "X",
+		"Fg": {"color": "black", "attr": "bold"},
+		"Bg": null
+	},
+	"HP": 130,
+	"Speed": 180,
+	"Regeneration": 5,
+	"Strength": 9,
+	"ProducesCorpse": false,
+	"Inventory": null
+}

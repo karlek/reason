@@ -38,25 +38,25 @@ func Monsters(info []MonstInfo) {
 		t := text.New(string(monst.Graphics.Ch), monst.Graphics.Fg)
 		Print(
 			t,
-			MonsterInfo.XOffset,
-			MonsterInfo.YOffset+y,
-			MonsterInfo.Width,
+			monsterInfo.XOffset,
+			monsterInfo.YOffset+y,
+			monsterInfo.Width,
 		)
 
 		t = text.New("█", monst.Color())
 		Print(
 			t,
-			MonsterInfo.XOffset+2,
-			MonsterInfo.YOffset+y,
-			MonsterInfo.Width,
+			monsterInfo.XOffset+2,
+			monsterInfo.YOffset+y,
+			monsterInfo.Width,
 		)
 
 		t = text.New(strings.Title(monst.Name), termbox.ColorWhite)
 		Print(
 			t,
-			MonsterInfo.XOffset+4,
-			MonsterInfo.YOffset+y,
-			MonsterInfo.Width,
+			monsterInfo.XOffset+4,
+			monsterInfo.YOffset+y,
+			monsterInfo.Width,
 		)
 	}
 }

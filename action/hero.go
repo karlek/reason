@@ -5,9 +5,11 @@ import (
 	"log"
 
 	"github.com/karlek/reason/creature"
+	"github.com/karlek/reason/inventory"
+	"github.com/karlek/reason/item"
+	"github.com/karlek/reason/object"
 	"github.com/karlek/reason/save"
 	"github.com/karlek/reason/state"
-	"github.com/karlek/reason/terrain"
 	"github.com/karlek/reason/ui"
 	"github.com/karlek/reason/ui/status"
 	"github.com/karlek/reason/util"
@@ -30,6 +32,9 @@ func HeroTurn(sav *save.Save, a *area.Area) (int, state.State) {
 		return 0, state.Wilderness
 	}
 	switch ev.Ch {
+	// case 'x':
+	// 	sfx.Glitch()
+	// 	return 0, state.Wilderness
 	case '5', 's':
 		// user wants to wait one turn.
 		return creature.Hero.Speed, state.Wilderness
@@ -45,9 +50,9 @@ func HeroTurn(sav *save.Save, a *area.Area) (int, state.State) {
 	// case 'm':
 	// 	// user wants to try debug function.
 	// 	return debug(a), state.Wilderness
-	// case ui.DropItemKey:
-	// user wants to drop an item.
-	// return dropItem(a), state.Drop
+	case ui.DropItemKey:
+		// user wants to drop an item.
+		return dropItem(a), state.Drop
 	// case ui.OpenDoorKey:
 	// user wants to open a door.
 	// return openDoor(a), state.Open
@@ -83,21 +88,22 @@ func saveQuit(a *area.Area, sav *save.Save) {
 	util.Quit()
 }
 
-func closeDoor(a *area.Area) int {
-	actionTaken := CloseDoorNarrative(a, creature.Hero.X(), creature.Hero.Y())
-	if actionTaken {
-		return creature.Hero.Speed
-	}
-	return 0
-}
+// Outdated.
+// func closeDoor(a *area.Area) int {
+// 	actionTaken := CloseDoorNarrative(a, creature.Hero.X(), creature.Hero.Y())
+// 	if actionTaken {
+// 		return creature.Hero.Speed
+// 	}
+// 	return 0
+// }
 
-func openDoor(a *area.Area) int {
-	actionTaken := OpenDoorNarrative(a, creature.Hero.X(), creature.Hero.Y())
-	if actionTaken {
-		return creature.Hero.Speed
-	}
-	return 0
-}
+// func openDoor(a *area.Area) int {
+// 	actionTaken := OpenDoorNarrative(a, creature.Hero.X(), creature.Hero.Y())
+// 	if actionTaken {
+// 		return creature.Hero.Speed
+// 	}
+// 	return 0
+// }
 
 func pickUp(a *area.Area) int {
 	actionTaken := creature.Hero.PickUp(a)
@@ -108,7 +114,7 @@ func pickUp(a *area.Area) int {
 }
 
 func showInventory(a *area.Area) int {
-	actionTaken := ShowInventory(a)
+	actionTaken := inventory.Show(a)
 	if actionTaken {
 		return creature.Hero.Speed
 	}
@@ -116,7 +122,7 @@ func showInventory(a *area.Area) int {
 }
 
 func dropItem(a *area.Area) int {
-	actionTaken := DropItem(a)
+	actionTaken := inventory.DropItem(a)
 	if actionTaken {
 		return creature.Hero.Speed
 	}
@@ -142,6 +148,24 @@ func HeroMovement(ev termbox.Event, a *area.Area) int {
 	if err != nil {
 		return 0
 	}
+	stk, ok := a.Items[creature.Hero.Coord()]
+	if ok && stk.Len() > 0 {
+		if stk.Len() > 1 {
+			status.Println("You find a heap of items on the ground:", termbox.ColorWhite)
+		} else {
+			status.Println("You find a single item on the ground:", termbox.ColorWhite)
+		}
+		print := "   "
+		for _, s := range []area.DrawPather(*stk) {
+			i, _ := s.(item.DrawItemer)
+			if stk.Len() < 4 {
+				print += i.Name() + ", "
+			} else {
+				print += string(i.Graphic().Ch) + ", "
+			}
+		}
+		status.Println(print[:len(print)-2], termbox.ColorBlack+termbox.AttrBold)
+	}
 	// Successful movement.
 	if col == nil {
 		return creature.Hero.Speed
@@ -151,13 +175,14 @@ func HeroMovement(ev termbox.Event, a *area.Area) int {
 		creature.Hero.Battle(c, a)
 		return creature.Hero.Speed
 	}
-	// Walked into a door -> ask if it should be open!
-	if fa, ok := col.S.(terrain.Terrain); ok {
-		if fa.Name() == "door (closed)" {
-			actionTaken := WalkedIntoDoor(a, col.X, col.Y)
-			if actionTaken {
-				return creature.Hero.Speed
-			}
+	// Hero walked into an object.
+	if obj, ok := a.Objects[col.Coord()].(*object.Object); ok {
+		// If the hero walked into a door -> open!
+		switch obj.Name() {
+		case "door (closed)":
+			a.Objects[col.Coord()] = object.Objects["door (open)"].New()
+			status.Println("You open the closed door.", termbox.ColorBlack+termbox.AttrBold)
+			return creature.Hero.Speed
 		}
 	}
 	return 0

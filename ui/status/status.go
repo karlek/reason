@@ -1,5 +1,7 @@
-/// In case whole buffer will be filled with new messages, termbox.PollEvent()?
 // Package status implements functions to print status messages.
+//
+// TODO(karlek): In case whole buffer will be filled with new messages,
+// termbox.PollEvent()?
 package status
 
 import (
@@ -30,20 +32,21 @@ func Println(str string, attr termbox.Attribute) {
 	PrintText(text.New(fmt.Sprintln(str), attr))
 }
 
+// PrintTextln prints text to status window.
 func PrintTextln(t *text.Text) {
 	PrintText(text.New(fmt.Sprintln(t.Text), t.Attr))
 }
 
-// Update
+// Update the status window.
 func Update() {
 	for index := len(status) - 1; index >= 0; index-- {
-		if len(status)-index > ui.Message.Height {
+		if len(status)-index > ui.Status.Height {
 			break
 		}
-		// From 0 to ui.Message.Height, so we don't write all messages on the
+		// From 0 to ui.Status.Height, so we don't write all messages on the
 		// same row and backwards.
 		y := int(math.Abs(float64(index - len(status))))
-		printLine(status[index], ui.Message.XOffset, ui.Message.YOffset-y+ui.Message.Height)
+		printLine(status[index], ui.Status.XOffset, ui.Status.YOffset-y+ui.Status.Height)
 	}
 }
 
@@ -67,12 +70,13 @@ func lineLen(line []*text.Text) (length int) {
 	return
 }
 
+// PrintText to status window.
 func PrintText(t *text.Text) {
 	for {
 		if line >= len(status) {
 			status = append(status, []*text.Text{})
 		}
-		if lineLen(status[line])+len(t.Text) < ui.Message.Width {
+		if lineLen(status[line])+len(t.Text) < ui.Status.Width {
 			status[line] = append(status[line], t)
 
 			/// Might be wrong, should remove newline char as well?
@@ -83,7 +87,7 @@ func PrintText(t *text.Text) {
 			}
 			break
 		}
-		strLen := ui.Message.Width - lineLen(status[line])
+		strLen := ui.Status.Width - lineLen(status[line])
 
 		status[line] = append(status[line], text.New(t.Text[:strLen], t.Attr))
 		line++

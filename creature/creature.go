@@ -25,6 +25,8 @@ type Creature struct {
 	Speed        int
 	Regeneration int
 	RegCounter   int
+	Level        int
+	Experience   int
 	Inventory    Inventory
 	Equipment    equipment.Equipment
 }
@@ -76,7 +78,7 @@ func (c *Creature) MonstersInRange(a *area.Area) []*Creature {
 			}
 
 			//
-			cor := coord.Coord{x, y}
+			cor := coord.Coord{X: x, Y: y}
 			if monst, ok := a.Monsters[cor]; ok {
 				if monst == nil || monst.Name() == "hero" {
 					continue

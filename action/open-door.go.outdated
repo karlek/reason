@@ -19,13 +19,13 @@ func direction(ev termbox.Event, x, y *int, a *area.Area) bool {
 		return true
 	// Movement
 	case ui.MoveUpKey:
-		*x, *y = *x, *y-1
+		*y = *y - 1
 	case ui.MoveDownKey:
-		*x, *y = *x, *y+1
+		*y = *y + 1
 	case ui.MoveLeftKey:
-		*x, *y = *x-1, *y
+		*x = *x - 1
 	case ui.MoveRightKey:
-		*x, *y = *x+1, *y
+		*x = *x + 1
 	}
 	// Prevent from moving outside the top
 	if *y < 0 {

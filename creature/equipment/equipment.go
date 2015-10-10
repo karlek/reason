@@ -19,6 +19,37 @@ type Equipment struct {
 	Legwear   *item.Legwear
 }
 
+func (eq Equipment) Num() (num int) {
+	if eq.MainHand != nil {
+		num++
+	}
+	if eq.OffHand != nil {
+		num++
+	}
+	if eq.Head != nil {
+		num++
+	}
+	if eq.Amulet != nil {
+		num++
+	}
+	if eq.Rings != nil {
+		num += len(eq.Rings)
+	}
+	if eq.Boots != nil {
+		num++
+	}
+	if eq.Gloves != nil {
+		num++
+	}
+	if eq.Chestwear != nil {
+		num++
+	}
+	if eq.Legwear != nil {
+		num++
+	}
+	return num
+}
+
 func (eq Equipment) Power() int {
 	if eq.MainHand == nil {
 		log.Println("no weapon")

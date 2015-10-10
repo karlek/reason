@@ -6,11 +6,13 @@ import (
 	"github.com/karlek/reason/ui"
 
 	"github.com/karlek/worc/area"
+	"github.com/karlek/worc/coord"
 )
 
 // DrawFOV draws a field of view around a creature as well as the creatures
 // memory of already explored areas.
 func (c Creature) DrawFOV(a *area.Area) {
+	// Clear screen.
 	ui.Clear()
 
 	// Get viewport coordinate offset.
@@ -19,15 +21,12 @@ func (c Creature) DrawFOV(a *area.Area) {
 	// Draw already explored areas.
 	a.DrawExplored(ui.Area, camX, camY)
 
-	// Inclusive hero's square so it's from hero's eyes.
+	// Draw hero.
+	a.Draw(c.X(), c.Y(), camX, camY, ui.Area)
+
 	radius := c.Sight
 	for x := c.X() - radius; x <= c.X()+radius; x++ {
 		for y := c.Y() - radius; y <= c.Y()+radius; y++ {
-			// Discriminate coordinates which are out of bounds.
-			if !a.ExistsXY(x, y) {
-				continue
-			}
-
 			// Distance between creature x and y coordinates and sight radius.
 			dx := float64(x - c.X())
 			dy := float64(y - c.Y())
@@ -40,13 +39,71 @@ func (c Creature) DrawFOV(a *area.Area) {
 				continue
 			}
 
-			// Set terrain as explored.
-			a.Terrain[x][y].IsExplored = true
+			// Ignore hero.
+			for _, p := range get_line(c.X(), c.Y(), x, y)[1:] {
+				if !a.ExistsXY(p.X, p.Y) {
+					break
+				}
+				// Set terrain as explored.
+				a.Terrain[p.X][p.Y].IsExplored = true
 
-			// TODO(_): refactor cam.
-			a.Draw(x, y, camX, camY, ui.Area)
+				// TODO(_): refactor cam.
+				a.Draw(p.X, p.Y, camX, camY, ui.Area)
+
+				if !a.IsXYPathable(p.X, p.Y) {
+					break
+				}
+			}
 		}
 	}
+}
+
+func get_line(x1, y1, x2, y2 int) (points []coord.Coord) {
+	points = make([]coord.Coord, 0)
+	steep := math.Abs(float64(y2-y1)) > math.Abs(float64(x2-x1))
+	if steep {
+		x1, y1 = y1, x1
+		x2, y2 = y2, x2
+	}
+	rev := false
+	if x1 > x2 {
+		x1, x2 = x2, x1
+		y1, y2 = y2, y1
+		rev = true
+	}
+	dx := x2 - x1
+	dy := int(math.Abs(float64(y2 - y1)))
+	err := dx / 2
+	y := y1
+	ystep := 0
+	if y1 < y2 {
+		ystep = 1
+	} else {
+		ystep = -1
+	}
+	for x := x1; x < x2+1; x++ {
+		if steep {
+			points = append(points, coord.Coord{X: y, Y: x})
+		} else {
+			points = append(points, coord.Coord{X: x, Y: y})
+		}
+		err -= dy
+		if err < 0 {
+			y += ystep
+			err += dx
+		}
+	}
+	if rev {
+		reverse(points)
+	}
+	return points
+}
+
+func reverse(s []coord.Coord) []coord.Coord {
+	for i, j := 0, len(s)-1; i < j; i, j = i+1, j-1 {
+		s[i], s[j] = s[j], s[i]
+	}
+	return s
 }
 
 // camXY returns the coordinate of offset for the viewport. Since the area can

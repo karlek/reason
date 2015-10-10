@@ -1,13 +1,13 @@
 package action
 
 import (
-	// "github.com/karlek/reason/fauna"
 	"github.com/karlek/reason/ui/status"
 
 	"github.com/karlek/worc/area"
 	"github.com/nsf/termbox-go"
 )
 
+// CloseDoorNarrative asks the us
 func CloseDoorNarrative(a *area.Area, x, y int) bool {
 	status.Println("Close door - In which direction lies the door?", termbox.ColorWhite)
 	termbox.Flush()
