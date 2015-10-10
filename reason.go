@@ -23,17 +23,6 @@ import (
 	"github.com/nsf/termbox-go"
 )
 
-var (
-	// Hero's name.
-	name string
-
-	// Save file.
-	sav *save.Save
-
-	// Current area.
-	a = new(area.Area)
-)
-
 // Main loop function.
 func main() {
 	err := reason()
@@ -44,15 +33,20 @@ func main() {
 
 func reason() (err error) {
 	state.Stack.Push(state.Init)
+
+	// Current area.
+	a := new(area.Area)
 	for {
-		err = tick()
+		err = tick(a)
 		if err != nil {
 			return err
 		}
 	}
 }
 
-func tick() (err error) {
+func tick(a *area.Area) (err error) {
+	// Save file.
+	var sav *save.Save
 	switch state.Stack.Pop() {
 	case state.Init:
 		// Load or create new game.
@@ -64,7 +58,7 @@ func tick() (err error) {
 		state.Stack.Push(state.Intro)
 	case state.Intro:
 		// Show entry screen, and ask player for character name.
-		name = intro.Intro()
+		name := intro.Intro()
 		status.Println(fmt.Sprintf("%s. You will change the world.", name), termbox.ColorWhite)
 		status.Println("Find Echidna and kill her.", termbox.ColorRed+termbox.AttrBold)
 		state.Stack.Push(state.Wilderness)

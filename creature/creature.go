@@ -9,7 +9,6 @@ import (
 	"github.com/karlek/reason/name"
 
 	"github.com/karlek/worc/area"
-	"github.com/karlek/worc/coord"
 	"github.com/karlek/worc/model"
 )
 
@@ -56,35 +55,14 @@ func (c Creature) dist() int {
 func (c *Creature) MonstersInRange(a *area.Area) []*Creature {
 	var monsters []*Creature
 
-	// Inclusive hero's square so it's from hero's eyes.
-	radius := c.Sight
-	for x := c.X() - radius; x <= c.X()+radius; x++ {
-		for y := c.Y() - radius; y <= c.Y()+radius; y++ {
-			// Discriminate coordinates which are out of bounds.
-			if !a.ExistsXY(x, y) {
+	cs := c.FOV(a)
+	for p := range cs {
+		if monst, ok := a.Monsters[p]; ok {
+			// Ignore hero.
+			if monst == nil || monst.Name() == "hero" {
 				continue
 			}
-
-			// Distance between creature x and y coordinates and sight radius.
-			dx := float64(x - c.X())
-			dy := float64(y - c.Y())
-
-			// Distance between creature and sight radius.
-			dist := math.Sqrt(math.Pow(dx, 2) + math.Pow(dy, 2))
-
-			// Discriminate coordinates which are outside of the circle.
-			if dist > float64(radius) {
-				continue
-			}
-
-			//
-			cor := coord.Coord{X: x, Y: y}
-			if monst, ok := a.Monsters[cor]; ok {
-				if monst == nil || monst.Name() == "hero" {
-					continue
-				}
-				monsters = append(monsters, monst.(*Creature))
-			}
+			monsters = append(monsters, monst.(*Creature))
 		}
 	}
 	return monsters

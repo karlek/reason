@@ -24,7 +24,20 @@ func (c Creature) DrawFOV(a *area.Area) {
 	// Draw hero.
 	a.Draw(c.X(), c.Y(), camX, camY, ui.Area)
 
+	// Visible coordinates of character.
+	cs := c.FOV(a)
+	for p := range cs {
+		// Set terrain as explored.
+		a.Terrain[p.X][p.Y].IsExplored = true
+
+		// TODO(_): refactor cam.
+		a.Draw(p.X, p.Y, camX, camY, ui.Area)
+	}
+}
+
+func (c *Creature) FOV(a *area.Area) (cs map[coord.Coord]struct{}) {
 	radius := c.Sight
+	cs = make(map[coord.Coord]struct{})
 	for x := c.X() - radius; x <= c.X()+radius; x++ {
 		for y := c.Y() - radius; y <= c.Y()+radius; y++ {
 			// Distance between creature x and y coordinates and sight radius.
@@ -44,18 +57,17 @@ func (c Creature) DrawFOV(a *area.Area) {
 				if !a.ExistsXY(p.X, p.Y) {
 					break
 				}
-				// Set terrain as explored.
-				a.Terrain[p.X][p.Y].IsExplored = true
 
-				// TODO(_): refactor cam.
-				a.Draw(p.X, p.Y, camX, camY, ui.Area)
+				cs[p] = struct{}{}
 
+				// Terrain that breaks line of sight.
 				if !a.IsXYPathable(p.X, p.Y) {
 					break
 				}
 			}
 		}
 	}
+	return cs
 }
 
 func get_line(x1, y1, x2, y2 int) (points []coord.Coord) {
