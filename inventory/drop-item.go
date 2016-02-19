@@ -11,6 +11,7 @@ import (
 
 	"github.com/karlek/worc/area"
 
+	"github.com/acsellers/inflections"
 	"github.com/nsf/termbox-go"
 )
 
@@ -62,8 +63,14 @@ func NarrativeEquip(pos rune) {
 	var equipStr string
 	if item.IsStackable(i) {
 		equipStr += fmt.Sprintf("%d ", i.Count())
+		if i.Count() > 1 {
+			inflections.Pluralize(i.Name())
+		} else {
+			equipStr += i.Name()
+		}
+	} else {
+		equipStr += i.Name()
 	}
-	equipStr += i.Name()
 	status.Println(fmt.Sprintf("You equipped %s.", equipStr), termbox.ColorWhite)
 }
 
@@ -78,7 +85,11 @@ func NarrativeUnEquip(pos rune) {
 func InvText(i item.Itemer) string {
 	invStr := ""
 	if item.IsStackable(i) {
-		invStr = fmt.Sprintf("%c - %d %s", i.Hotkey(), i.Count(), i.Name())
+		name := i.Name()
+		if i.Count() > 1 {
+			name = inflections.Pluralize(name)
+		}
+		invStr = fmt.Sprintf("%c - %d %s", i.Hotkey(), i.Count(), name)
 	} else {
 		invStr = fmt.Sprintf("%c - %s", i.Hotkey(), i.Name())
 	}

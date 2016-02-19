@@ -8,6 +8,7 @@ import (
 	"github.com/karlek/reason/item"
 	"github.com/karlek/reason/ui/status"
 
+	"github.com/acsellers/inflections"
 	"github.com/karlek/worc/area"
 	"github.com/mewkiz/pkg/errutil"
 	"github.com/nsf/termbox-go"
@@ -227,7 +228,11 @@ func (c *Creature) DropItem(pos rune, a *area.Area) {
 	}
 	iName := i.Name()
 	if item.IsStackable(i) {
-		iName = strconv.Itoa(i.Count()) + " " + i.Name()
+		name := i.Name()
+		if i.Count() > 1 {
+			name = inflections.Pluralize(name)
+		}
+		iName = strconv.Itoa(i.Count()) + " " + name
 	}
 
 	if c.dist() <= Hero.Sight {
