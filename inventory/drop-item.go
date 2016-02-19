@@ -140,17 +140,26 @@ func categorizedInv(title string) (isEmpty bool) {
 		}
 	}
 
+	// The ordering of the categories in the inventory.
+	var order = []string{
+		"Weapons",
+		"Rings",
+		"Potions",
+		"Tools",
+		"Unknown",
+	}
 	// Print categories and the items in that category to screen.
 	// Rows written to screen.
 	rowOffset := 0
-	for catStr, items := range categories {
+	for _, cat := range order {
+		items := categories[cat]
 		// Ignore empty categories
 		if len(items) == 0 {
 			continue
 		}
 
 		// Item category.
-		printCategory(catStr, items, &rowOffset)
+		printCategory(cat, items, &rowOffset)
 	}
 	termbox.Flush()
 	return false
