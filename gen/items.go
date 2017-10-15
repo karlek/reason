@@ -4,8 +4,8 @@ import (
 	"github.com/karlek/reason/item"
 	"github.com/karlek/reason/util"
 
-	"github.com/karlek/worc/area"
-	"github.com/karlek/worc/coord"
+	"github.com/karlek/reason/area"
+	"github.com/karlek/reason/coord"
 )
 
 // Items is a debug function to add mobs to the map.

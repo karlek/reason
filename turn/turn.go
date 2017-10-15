@@ -2,14 +2,13 @@ package turn
 
 import (
 	"container/heap"
-	// "log"
 
 	"github.com/karlek/reason/action"
 	"github.com/karlek/reason/creature"
 	"github.com/karlek/reason/save"
 	"github.com/karlek/reason/state"
 
-	"github.com/karlek/worc/area"
+	"github.com/karlek/reason/area"
 )
 
 var turnQueue *PriorityQueue
@@ -19,7 +18,8 @@ type Turn struct {
 	c        *creature.Creature // The c of the turn; arbitrary.
 	priority int                // The priority of the turn in the queue.
 
-	// The index is needed by update and is maintained by the heap.Interface methods.
+	// The index is needed by update and is maintained by the heap.Interface
+	// methods.
 	index int // The index of the turn in the heap.
 }
 
@@ -28,16 +28,15 @@ func deferWrap(sta *state.State) {
 }
 
 func Proccess(sav *save.Save, a *area.Area) {
-	var sta *state.State = new(state.State)
+	sta := new(state.State)
 	*sta = state.Wilderness
 
 	defer deferWrap(sta)
 	// Pop the next turn.
 	t := heap.Pop(turnQueue).(*Turn)
 
-	// remove dead creatures from the queue.
+	// Remove dead creatures from the queue.
 	if t.c.Hp <= 0 {
-
 		return
 	}
 
@@ -45,9 +44,9 @@ func Proccess(sav *save.Save, a *area.Area) {
 	if t.c.IsHero() {
 		timeTaken, *sta = action.HeroTurn(sav, a)
 	} else {
-		timeTaken = t.c.Action(a)
+		timeTaken = action.Action(t.c, a)
 	}
-	// If no action was taken, reinsert the turn with the same priority so it
+	// If no action was taken, re-insert the turn with the same priority so it
 	// will be popped again.
 	if timeTaken == 0 {
 		heap.Push(turnQueue, t)

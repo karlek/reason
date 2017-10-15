@@ -3,37 +3,9 @@ package creature
 import (
 	"math"
 
-	"github.com/karlek/reason/ui"
-
-	"github.com/karlek/worc/area"
-	"github.com/karlek/worc/coord"
+	"github.com/karlek/reason/area"
+	"github.com/karlek/reason/coord"
 )
-
-// DrawFOV draws a field of view around a creature as well as the creatures
-// memory of already explored areas.
-func (c Creature) DrawFOV(a *area.Area) {
-	// Clear screen.
-	ui.Clear()
-
-	// Get viewport coordinate offset.
-	camX, camY := camXY(c, a)
-
-	// Draw already explored areas.
-	a.DrawExplored(ui.Area, camX, camY)
-
-	// Draw hero.
-	a.Draw(c.X(), c.Y(), camX, camY, ui.Area)
-
-	// Visible coordinates of character.
-	cs := c.FOV(a)
-	for p := range cs {
-		// Set terrain as explored.
-		a.Terrain[p.X][p.Y].IsExplored = true
-
-		// TODO(_): refactor cam.
-		a.Draw(p.X, p.Y, camX, camY, ui.Area)
-	}
-}
 
 func (c *Creature) FOV(a *area.Area) (cs map[coord.Coord]struct{}) {
 	radius := c.Sight
@@ -116,41 +88,4 @@ func reverse(s []coord.Coord) []coord.Coord {
 		s[i], s[j] = s[j], s[i]
 	}
 	return s
-}
-
-// camXY returns the coordinate of offset for the viewport. Since the area can
-// be larger than the viewport.
-func camXY(c Creature, a *area.Area) (int, int) {
-	cameraX, cameraY := camX(c, a), camY(c, a)
-	if ui.Area.Width > len(a.Terrain) {
-		cameraX = 0
-	}
-	if ui.Area.Height > len(a.Terrain[0]) {
-		cameraY = 0
-	}
-	return cameraX, cameraY
-}
-
-func camX(c Creature, a *area.Area) int {
-	// ui.Area is the viewport size.
-	cameraX := c.X() - ui.Area.Width/2
-
-	if c.X() < ui.Area.Width/2 {
-		cameraX = 0
-	}
-	if c.X() >= a.Width-ui.Area.Width/2 {
-		cameraX = a.Width - ui.Area.Width
-	}
-	return cameraX
-}
-
-func camY(c Creature, a *area.Area) int {
-	cameraY := c.Y() - ui.Area.Height/2
-	if c.Y() < ui.Area.Height/2 {
-		cameraY = 0
-	}
-	if c.Y() > a.Height-ui.Area.Height/2 {
-		cameraY = a.Height - ui.Area.Height
-	}
-	return cameraY
 }

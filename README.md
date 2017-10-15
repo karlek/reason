@@ -1,3 +1,5 @@
+[![Code Climate](https://codeclimate.com/github/karlek/reason/badges/gpa.svg)](https://codeclimate.com/github/karlek/reason)
+
 WIP
 ---
 This project is a *work in progress*. The implementation is *incomplete* and
@@ -10,6 +12,8 @@ reason
 Reason is a roguelike written in golang. The name is a reference to the japanese
 word for freedom: jiyuu/jiyū (自由). The direct translation of the kanji is: self
 (自) and reason (由).
+
+Some trivia: the old package name was "Worc". It's named after an old World of Warcraft movie called ["World of roguecraft"](http://www.roguecraft.com/episode1.html).
 
 API documentation
 -----------------

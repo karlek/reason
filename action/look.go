@@ -2,12 +2,9 @@
 package action
 
 import (
-	// "github.com/karlek/reason/name"
 	"github.com/karlek/reason/ui"
 
-	// "github.com/karlek/reason/ui/status"
-	"github.com/karlek/worc/area"
-	// "github.com/karlek/worc/coord"
+	"github.com/karlek/reason/area"
 	"github.com/nsf/termbox-go"
 )
 

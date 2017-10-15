@@ -10,8 +10,8 @@ import (
 	"github.com/karlek/reason/item"
 	"github.com/karlek/reason/terrain"
 
-	"github.com/karlek/worc/area"
-	"github.com/karlek/worc/model"
+	"github.com/karlek/reason/area"
+	"github.com/karlek/reason/model"
 	"github.com/mewkiz/pkg/errorsutil"
 )
 

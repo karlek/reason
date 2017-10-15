@@ -17,13 +17,13 @@ import (
 	"github.com/karlek/reason/ui"
 	"github.com/karlek/reason/ui/status"
 
-	"github.com/karlek/worc/area"
+	"github.com/karlek/reason/area"
 	"github.com/mewkiz/pkg/errutil"
 	"github.com/mewkiz/pkg/goutil"
 	"github.com/nsf/termbox-go"
 )
 
-// Main loop function.
+// Err wrapper.
 func main() {
 	err := reason()
 	if err != nil {
@@ -36,6 +36,7 @@ func reason() (err error) {
 
 	// Current area.
 	a := new(area.Area)
+	// Main loop.
 	for {
 		err = tick(a)
 		if err != nil {
@@ -44,6 +45,7 @@ func reason() (err error) {
 	}
 }
 
+// tick pops the next state from the state stack and executes it.
 func tick(a *area.Area) (err error) {
 	// Save file.
 	var sav *save.Save

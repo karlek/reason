@@ -25,28 +25,17 @@ func Quit() {
 // YesOrNo forces the player to answer either y or n.
 // Esc is false and enter is true.
 func YesOrNo() bool {
-	for {
-		switch ev := termbox.PollEvent(); ev.Type {
-		case termbox.EventKey:
-			switch ev.Ch {
-			case 'n', 'N':
-				return false
-			case 'y', 'Y':
-				return true
-			}
-			switch ev.Key {
-			case termbox.KeyEsc:
-				return false
-			case termbox.KeyEnter:
-				return true
-			}
-		}
-	}
+	return prompt(true)
 }
 
 // NoOrYes forces the player to answer either y or n.
 // Enter is false and esc is false.
 func NoOrYes() bool {
+	return prompt(false)
+}
+
+// prompt the user with y/n. Defaults esc to false, enter is variable.
+func prompt(enter bool) bool {
 	for {
 		switch ev := termbox.PollEvent(); ev.Type {
 		case termbox.EventKey:
@@ -60,7 +49,7 @@ func NoOrYes() bool {
 			case termbox.KeyEsc:
 				return false
 			case termbox.KeyEnter:
-				return false
+				return enter
 			}
 		}
 	}

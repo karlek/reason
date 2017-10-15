@@ -1,24 +1,25 @@
-package creature
+package action
 
 import (
 	"fmt"
-	// "math/rand"
 	"strings"
 
+	"github.com/karlek/reason/creature"
 	"github.com/karlek/reason/item"
+	"github.com/karlek/reason/ui"
 	"github.com/karlek/reason/ui/status"
 	"github.com/karlek/reason/ui/text"
 	"github.com/karlek/reason/util"
 
-	"github.com/karlek/worc/area"
-	"github.com/karlek/worc/coord"
+	"github.com/karlek/reason/area"
+	"github.com/karlek/reason/coord"
 	"github.com/nsf/termbox-go"
 )
 
 // Action performs simple AI for a creature.
-func (c *Creature) Action(a *area.Area) int {
+func Action(c *creature.Creature, a *area.Area) int {
 	if i := a.Items[c.Coord()].Peek(); i != nil {
-		c.PickUp(a)
+		PickUp(c, a)
 		return c.Speed
 	}
 	if c.Equipment.MainHand == nil && len(c.Inventory) > 0 {
@@ -38,13 +39,13 @@ func (c *Creature) Action(a *area.Area) int {
 
 	var col *area.Collision
 	var err error
-	if c.X() < Hero.X() {
+	if c.X() < creature.Hero.X() {
 		col, err = a.MoveRight(c)
-	} else if c.X() > Hero.X() {
+	} else if c.X() > creature.Hero.X() {
 		col, err = a.MoveLeft(c)
-	} else if c.Y() < Hero.Y() {
+	} else if c.Y() < creature.Hero.Y() {
 		col, err = a.MoveDown(c)
-	} else if c.Y() > Hero.Y() {
+	} else if c.Y() > creature.Hero.Y() {
 		col, err = a.MoveUp(c)
 	}
 	if err != nil {
@@ -55,9 +56,9 @@ func (c *Creature) Action(a *area.Area) int {
 	if col == nil {
 		return c.Speed
 	}
-	if mob, ok := col.S.(*Creature); ok {
+	if mob, ok := col.S.(*creature.Creature); ok {
 		if mob.IsHero() {
-			c.Battle(mob, a)
+			Battle(c, mob, a)
 			return c.Speed
 		}
 	}
@@ -66,32 +67,32 @@ func (c *Creature) Action(a *area.Area) int {
 	return c.Speed
 }
 
-func (c *Creature) power() int {
+func power(c *creature.Creature) int {
 	return c.Strength + c.Equipment.Power()
 }
 
-func (c *Creature) defense() int {
+func defense(c *creature.Creature) int {
 	return c.Equipment.Defense()
 }
 
-func (attacker *Creature) isHit(defender *Creature) bool {
+func isHit(attacker *creature.Creature, defender *creature.Creature) bool {
 	return true
 }
 
-func (attacker *Creature) Battle(defender *Creature, a *area.Area) {
+func Battle(attacker *creature.Creature, defender *creature.Creature, a *area.Area) {
 	t := text.New("", termbox.ColorWhite)
-	if attacker.isHit(defender) {
-		t.Text = attacker.damage(defender, a)
+	if isHit(attacker, defender) {
+		t.Text = damage(attacker, defender, a)
 	} else {
-		t.Text = attacker.hitFail(defender)
+		t.Text = hitFail(attacker, defender)
 		t.Attr = termbox.ColorBlack
 	}
-	if attacker.dist() <= Hero.Sight {
+	if attacker.Dist() <= creature.Hero.Sight {
 		status.PrintTextln(t)
 	}
 }
 
-func (attacker *Creature) hitFail(defender *Creature) (s string) {
+func hitFail(attacker *creature.Creature, defender *creature.Creature) (s string) {
 	if defender.IsHero() {
 		s = fmt.Sprintf("%s misses you!", strings.Title(attacker.Name()))
 	} else if attacker.IsHero() {
@@ -102,8 +103,8 @@ func (attacker *Creature) hitFail(defender *Creature) (s string) {
 	return s
 }
 
-func (attacker *Creature) damage(defender *Creature, a *area.Area) (s string) {
-	lossOfHp := attacker.power() - defender.defense()
+func damage(attacker *creature.Creature, defender *creature.Creature, a *area.Area) (s string) {
+	lossOfHp := power(attacker) - defense(defender)
 	if lossOfHp < 0 {
 		lossOfHp = 0
 	}
@@ -118,7 +119,7 @@ func (attacker *Creature) damage(defender *Creature, a *area.Area) (s string) {
 	defender.Hp -= lossOfHp
 	if defender.Hp <= 0 {
 		if defender.IsHero() {
-			Hero.DrawFOV(a)
+			ui.DrawFOV(creature.Hero.Coord(), creature.Hero.FOV(a), a)
 			status.Println(s, termbox.ColorWhite)
 			status.Println("You die. Press any key to quit.", termbox.ColorWhite)
 			status.Update()
@@ -140,7 +141,3 @@ func (attacker *Creature) damage(defender *Creature, a *area.Area) (s string) {
 	}
 	return s
 }
-
-// func (attacker *Creature) battle(defender *Creature, a *area.Area) {
-
-// }

@@ -11,7 +11,7 @@ import (
 	"github.com/karlek/reason/ui"
 	"github.com/karlek/reason/ui/text"
 
-	"github.com/karlek/worc/area"
+	"github.com/karlek/reason/area"
 
 	"github.com/mewkiz/pkg/stringsutil"
 	"github.com/nsf/termbox-go"
@@ -23,12 +23,12 @@ const (
 	dropAction  = "You can (d)rop this item."
 )
 
-func slotsString() string {
+func SlotsString() string {
 	return strconv.Itoa(creature.Hero.Inventory.UsedSlots()) + "/" + strconv.Itoa(len(item.Positions))
 }
 
 func Show(a *area.Area) bool {
-	categorizedInv(fmt.Sprintf(InvTitleFmt, WeightStr, slotsString()))
+	CategorizedInv(fmt.Sprintf(InvTitleFmt, WeightStr, SlotsString()))
 	if len(creature.Hero.Inventory) == 0 {
 		return false
 	}
@@ -45,7 +45,7 @@ inventoryLoop:
 				if actionTaken := ShowItemDetails(i, a); actionTaken {
 					return true
 				} else {
-					categorizedInv(fmt.Sprintf(InvTitleFmt, WeightStr, slotsString()))
+					CategorizedInv(fmt.Sprintf(InvTitleFmt, WeightStr, SlotsString()))
 				}
 			}
 		}

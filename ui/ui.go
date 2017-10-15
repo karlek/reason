@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/karlek/reason/screen"
 	"github.com/karlek/reason/ui/text"
 
 	"github.com/karlek/progress/barcli"
-	"github.com/karlek/worc/screen"
 	"github.com/nsf/termbox-go"
 )
 

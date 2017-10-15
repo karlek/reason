@@ -9,14 +9,12 @@ import (
 	"github.com/karlek/reason/ui/status"
 	"github.com/karlek/reason/ui/text"
 
-	"github.com/karlek/worc/area"
-
 	"github.com/acsellers/inflections"
 	"github.com/nsf/termbox-go"
 )
 
 const (
-	dropTitleFmt  = "Drop Item: %s (%s)"
+	DropTitleFmt  = "Drop Item: %s (%s)"
 	emptyInv      = "You aren't carrying anything."
 	unableToEquip = "That item can't be equipped."
 	unableToDrop  = "Couldn't drop item."
@@ -25,33 +23,6 @@ const (
 var (
 	InvInfo = "currentWeight/maxPossibleWeight (usedSlots/totalSlots)"
 )
-
-func DropItem(a *area.Area) bool {
-	// Show the inventory so the player knows which item to drop.
-	title := fmt.Sprintf(dropTitleFmt, WeightStr, slotsString())
-	isEmpty := categorizedInv(title)
-	if isEmpty {
-		return false
-	}
-
-	// Listen for user input to drop item.
-	return dropInput(a)
-}
-
-func dropInput(a *area.Area) (actionTaken bool) {
-	for {
-		switch ev := termbox.PollEvent(); ev.Type {
-		case termbox.EventKey:
-			if ev.Key == ui.CancelKey {
-				return false
-			}
-			if _, ok := creature.Hero.Inventory[ev.Ch]; ok {
-				creature.Hero.DropItem(ev.Ch, a)
-				return true
-			}
-		}
-	}
-}
 
 func NarrativeEquip(pos rune) {
 	i := creature.Hero.Equip(pos)
@@ -125,7 +96,7 @@ func RarityAttr(i item.Itemer) termbox.Attribute {
 	return attr
 }
 
-func categorizedInv(title string) (isEmpty bool) {
+func CategorizedInv(title string) (isEmpty bool) {
 	// Make screen black.
 	ui.Clear()
 

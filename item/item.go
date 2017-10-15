@@ -8,8 +8,8 @@ import (
 	"github.com/karlek/reason/item/effect"
 	"github.com/karlek/reason/name"
 
-	"github.com/karlek/worc/area"
-	"github.com/karlek/worc/model"
+	"github.com/karlek/reason/area"
+	"github.com/karlek/reason/model"
 )
 
 var Positions string = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"

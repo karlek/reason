@@ -6,8 +6,8 @@ import (
 	"github.com/karlek/reason/terrain"
 	"github.com/karlek/reason/util"
 
-	"github.com/karlek/worc/area"
-	"github.com/karlek/worc/coord"
+	"github.com/karlek/reason/area"
+	"github.com/karlek/reason/coord"
 )
 
 // Area is a debug function to generate terrain.

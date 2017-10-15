@@ -10,19 +10,19 @@ import (
 
 type MonstInfo struct {
 	Name     string
-	HpLevel  int
+	HpLevel  float64
 	Graphics termbox.Cell
 }
 
 func (mi MonstInfo) Color() termbox.Attribute {
-	switch mi.HpLevel {
-	case 1:
+	switch {
+	case mi.HpLevel > 0.75:
 		return termbox.ColorGreen + termbox.AttrBold
-	case 2:
+	case mi.HpLevel > 0.5:
 		return termbox.ColorYellow + termbox.AttrBold
-	case 3:
+	case mi.HpLevel > 0.25:
 		return termbox.ColorMagenta + termbox.AttrBold
-	case 4:
+	case mi.HpLevel >= 0:
 		return termbox.ColorRed
 	}
 	return termbox.ColorBlack

@@ -2,6 +2,7 @@
 package action
 
 import (
+	"fmt"
 	"log"
 
 	"github.com/karlek/reason/creature"
@@ -9,21 +10,33 @@ import (
 	"github.com/karlek/reason/item"
 	"github.com/karlek/reason/object"
 	"github.com/karlek/reason/save"
+	"github.com/karlek/reason/sfx"
 	"github.com/karlek/reason/state"
 	"github.com/karlek/reason/ui"
 	"github.com/karlek/reason/ui/status"
 	"github.com/karlek/reason/util"
 
-	"github.com/karlek/worc/area"
+	"github.com/karlek/reason/area"
 	"github.com/nsf/termbox-go"
 )
 
 // HeroTurn listens on user input and then acts on it.
 func HeroTurn(sav *save.Save, a *area.Area) (int, state.State) {
-	creature.Hero.DrawFOV(a)
+	ui.DrawFOV(creature.Hero.Coord(), creature.Hero.FOV(a), a)
 	status.Update()
 	ui.Hp(creature.Hero.Hp, creature.Hero.MaxHp)
-	ui.Monsters(monsterInfo(creature.Hero.MonstersInRange(a)))
+
+	monsters := creature.Hero.MonstersInRange(a)
+	info := make([]ui.MonstInfo, len(monsters))
+	for i, monst := range monsters {
+		info[i] = ui.MonstInfo{
+			Name:     monst.Name(),
+			HpLevel:  float64(monst.Hp) / float64(monst.MaxHp),
+			Graphics: monst.Graphic(),
+		}
+	}
+	ui.Monsters(info)
+
 	termbox.Flush()
 
 	// Listen for keystrokes.
@@ -32,9 +45,9 @@ func HeroTurn(sav *save.Save, a *area.Area) (int, state.State) {
 		return 0, state.Wilderness
 	}
 	switch ev.Ch {
-	// case 'x':
-	// 	sfx.Glitch()
-	// 	return 0, state.Wilderness
+	case 'x':
+		sfx.Glitch()
+		return 0, state.Wilderness
 	case '5', 's':
 		// user wants to wait one turn.
 		return creature.Hero.Speed, state.Wilderness
@@ -106,7 +119,7 @@ func saveQuit(a *area.Area, sav *save.Save) {
 // }
 
 func pickUp(a *area.Area) int {
-	actionTaken := creature.Hero.PickUp(a)
+	actionTaken := PickUp(&creature.Hero, a)
 	if actionTaken {
 		return creature.Hero.Speed
 	}
@@ -122,11 +135,38 @@ func showInventory(a *area.Area) int {
 }
 
 func dropItem(a *area.Area) int {
-	actionTaken := inventory.DropItem(a)
+	actionTaken := DropItem(a)
 	if actionTaken {
 		return creature.Hero.Speed
 	}
 	return 0
+}
+
+func DropItem(a *area.Area) bool {
+	// Show the inventory so the player knows which item to drop.
+	title := fmt.Sprintf(inventory.DropTitleFmt, inventory.WeightStr, inventory.SlotsString())
+	isEmpty := inventory.CategorizedInv(title)
+	if isEmpty {
+		return false
+	}
+
+	// Listen for user input to drop item.
+	return dropInput(a)
+}
+
+func dropInput(a *area.Area) (actionTaken bool) {
+	for {
+		switch ev := termbox.PollEvent(); ev.Type {
+		case termbox.EventKey:
+			if ev.Key == ui.CancelKey {
+				return false
+			}
+			if _, ok := creature.Hero.Inventory[ev.Ch]; ok {
+				creature.Hero.DropItem(ev.Ch, a)
+				return true
+			}
+		}
+	}
 }
 
 func HeroMovement(ev termbox.Event, a *area.Area) int {
@@ -172,7 +212,7 @@ func HeroMovement(ev termbox.Event, a *area.Area) int {
 	}
 	// Another creature occupied that tile -> battle!
 	if c, ok := col.S.(*creature.Creature); ok {
-		creature.Hero.Battle(c, a)
+		Battle(&creature.Hero, c, a)
 		return creature.Hero.Speed
 	}
 	// Hero walked into an object.

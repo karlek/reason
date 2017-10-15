@@ -4,7 +4,7 @@ package object
 import (
 	"github.com/karlek/reason/name"
 
-	"github.com/karlek/worc/model"
+	"github.com/karlek/reason/model"
 )
 
 // Object is non-moveable, but drawable object.
